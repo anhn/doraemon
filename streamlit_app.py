@@ -1,11 +1,6 @@
 import openai 
 import streamlit as st
 
-try:
-    from typing import Literal
-except ImportError:
-    from typing_extensions import Literal
-
 # pip install streamlit-chat  
 from streamlit_chat import message
 

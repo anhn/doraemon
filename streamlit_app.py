@@ -44,12 +44,12 @@ if 'past' not in st.session_state:
     st.session_state['past'] = []
 
 def get_text():
-    input_text = st.text_input("Say something to Mc Cathy:", value='I am having a problem with my project...', key="input")
+    input_text = st.text_area("Say something to Mc Cathy:", value="Hi, my name is Anh. I am a startup founder!", height=10, key="input")
     return input_text
 
 jim_line = get_text()
 
-st.markdown(""":mailbox :red[Mc Cathy]:  """ + get_response(jim_line))
+st.markdown(""" :mailbox: :red[Mc Cathy]  """ + get_response(jim_line))
 #if jim_line:
 #    output = get_response(jim_line)
 #    # store the output 

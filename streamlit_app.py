@@ -11,23 +11,23 @@ st.set_page_config(
     page_title='Your Virtual Project Assistant',
     menu_items={
         'Get Help': 'https://join.slack.com/t/officechatbot/shared_invite/zt-14rlr8chh-C~rwJN~~KUAX~DOkvcno1g',
-        'Report a bug': "https://github.com/parker84/office-chat-bot/issues/new",
-        'About': "This dashboard was initially created by [Brydon Parker](https://linkpop.com/brydon)."
+        'Report a bug': "https://github.com/anhn/streamlit-example/issues/new",
+        'About': "This chatbot is tailored by Anh Nguyen-Duc for trying a virtual project assistant "
     }
 )
-st.title("🏢 Dunder Mifflin Rabies Awareness Chatbot For the Cure")
+st.title("🏢 Mc Cathy Consulatation's space")
 
-st.sidebar.title("🏢 The Office Chatbot")
+st.sidebar.title("🏢 The Virtual Assistant Chatbot")
 st.sidebar.markdown("""
 
 **Feedback/Questions**: 
 [join our slack workspace](https://join.slack.com/t/officechatbot/shared_invite/zt-14rlr8chh-C~rwJN~~KUAX~DOkvcno1g)
 
-Like 🏢 **The Office Chatbot** and want to say thanks? [:coffee: buy me a coffee](https://www.buymeacoffee.com/brydon)
+Like 🏢 **The Office Chatbot** and want to say thanks? [:coffee: buy me a coffee](https://www.buymeacoffee.com/anhnd85Q)
 """)
 
 
-jim_line = st.text_input("Say something to Dwight Schrute:", value='bears beats battlestar gallactica')
+jim_line = st.text_input("Say something to Mc Cathy:", value='I am having a problem with my project...')
 
 def dwight_and_jim_prompt(jim_line):
     return f"""Predict what Dwight will say next
@@ -141,26 +141,28 @@ Jim: {jim_line}
 Dwight Schrute:"""
 
 @st.cache() # caching just so it's cheaper
+
 def get_response(jim_line):
     response = openai.Completion.create(
-        engine="text-davinci-001",
-        prompt=dwight_and_jim_prompt(jim_line),
-        temperature=0.9,
+        engine="text-davinci-003",
+        prompt=jim_line,
+        max_tokens = 1024,
+        temperature=0.5,
     )
     return response
 
 response = get_response(jim_line)
 st.text(response.choices[0].text.split('\n')[0])
 
-with st.expander("Not sure what to say to Dwight?"):
+with st.expander("Not sure what to say to Mc Cathy?"):
     st.markdown(""" 
 Try some of these:
 ```
-1. What is your name?
-2. Where do you work?
-3. What is the best bear?
-4. Michael!
-5. you're fired
-6. beets are the worst vegetable
+1. What do you think are the most important qualities for a successful entrepreneur?
+2. What are the biggest challenges that entrepreneurs face in the early stages of building a business, and how can they overcome them?
+3. How can I build and manage a strong team that shares my vision and values?
+4. How do I raise capital for my startup, and what are some effective fundraising strategies?
+5. What are the most important metrics to track in the early stages of a startup, and how can I use them to make data-driven decisions?
+6. How can I establish and maintain relationships with customers, partners, and investors?
 ```
     """)

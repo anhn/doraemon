@@ -3,7 +3,6 @@ import os
 from decouple import config
 import openai
 import streamlit as st
-from streamlit_chat import message
 
 openai.api_key = st.secrets["OPENAI_KEY"]
 
@@ -50,17 +49,18 @@ def get_text():
 
 jim_line = get_text()
 
-if jim_line:
-    output = get_response(jim_line)
-    # store the output 
-    st.session_state.past.append(jim_line)
-    st.session_state.generated.append(output)
+st.text(get_response(jim_line))
+#if jim_line:
+#    output = get_response(jim_line)
+#    # store the output 
+#    st.session_state.past.append(jim_line)
+#    st.session_state.generated.append(output)
 
-if st.session_state['generated']:
-    
-    for i in range(len(st.session_state['generated'])-1, -1, -1):
-        message(st.session_state["generated"][i], key=str(i))
-        message(st.session_state['past'][i], is_user=True, key=str(i) + '_user')
+#if st.session_state['generated']:
+#    
+#    for i in range(len(st.session_state['generated'])-1, -1, -1):
+#        message(st.session_state["generated"][i], key=str(i))
+#        message(st.session_state['past'][i], is_user=True, key=str(i) + '_user')
         
         
 with st.expander("Not sure what to say to Mc Cathy?"):

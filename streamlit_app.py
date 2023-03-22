@@ -56,7 +56,7 @@ if 'past' not in st.session_state:
 
 jim_line = get_text()
 st.session_state.past.append(jim_line)
-cathy_line = st.session_state['past'][-1] + get_response(jim_line)
+cathy_line =  get_response(st.session_state['past'][-1] + jim_line)
 st.markdown(""" :mailbox: Mc Cathy:    \ """ + cathy_line)
 #if jim_line:
 #    output = get_response(jim_line)

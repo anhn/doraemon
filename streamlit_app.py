@@ -50,7 +50,6 @@ def get_text():
 jim_line = get_text()
 
 if jim_line:
-    @st.cache() # caching just so it's cheaper
     output = get_response(jim_line)
     # store the output 
     st.session_state.past.append(jim_line)

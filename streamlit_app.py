@@ -27,7 +27,7 @@ Like 🏢 **The Office Chatbot** and want to say thanks? [:coffee: buy me a coff
 """)
 
 def get_response(jim_line):
-    response = openai.Completion.create(
+    completions = openai.Completion.create(
         engine="text-davinci-003",
         prompt=jim_line,
         max_tokens = 1024,

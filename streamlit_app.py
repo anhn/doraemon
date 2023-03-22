@@ -25,6 +25,7 @@ st.sidebar.markdown("""
 
 Like 🏢 **The Office Chatbot** and want to say thanks? [:coffee: buy me a coffee](https://www.buymeacoffee.com/anhnd85Q)
 """)
+cathy_line =''
 
 def get_response(jim_line):
     completions = openai.ChatCompletion.create(
@@ -50,9 +51,13 @@ def get_text():
     input_text = st.text_area("Say something to Mc Cathy:", value="Hi, my name is Anh. I am a startup founder!", height=10, key="input")
     return input_text
 
-jim_line = get_text()
+if 'past' not in st.session_state:
+    st.session_state['past'] = []
 
-st.markdown(""" :mailbox: Mc Cathy:    \ """ + get_response(jim_line))
+jim_line = get_text()
+st.session_state.past.append(jim_line)
+cathy_line = st.session_state['past'][jim_line] + get_response(jim_line)
+st.markdown(""" :mailbox: Mc Cathy:    \ """ + cathy_line)
 #if jim_line:
 #    output = get_response(jim_line)
 #    # store the output 

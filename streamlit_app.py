@@ -49,7 +49,7 @@ def get_text():
 
 jim_line = get_text()
 
-st.markdown(get_response(jim_line))
+st.markdown(""" Mc Cathy: \ """ + get_response(jim_line))
 #if jim_line:
 #    output = get_response(jim_line)
 #    # store the output 

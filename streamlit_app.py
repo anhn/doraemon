@@ -3,6 +3,7 @@ import os
 from decouple import config
 import openai
 import streamlit as st
+from streamlit_chat import message
 
 openai.api_key = st.secrets["OPENAI_KEY"]
 

@@ -4,11 +4,11 @@ from decouple import config
 import openai
 import streamlit as st
 
-openai.api_key = config("OPENAI_API_KEY")
+openai.api_key = "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"
 
 st.set_page_config(
     page_icon='🏢',
-    page_title='Office Chatbot',
+    page_title='Your Virtual Project Assistant',
     menu_items={
         'Get Help': 'https://join.slack.com/t/officechatbot/shared_invite/zt-14rlr8chh-C~rwJN~~KUAX~DOkvcno1g',
         'Report a bug': "https://github.com/parker84/office-chat-bot/issues/new",

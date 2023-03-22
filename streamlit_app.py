@@ -28,7 +28,7 @@ Like 🏢 **The Office Chatbot** and want to say thanks? [:coffee: buy me a coff
 
 def get_response(jim_line):
     completions = openai.Completion.create(
-        engine="text-davinci-003",
+        engine="gpt-3.5-turbo",
         prompt=jim_line,
         max_tokens = 1024,
         temperature=0.5,
@@ -49,7 +49,7 @@ def get_text():
 
 jim_line = get_text()
 
-st.markdown(""" :mailbox: :red[Mc Cathy],  """ + get_response(jim_line))
+st.markdown(""" :mailbox: Mc Cathy  """ + get_response(jim_line))
 #if jim_line:
 #    output = get_response(jim_line)
 #    # store the output 

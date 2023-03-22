@@ -4,7 +4,7 @@ from decouple import config
 import openai
 import streamlit as st
 
-openai.api_key = "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"
+openai.api_key = config("OPENAI_KEY")
 
 st.set_page_config(
     page_icon='🏢',

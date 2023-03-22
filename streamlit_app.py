@@ -36,7 +36,7 @@ def get_response(jim_line):
         max_tokens = 1024,
         temperature = 0.5,
     )
-    response = completions.choices[0]["message"]["content"].strip().lower()
+    response = completions.choices[0]["message"]["content"].strip()
     return response 
 
 # Storing the chat

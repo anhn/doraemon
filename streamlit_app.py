@@ -28,7 +28,7 @@ Like 🏢 **The Office Chatbot** and want to say thanks? [:coffee: buy me a coff
 
 def get_response(jim_line):
     completions = openai.ChatCompletion.create(
-        engine="gpt-3.5-turbo",
+        model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "You are performing text analysis."},
             {"role": "user", "content": "YOUR PROMPT GOES HERE: " + jim_line},

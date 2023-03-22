@@ -26,17 +26,13 @@ st.sidebar.markdown("""
 Like 🏢 **The Office Chatbot** and want to say thanks? [:coffee: buy me a coffee](https://www.buymeacoffee.com/anhnd85Q)
 """)
 
-
-jim_line = st.text_input("Say something to Mc Cathy:", value='I am having a problem with my project...')
-
 def get_response(jim_line):
     response = openai.Completion.create(
         engine="text-davinci-003",
         prompt=jim_line,
         max_tokens = 1024,
         temperature=0.5,
-    )
-    
+    )    
     response = completions.choices[0].text
     return response 
 
@@ -47,9 +43,15 @@ if 'generated' not in st.session_state:
 if 'past' not in st.session_state:
     st.session_state['past'] = []
 
+def get_text():
+    input_text = st.text_input("Say something to Mc Cathy:", value='I am having a problem with my project...', key="input")
+    return input_text
+
+jim_line = get_text()
+
 if jim_line:
     @st.cache() # caching just so it's cheaper
-    output = generate_response(jim_line)
+    output = get_response(jim_line)
     # store the output 
     st.session_state.past.append(jim_line)
     st.session_state.generated.append(output)

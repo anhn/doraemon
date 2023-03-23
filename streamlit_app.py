@@ -64,7 +64,6 @@ if result:
         st.write(":pig: You: " + result.get("GET_TEXT"))
         jim_line = result.get("GET_TEXT")
         
-@st.cache
 def get_response(jim_line):
     completions = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -96,9 +95,10 @@ john_line = st.text_area("Can not speak?",value="write your prompt here", height
 if john_line:
     cathy_line = get_response(john_line)
     jim_line = ''
-#if jim_line != '':
+
+if jim_line != '':
 #jim_line = get_text()
-cathy_line = get_response(jim_line)
+    cathy_line = get_response(jim_line)
 #st.session_state.past.append(jim_line)
 #cathy_line =  get_response(st.session_state['past'][-1] + jim_line)
 st.markdown(""" :mailbox: Hannah:     """ + cathy_line)

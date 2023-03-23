@@ -30,8 +30,6 @@ st.sidebar.markdown("""
 Like 🏢 **The Office Chatbot** and want to say thanks? [:coffee: buy me a coffee](https://www.buymeacoffee.com/anhnd85Q)
 """)
 cathy_line =''
-if 'options' not in st.session_state:
-    st.session_state['options'] = "Hi, my name is Anh. I am a startup founder!"
     
 def get_response(jim_line):
     completions = openai.ChatCompletion.create(
@@ -88,7 +86,6 @@ result = streamlit_bokeh_events(
     debounce_time=0)
 if result:
     if "GET_TEXT" in result:
-        st.session_state['options'] = result.get("GET_TEXT")
         st.write(result.get("GET_TEXT"))
         
 jim_line = get_text()

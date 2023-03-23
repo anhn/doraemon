@@ -15,7 +15,7 @@ st.set_page_config(
         'About': "This chatbot is tailored by Anh Nguyen-Duc for trying a virtual project assistant "
     }
 )
-st.title("🏢 Mc Cathy Consulatation's space")
+st.title("🏢 Hannah Consulatation's space")
 
 st.sidebar.title("🏢 The Virtual Assistant Chatbot")
 st.sidebar.markdown("""
@@ -26,7 +26,9 @@ st.sidebar.markdown("""
 Like 🏢 **The Office Chatbot** and want to say thanks? [:coffee: buy me a coffee](https://www.buymeacoffee.com/anhnd85Q)
 """)
 cathy_line =''
-
+if 'options' not in st.session_state:
+    st.session_state['options'] = "Hi, my name is Anh. I am a startup founder!"
+    
 def get_response(jim_line):
     completions = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -48,16 +50,49 @@ if 'past' not in st.session_state:
     st.session_state['past'] = []
 
 def get_text():
-    input_text = st.text_area("Say something to Mc Cathy:", value="Hi, my name is Anh. I am a startup founder!", height=10, key="input")
+    input_text = st.text_area("Say something to Hannah:", height=10, key='option')
+    stt_button = Button(label="Speak", width=100)
+    stt_button.js_on_event("button_click", CustomJS(code="""
+        var recognition = new webkitSpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        recognition.onresult = function (e) {
+            var value = "";
+            for (var i = e.resultIndex; i < e.results.length; ++i) {
+                if (e.results[i].isFinal) {
+                    value += e.results[i][0].transcript;
+                }
+            }
+            if ( value != "") {
+                document.dispatchEvent(new CustomEvent("GET_TEXT", {detail: value}));
+            }
+        }
+        recognition.start();
+        """))
+    result = streamlit_bokeh_events(
+        stt_button,
+        events="GET_TEXT",
+        key="listen",
+        refresh_on_update=False,
+        override_height=75,
+        debounce_time=0)
+    if result:
+        if "GET_TEXT" in result:
+            st.session_state['options'] = result.get("GET_TEXT")
     return input_text
 
 if 'past' not in st.session_state:
     st.session_state['past'] = []
 
 jim_line = get_text()
+
+
+
+
 st.session_state.past.append(jim_line)
 cathy_line =  get_response(st.session_state['past'][-1] + jim_line)
-st.markdown(""" :mailbox: Mc Cathy:    \ """ + cathy_line)
+st.markdown(""" :mailbox: Hannah:    \ """ + cathy_line)
 #if jim_line:
 #    output = get_response(jim_line)
 #    # store the output 

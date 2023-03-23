@@ -91,8 +91,9 @@ if 'past' not in st.session_state:
 #if 'past' not in st.session_state:
 #    st.session_state['past'] = []
 
-
-        
+john_line = st.text_area(value="...or you can write here", height=5, key='input')
+if john_line:
+    cathy_line = get_response(john_line)
 #jim_line = get_text()
 cathy_line = get_response(jim_line)
 #st.session_state.past.append(jim_line)

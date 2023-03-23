@@ -30,6 +30,7 @@ st.sidebar.markdown("""
 Like 🏢 **The Office Chatbot** and want to say thanks? [:coffee: buy me a coffee](https://www.buymeacoffee.com/anhnd85Q)
 """)
 cathy_line =''
+jim_line = 'You are a helpful assistant!'
 
 stt_button = Button(label="Speak", width=100)
 stt_button.js_on_event("button_click", CustomJS(code="""

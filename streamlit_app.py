@@ -96,7 +96,7 @@ john_line = st.text_area("Can not speak?",value="write your prompt here", height
 if john_line:
     cathy_line = get_response(john_line)
     jim_line = ''
-if jim_line:
+if jim_line != '':
 #jim_line = get_text()
     cathy_line = get_response(jim_line)
 #st.session_state.past.append(jim_line)

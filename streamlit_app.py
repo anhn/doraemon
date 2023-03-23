@@ -84,6 +84,7 @@ def get_text():
     if result:
         if "GET_TEXT" in result:
             st.session_state['options'] = result.get("GET_TEXT")
+            st.write(result.get("GET_TEXT"))
     return input_text
 
 if 'past' not in st.session_state:

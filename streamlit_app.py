@@ -60,7 +60,8 @@ result = streamlit_bokeh_events(
     debounce_time=0)
 if result:
     if "GET_TEXT" in result:
-        st.write(result.get("GET_TEXT"))
+        st.write("You: " + result.get("GET_TEXT"))
+        jim_line = result.get("GET_TEXT")
         
 def get_response(jim_line):
     completions = openai.ChatCompletion.create(
@@ -83,19 +84,19 @@ if 'past' not in st.session_state:
     st.session_state['past'] = []
 
 def get_text():
-    input_text = st.text_area("Say something to Hannah:", height=10, key='option')
-    return input_text
+    #input_text = st.text_area("Say something to Hannah:", height=10, key='option')
+    #return input_text
 
-if 'past' not in st.session_state:
-    st.session_state['past'] = []
+#if 'past' not in st.session_state:
+#    st.session_state['past'] = []
 
 
         
-jim_line = get_text()
-
-st.session_state.past.append(jim_line)
-cathy_line =  get_response(st.session_state['past'][-1] + jim_line)
-st.markdown(""" :mailbox: Hannah:    \ """ + cathy_line)
+#jim_line = get_text()
+cathy_line =  get_response(jim_line)
+#st.session_state.past.append(jim_line)
+#cathy_line =  get_response(st.session_state['past'][-1] + jim_line)
+st.markdown(""" :mailbox: Hannah:     """ + cathy_line)
 #if jim_line:
 #    output = get_response(jim_line)
 #    # store the output 

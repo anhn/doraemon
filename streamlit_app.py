@@ -51,7 +51,7 @@ stt_button.js_on_event("button_click", CustomJS(code="""
     }
     recognition.start();
     #setTimeout(function() { recognition.stop(); recognition.start(); }, 3000);
-"""))
+    """))
 
 result = streamlit_bokeh_events(
     stt_button,
@@ -62,15 +62,15 @@ result = streamlit_bokeh_events(
     debounce_time=0)
 if result:
     if "GET_TEXT" in result:
-        st.write("You: " + result.get("GET_TEXT"))
+        st.write(":pig: You: " + result.get("GET_TEXT"))
         jim_line = result.get("GET_TEXT")
         
 def get_response(jim_line):
     completions = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": "You are performing text analysis."},
-            {"role": "user", "content": "YOUR PROMPT GOES HERE: " + jim_line},
+            {"role": "system", "content": "You try your best to answer questions"},
+            {"role": "user", "content": jim_line},
         ],
         max_tokens = 1024,
         temperature = 0.5,
@@ -112,7 +112,7 @@ st.markdown(""" :mailbox: Hannah:     """ + cathy_line)
 #        message(st.session_state['past'][i], is_user=True, key=str(i) + '_user')
         
         
-with st.expander("Not sure what to say to Mc Cathy?"):
+with st.expander("Not sure what to say to Hannah?"):
     st.markdown(""" 
 Try some of these:
 ```

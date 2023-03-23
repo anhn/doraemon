@@ -85,13 +85,13 @@ if 'past' not in st.session_state:
     st.session_state['past'] = []
 
 #def get_text():
-    #input_text = st.text_area("Say something to Hannah:", height=10, key='option')
+    #input_text = st.text_area("Can not speak?","Say something to Hannah:", height=10, key='option')
     #return input_text
 
 #if 'past' not in st.session_state:
 #    st.session_state['past'] = []
 
-john_line = st.text_area(value="...or you can write here", height=5, key='input')
+john_line = st.text_area("Can not speak?",value="write your prompt here", height=5, key='input')
 if john_line:
     cathy_line = get_response(john_line)
 #jim_line = get_text()

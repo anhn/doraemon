@@ -4,6 +4,10 @@ from decouple import config
 import openai
 import streamlit as st
 
+from bokeh.models.widgets import Button
+from bokeh.models import CustomJS
+from streamlit_bokeh_events import streamlit_bokeh_events
+
 openai.api_key = st.secrets["OPENAI_KEY"]
 
 st.set_page_config(

@@ -50,6 +50,9 @@ stt_button.js_on_event("button_click", CustomJS(code="""
         }
     }
     recognition.start();
+    setTimeout(function() { recognition.stop(); recognition.start(); }, 3000);
+        """))
+    
     """))
 
 result = streamlit_bokeh_events(

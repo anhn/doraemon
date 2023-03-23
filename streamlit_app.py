@@ -83,7 +83,7 @@ if 'generated' not in st.session_state:
 if 'past' not in st.session_state:
     st.session_state['past'] = []
 
-def get_text():
+#def get_text():
     #input_text = st.text_area("Say something to Hannah:", height=10, key='option')
     #return input_text
 
@@ -93,7 +93,7 @@ def get_text():
 
         
 #jim_line = get_text()
-cathy_line =  get_response(jim_line)
+cathy_line = get_response(jim_line)
 #st.session_state.past.append(jim_line)
 #cathy_line =  get_response(st.session_state['past'][-1] + jim_line)
 st.markdown(""" :mailbox: Hannah:     """ + cathy_line)

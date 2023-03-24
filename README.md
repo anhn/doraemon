@@ -1,6 +1,4 @@
-# Welcome to Streamlit!
+experiments with computing, analytics and AI in a app form
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire. :heart:
-
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
+24.03.2023
+Anh Nguyen Duc

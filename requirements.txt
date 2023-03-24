@@ -28,9 +28,6 @@ executing==0.8.3
 Flask==2.0.2
 gitdb==4.0.9
 GitPython==3.1.27
-google-trans-new==1.1.9
-googletrans==3.0.0
-gTTS==2.2.2
 idna==3.3
 importlib-metadata==4.11.2
 ipdb==0.13.9
@@ -84,13 +81,12 @@ python-dotenv==0.19.2
 pytz==2021.3
 pytz-deprecation-shim==0.1.0.post0
 pyzmq==22.3.0
-requests
+requests==2.26.0
 semver==2.13.0
 Send2Trash==1.8.0
 six==1.16.0
 smmap==5.0.0
 stack-data==0.2.0
-SpeechRecognition==3.8.1
 streamlit==1.7.0
 streamlit-chat==0.0.1
 terminado==0.13.2

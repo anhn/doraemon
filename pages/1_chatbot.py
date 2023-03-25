@@ -134,7 +134,8 @@ translator = Translator()
 #    output_language = "vn"
 
 input_language = "en"
-output_language = "vi"
+#output_language = "vi"
+output_language = "en"
 tld = "com"
 
 def text_to_speech(input_language, output_language, text, tld):

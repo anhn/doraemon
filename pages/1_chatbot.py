@@ -93,9 +93,6 @@ if 'past' not in st.session_state:
     #input_text = st.text_area("Can not speak?","Say something to Hannah:", height=10, key='option')
     #return input_text
 
-#if 'past' not in st.session_state:
-#    st.session_state['past'] = []
-
 john_line = st.text_area("Can not speak?",value="write your prompt here", height=5, key='input')
 if john_line:
     cathy_line = get_response(john_line)
@@ -105,7 +102,10 @@ if jim_line != '':
 #jim_line = get_text()
     cathy_line = get_response(jim_line)
 #st.session_state.past.append(jim_line)
-#cathy_line =  get_response(st.session_state['past'][-1] + jim_line)
+
+if cathy_line != '':
+    st.session_state.generated = cathy_line
+    
 st.markdown(""" :mailbox: Hannah:     """ + cathy_line)
 
 try:
@@ -152,7 +152,7 @@ def text_to_speech(input_language, output_language, text, tld):
 #display_output_text = st.checkbox("Display output text")
 
 if st.button("convert"):
-    result, output_text = text_to_speech(input_language, output_language, cathy_line, tld)
+    result, output_text = text_to_speech(input_language, output_language, st.session_state.generated, tld)
     audio_file = open(f"temp/{result}.mp3", "rb")
     audio_bytes = audio_file.read()
     st.markdown(f"## Your audio:")

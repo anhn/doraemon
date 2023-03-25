@@ -115,24 +115,26 @@ except:
 
 translator = Translator()
 
-in_lang = st.selectbox(
-    "Select your input language",
-    ("English", "Vietnamese"),
-)
-if in_lang == "English":
-    input_language = "en"
-elif in_lang == "Vietnamese":
-    input_language = "vn"
+#in_lang = st.selectbox(
+#    "Select your input language",
+#    ("English", "Vietnamese"),
+#)
+#if in_lang == "English":
+#    input_language = "en"
+#elif in_lang == "Vietnamese":
+#    input_language = "vn"
 
-out_lang = st.selectbox(
-    "Select your output language",
-    ("English", "Vietnamese"),
-)
-if out_lang == "English":
-    output_language = "en"
-elif out_lang == "Vietnamese":
-    output_language = "vn"
+#out_lang = st.selectbox(
+#    "Select your output language",
+#    ("English", "Vietnamese"),
+#)
+#if out_lang == "English":
+#    output_language = "en"
+#elif out_lang == "Vietnamese":
+#    output_language = "vn"
 
+input_lang == "vn"
+output_lang == "vn"
 tld = "com"
 
 def text_to_speech(input_language, output_language, text, tld):
@@ -147,7 +149,7 @@ def text_to_speech(input_language, output_language, text, tld):
     return my_file_name, trans_text
 
 
-display_output_text = st.checkbox("Display output text")
+#display_output_text = st.checkbox("Display output text")
 
 if st.button("convert"):
     result, output_text = text_to_speech(input_language, output_language, cathy_line, tld)
@@ -156,9 +158,9 @@ if st.button("convert"):
     st.markdown(f"## Your audio:")
     st.audio(audio_bytes, format="audio/mp3", start_time=0)
 
-    if display_output_text:
-        st.markdown(f"## Output text:")
-        st.write(f" {output_text}")
+#    if display_output_text:
+#        st.markdown(f"## Output text:")
+#        st.write(f" {output_text}")
 
 def remove_files(n):
     mp3_files = glob.glob("temp/*mp3")

@@ -148,7 +148,8 @@ def text_to_speech(input_language, output_language, text, tld):
     except:
         my_file_name = "audio"
     tts.save(f"temp/{my_file_name}.mp3")
-    return my_file_name, trans_text
+#    return my_file_name, trans_text
+    return my_file_name, text
 
 
 #display_output_text = st.checkbox("Display output text")

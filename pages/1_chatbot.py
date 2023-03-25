@@ -133,8 +133,8 @@ translator = Translator()
 #elif out_lang == "Vietnamese":
 #    output_language = "vn"
 
-input_language = "vn"
-output_language = "vn"
+input_language = "en"
+output_language = "vi"
 tld = "com"
 
 def text_to_speech(input_language, output_language, text, tld):

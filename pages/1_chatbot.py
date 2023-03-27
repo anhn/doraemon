@@ -17,16 +17,16 @@ openai.api_key = st.secrets["OPENAI_KEY"]
 
 st.set_page_config(
     page_icon='🏢',
-    page_title='Your Virtual Project Assistant',
+    page_title='Doraemon - Your Virtual AI Assistant',
     menu_items={
         'Get Help': 'https://join.slack.com/t/officechatbot/shared_invite/zt-14rlr8chh-C~rwJN~~KUAX~DOkvcno1g',
         'Report a bug': "https://github.com/anhn/streamlit-example/issues/new",
         'About': "This chatbot is tailored by Anh Nguyen-Duc for trying a virtual project assistant "
     }
 )
-st.title("🏢 Hannah Consulatation's space")
+st.title("🏢 Get More Done with Virtuo, Your All-in-One Virtual Assistant"")
 
-st.sidebar.title("🏢 The Virtual Assistant Chatbot")
+st.sidebar.title("🏢 Doraemon Chatbot")
 st.sidebar.markdown("""
 
 **Feedback/Questions**: 
@@ -35,6 +35,7 @@ st.sidebar.markdown("""
 Like 🏢 **The Office Chatbot** and want to say thanks? [:coffee: buy me a coffee](https://www.buymeacoffee.com/anhnd85Q)
 """)
 cathy_line =''
+john_line = ''
 jim_line = 'You are a helpful assistant!'
 
 stt_button = Button(label="Speak", width=100)
@@ -93,7 +94,8 @@ if 'past' not in st.session_state:
     #input_text = st.text_area("Can not speak?","Say something to Hannah:", height=10, key='option')
     #return input_text
 
-john_line = st.text_area("Can not speak?",value="write your prompt here", height=5, key='input')
+with st.expander("Can not speak now?"):         
+    john_line = st.text_area("Write your prompt here",value='', height=5, key='input')
 if john_line:
     cathy_line = get_response(john_line)
     jim_line = ''

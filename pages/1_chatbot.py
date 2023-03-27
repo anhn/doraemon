@@ -24,7 +24,7 @@ st.set_page_config(
         'About': "This chatbot is tailored by Anh Nguyen-Duc for trying a virtual project assistant "
     }
 )
-st.title("🏢 Get More Done with Virtuo, Your All-in-One Virtual Assistant")
+st.title("🏢 Your All-in-One Virtual Assistant")
 
 st.sidebar.title("🏢 Doraemon Chatbot")
 st.sidebar.markdown("""

@@ -24,9 +24,9 @@ st.set_page_config(
         'About': "This chatbot is tailored by Anh Nguyen-Duc for trying a virtual project assistant "
     }
 )
-st.title("🏢 Your All-in-One Virtual Assistant")
+st.title("🏢 Doraemon - Trợ lý khởi nghiệp vạn năng")
 
-st.sidebar.title("🏢 Doraemon Chatbot")
+st.sidebar.title("🏢 Trợ lý khởi nghiệp vạn năng")
 st.sidebar.markdown("""
 
 **Feedback/Questions**: 
@@ -74,7 +74,7 @@ def get_response(jim_line):
     completions = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": "You try your best to answer questions"},
+            {"role": "system", "content": "Bạn là một trợ lý ảo cho lập trình viên và người khởi nghiệp"},
             {"role": "user", "content": jim_line},
         ],
         max_tokens = 1024,
@@ -94,7 +94,7 @@ if 'past' not in st.session_state:
     #input_text = st.text_area("Can not speak?","Say something to Hannah:", height=10, key='option')
     #return input_text
 
-with st.expander("Can not speak now?"):         
+with st.expander("Viết yêu cầu tại đây"):         
     john_line = st.text_area("Write your prompt here",value='', height=5, key='input')
 if john_line:
     cathy_line = get_response(john_line)
@@ -135,9 +135,9 @@ translator = Translator()
 #elif out_lang == "Vietnamese":
 #    output_language = "vn"
 
-input_language = "en"
+input_language = "vi"
 #output_language = "vi"
-output_language = "en"
+output_language = "vi"
 tld = "com"
 
 def text_to_speech(input_language, output_language, text, tld):

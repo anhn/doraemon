@@ -67,7 +67,7 @@ result = streamlit_bokeh_events(
     debounce_time=0)
 if result:
     if "GET_TEXT" in result:
-        st.write(":pig: You: " + result.get("GET_TEXT"))
+        st.write(":pig: Bạn: " + result.get("GET_TEXT"))
         jim_line = result.get("GET_TEXT")
         
 def get_response(jim_line):
@@ -108,7 +108,7 @@ if jim_line != '':
 if cathy_line != '':
     st.session_state.generated = cathy_line
     
-st.markdown(""" :mailbox: Hannah:     """ + cathy_line)
+st.markdown(""" :mailbox: Doraemon:     """ + cathy_line)
 
 try:
     os.mkdir("temp")

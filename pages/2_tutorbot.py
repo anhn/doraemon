@@ -19,8 +19,6 @@ st.set_page_config(
 st.title("🏢 Virtual assistant in learning Javascript")
 
 st.sidebar.title("🏢 Your virtual assisant in learning Javascript")
-st.sidebar.markdown("""
-
 cathy_line =''
 jim_line = ''
 

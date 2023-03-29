@@ -41,7 +41,7 @@ def get_response(jim_line):
       presence_penalty=0.6,
       stop=[" Human:", " AI:"]
     )
-    response = completions.choices[0]["message"]["content"].strip()
+    response = response.choices[0]["message"]["content"].strip()
     return response 
 
 # Storing the chat

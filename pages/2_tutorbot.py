@@ -41,8 +41,8 @@ def get_response(jim_line):
       presence_penalty=0.6,
       stop=[" Human:", " AI:"]
     )
-    response = response.choices[0]["message"]["content"].strip()
-    return response 
+    output = response.choices[0].text
+    return output 
 
 # Storing the chat
 if 'generated' not in st.session_state:

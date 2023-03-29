@@ -16,9 +16,9 @@ st.set_page_config(
         'About': "This chatbot is tailored by Anh Nguyen-Duc for trying a virtual project assistant "
     }
 )
-st.title("🏢 Virtual assistant in learning Javascript")
+st.title("🏢 Javascript Tutor")
 
-st.sidebar.title("🏢 Javascript Tutor")
+st.sidebar.title("🏢 Your virtual assisant in learning Javascript")
 cathy_line =''
 jim_line = ''
 def get_response(jim_line):

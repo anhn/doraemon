@@ -17,14 +17,14 @@ openai.api_key = st.secrets["OPENAI_KEY"]
 
 st.set_page_config(
     page_icon='🏢',
-    page_title='Doraemon - Your Virtual AI Assistant',
+    page_title='CMAT DIGITAL - Your Virtual AI Assistant',
     menu_items={
         'Get Help': 'https://join.slack.com/t/officechatbot/shared_invite/zt-14rlr8chh-C~rwJN~~KUAX~DOkvcno1g',
         'Report a bug': "https://github.com/anhn/streamlit-example/issues/new",
         'About': "This chatbot is tailored by Anh Nguyen-Duc for trying a virtual project assistant "
     }
 )
-st.title("🏢 Doraemon - Trợ lý khởi nghiệp vạn năng")
+st.title("🏢 CMAT Digital - Trợ lý khởi nghiệp vạn năng")
 
 st.sidebar.title("🏢 Trợ lý khởi nghiệp vạn năng")
 st.sidebar.markdown("""
@@ -36,9 +36,9 @@ Like 🏢 **The Office Chatbot** and want to say thanks? [:coffee: buy me a coff
 """)
 cathy_line =''
 john_line = ''
-jim_line = 'You are a helpful assistant!'
+jim_line = 'Bạn là trợ lý ảo vạn năng!'
 
-stt_button = Button(label="Speak", width=100)
+stt_button = Button(label="Nói", width=100)
 stt_button.js_on_event("button_click", CustomJS(code="""
     var recognition = new webkitSpeechRecognition();
     recognition.continuous = true;
@@ -95,7 +95,7 @@ if 'past' not in st.session_state:
     #return input_text
 
 with st.expander("Viết yêu cầu tại đây"):         
-    john_line = st.text_area("Write your prompt here",value='', height=5, key='input')
+    john_line = st.text_area("Viết câu hỏi của bạn",value='', height=5, key='input')
 if john_line:
     cathy_line = get_response(john_line)
     jim_line = ''
@@ -108,7 +108,7 @@ if jim_line != '':
 if cathy_line != '':
     st.session_state.generated = cathy_line
     
-st.markdown(""" :mailbox: Doraemon:     """ + cathy_line)
+st.markdown(""" :mailbox: CMAT Digital:     """ + cathy_line)
 
 try:
     os.mkdir("temp")

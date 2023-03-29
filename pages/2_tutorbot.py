@@ -36,7 +36,7 @@ def get_response(jim_line):
     response = openai.Completion.create(
       model="text-davinci-003",
       prompt=jim_line,
-      temperature=0.9,
+      temperature=0.1,
       max_tokens=150,
       top_p=1,
       frequency_penalty=0,

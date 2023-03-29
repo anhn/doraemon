@@ -31,6 +31,8 @@ def get_response(jim_line):
 #        max_tokens = 1024,
 #        temperature = 0.5,
 #    )
+    start_sequence = "\nAI:"
+    restart_sequence = "\nHuman: "
     response = openai.Completion.create(
       model="text-davinci-003",
       prompt=jim_line,

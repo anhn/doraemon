@@ -52,7 +52,7 @@ if 'past' not in st.session_state:
     st.session_state['past'] = []
 
 def get_text():
-    input_text = st.text_area("Write you command here","Say something to your tutor:", height=10, key='option')
+    input_text = st.text_area("Write you command here","You are my Javascript teacher!", height=10, key='option')
     return input_text
 
 jim_line = get_text()
@@ -64,8 +64,8 @@ if jim_line:
 
 if st.session_state['generated']:  
     for i in range(len(st.session_state['generated'])-1, -1, -1):
-        st.markdown(""" :mailbox: AI:     """ + st.session_state["generated"][i])
-        st.markdown(""" :mailbox: Human:     """ + st.session_state['past'][i])
+        st.markdown(""" :mailbox: AI: """ + st.session_state["generated"][i])
+        st.markdown(""" :mailbox: Human: """ + st.session_state['past'][i])
            
 #with st.expander("Not sure what to say to Hannah?"):
 #    st.markdown(""" 

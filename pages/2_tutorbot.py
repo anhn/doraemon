@@ -58,10 +58,15 @@ if 'past' not in st.session_state:
 with st.form("my_form"):
    jim_line = st.text_area("Write you command here","", height=10, key='option')
    # Every form must have a submit button.
+   historyIncluded = st.checkbox('Add the last chat to input')
    submitted = st.form_submit_button("Submit")
    if submitted:
         if jim_line:
-            cathy_line = get_response(jim_line)
+            if historyIncluded:
+                jim_line_long = st.session_state["past"][len(st.session_state['past'])-1] + st.session_state["generated"][len(st.session_state['generated'])-1] + jim_line
+                cathy_line = get_response(jim_line_long)
+            else:
+                cathy_line = get_response(jim_line)
             st.session_state.past.append(jim_line)
             st.session_state.generated.append(cathy_line)
     

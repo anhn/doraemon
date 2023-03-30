@@ -68,7 +68,7 @@ if jim_line:
 
 if st.session_state['generated']:  
     for i in range(len(st.session_state['generated'])-1, -1, -1):
-        st.markdown(""" :mailbox: AI: """ + ":color[" + "st.session_state["generated"][i] + "]")
+        st.markdown(""" :mailbox: AI: """ + ":color[" + st.session_state["generated"][i] + "]")
         st.markdown(""" :mailbox: Human: """ + st.session_state['past'][i])
            
 #with st.expander("Not sure what to say to Hannah?"):

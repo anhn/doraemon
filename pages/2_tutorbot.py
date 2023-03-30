@@ -56,8 +56,7 @@ if 'past' not in st.session_state:
     st.session_state['past'] = []
 
 with st.form("my_form"):
-   st.write("Write you command here")
-   jim_line = st.text_area("","", height=10, key='option')
+   jim_line = st.text_area("Write you command here","", height=10, key='option')
    # Every form must have a submit button.
    submitted = st.form_submit_button("Submit")
    if submitted:
@@ -78,8 +77,8 @@ with st.form("my_form"):
 
 if st.session_state['generated']:  
     for i in range(len(st.session_state['generated'])-1, -1, -1):
-        st.markdown(""" :mailbox: AI: """ + ":blue[" + st.session_state["generated"][i] + "]")
-        st.markdown(""" :mailbox: Human: """ + st.session_state['past'][i])
+        st.markdown(""" :mailbox: :blue[Tutor:] """ + st.session_state["generated"][i])
+        st.markdown(""" :mailbox: :red[You:] """ + st.session_state['past'][i])
            
 #with st.expander("Not sure what to say to Hannah?"):
 #    st.markdown(""" 

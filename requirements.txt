@@ -88,7 +88,7 @@ Send2Trash==1.8.0
 six==1.16.0
 smmap==5.0.0
 stack-data==0.2.0
-streamlit==1.7.0
+streamlit==1.16.0
 streamlit-chat==0.0.1
 terminado==0.13.2
 testpath==0.6.0

@@ -55,20 +55,30 @@ if 'generated' not in st.session_state:
 if 'past' not in st.session_state:
     st.session_state['past'] = []
 
-def get_text():
-    input_text = st.text_area("Write you command here","You are my Javascript teacher!", height=10, key='option')
-    return input_text
+with st.form("my_form"):
+   st.write("Write you command here")
+   jim_line = st.text_area("","", height=10, key='option')
+   # Every form must have a submit button.
+   submitted = st.form_submit_button("Submit")
+   if submitted:
+        if jim_line:
+            cathy_line = get_response(jim_line)
+            st.session_state.past.append(jim_line)
+            st.session_state.generated.append(cathy_line)
+    
+#def get_text():
+#    input_text = st.text_area("","", height=10, key='option')
+#    return input_text
+#jim_line = get_text()
 
-jim_line = get_text()
-
-if jim_line:
-    cathy_line = get_response(jim_line)
-    st.session_state.past.append(jim_line)
-    st.session_state.generated.append(cathy_line)
+#if jim_line:
+#    cathy_line = get_response(jim_line)
+#    st.session_state.past.append(jim_line)
+#    st.session_state.generated.append(cathy_line)
 
 if st.session_state['generated']:  
     for i in range(len(st.session_state['generated'])-1, -1, -1):
-        st.markdown(""" :mailbox: AI: """ + ":color[" + st.session_state["generated"][i] + "]")
+        st.markdown(""" :mailbox: AI: """ + ":blue[" + st.session_state["generated"][i] + "]")
         st.markdown(""" :mailbox: Human: """ + st.session_state['past'][i])
            
 #with st.expander("Not sure what to say to Hannah?"):

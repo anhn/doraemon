@@ -22,28 +22,29 @@ st.sidebar.title("🏢 Your virtual assisant in learning Javascript")
 cathy_line =''
 jim_line = ''
 def get_response(jim_line):
-#    completions = openai.ChatCompletion.create(
-#        model="gpt-3.5-turbo",
-#        messages=[
-#            {"role": "system", "content": "You are a Javascript teacher for 2nd year students"},
-#            {"role": "user", "content": jim_line},
-#        ],
-#        max_tokens = 1024,
-#        temperature = 0.5,
-#    )
-    start_sequence = "\nAI:"
-    restart_sequence = "\nHuman: "
-    response = openai.Completion.create(
-      model="text-davinci-003",
-      prompt=jim_line,
-      temperature=0.1,
-      max_tokens=150,
-      top_p=1,
-      frequency_penalty=0,
-      presence_penalty=0.6,
-      stop=[" Human:", " AI:"]
+    completions = openai.ChatCompletion.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "system", "content": "You are a Javascript teacher for 2nd year students"},
+            {"role": "user", "content": jim_line},
+        ],
+        max_tokens = 1024,
+        temperature = 0.5,
     )
-    output = response.choices[0].text.strip()
+    output = completions.choices[0]["message"]["content"].strip()
+#    start_sequence = "\nAI:"
+#    restart_sequence = "\nHuman: "
+#    response = openai.Completion.create(
+#      model="text-davinci-003",
+#      prompt=jim_line,
+#      temperature=0.1,
+#      max_tokens=150,
+#      top_p=1,
+#      frequency_penalty=0,
+#      presence_penalty=0.6,
+#      stop=[" Human:", " AI:"]
+#    )
+#    output = response.choices[0].text.strip()
     return output 
 
 # Storing the chat

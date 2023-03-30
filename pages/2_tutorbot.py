@@ -83,7 +83,7 @@ with st.form("my_form"):
 if st.session_state['generated']:  
     for i in range(len(st.session_state['generated'])-1, -1, -1):
         st.markdown(""" :mailbox: Tutor: """ + st.session_state["generated"][i])
-        st.markdown(""" :mailbox: You: """ + st.session_state['past'][i])
+        st.markdown(""" :mailbox: You: """ + ":violet["+ st.session_state['past'][i] + "]")
            
 #with st.expander("Not sure what to say to Hannah?"):
 #    st.markdown(""" 

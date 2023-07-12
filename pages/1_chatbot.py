@@ -27,7 +27,7 @@ openai.api_key = st.secrets["OPENAI_KEY"]
 #)
 #st.title("🏢 Trợ lý sáng đạo trong đời")
 image = Image.open("law1.jpg")
-st.image(image, width=1024)
+st.image(image, width=800)
 
 #st.sidebar.title("🏢 Trợ lý sáng đạo trong đời")
 #st.sidebar.markdown("""

@@ -161,7 +161,7 @@ def text_to_speech(input_language, output_language, text, tld):
 result, output_text = text_to_speech(input_language, output_language, st.session_state.generated, tld)
 audio_file = open(f"temp/{result}.mp3", "rb")
 audio_bytes = audio_file.read()
-st.markdown(f"## Your audio:")
+st.markdown(f"## Nghe lời giảng:")
 st.audio(audio_bytes, format="audio/mp3", start_time=0)
 
 #if st.button("convert"):

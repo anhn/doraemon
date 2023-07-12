@@ -31,13 +31,12 @@ st.image(image, width=1024)
 
 #st.sidebar.title("🏢 Trợ lý sáng đạo trong đời")
 #st.sidebar.markdown("""
-st.markdown("""
-
-**Feedback/Questions**: 
-[join our slack workspace](https://join.slack.com/t/officechatbot/shared_invite/zt-14rlr8chh-C~rwJN~~KUAX~DOkvcno1g)
-
-Like 🏢 **The Office Chatbot** and want to say thanks? [:coffee: buy me a coffee](https://www.buymeacoffee.com/anhnd85Q)
-""")
+#
+#**Feedback/Questions**: 
+#[join our slack workspace](https://join.slack.com/t/officechatbot/shared_invite/zt-14rlr8chh-C~rwJN~~KUAX~DOkvcno1g)
+#
+#Like 🏢 **The Office Chatbot** and want to say thanks? [:coffee: buy me a coffee](https://www.buymeacoffee.com/anhnd85Q)
+#""")
 cathy_line =''
 john_line = ''
 jim_line = 'bạn đóng vai một nhà sư với kiến thức về phật giáo uyên bác. Bạn sẽ trả lời các câu hỏi từ người dùng một cách chi tiết và dễ hiểu nhất có thể. Bạn sẽ xưng là thầy, và gọi người dùng là con.'

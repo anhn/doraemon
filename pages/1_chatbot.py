@@ -72,15 +72,15 @@ jim_line = 'bạn đóng vai một nhà sư với kiến thức về phật giá
 #    if "GET_TEXT" in result:
 #        st.write(":pig: Phật tử: " + result.get("GET_TEXT"))
 #        jim_line = result.get("GET_TEXT")
-        
+
 def get_response(jim_line):
     completions = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4",
         messages=[
             {"role": "system", "content": "bạn đóng vai một nhà sư với kiến thức về phật giáo uyên bác. Bạn sẽ trả lời các câu hỏi từ người dùng một cách chi tiết và dễ hiểu nhất có thể. Bạn sẽ xưng là thầy, và gọi người dùng là con."},
             {"role": "user", "content": jim_line},
         ],
-        max_tokens = 1024,
+        max_tokens = 2048,
         temperature = 0.5,
     )
     response = completions.choices[0]["message"]["content"].strip()

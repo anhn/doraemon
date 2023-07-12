@@ -75,12 +75,12 @@ jim_line = 'bạn đóng vai một nhà sư với kiến thức về phật giá
 
 def get_response(jim_line):
     completions = openai.ChatCompletion.create(
-        model="gpt-4",
+        model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "bạn đóng vai một nhà sư với kiến thức về phật giáo uyên bác. Bạn sẽ trả lời các câu hỏi từ người dùng một cách chi tiết và dễ hiểu nhất có thể. Bạn sẽ xưng là thầy, và gọi người dùng là con."},
             {"role": "user", "content": jim_line},
         ],
-        max_tokens = 2048,
+        max_tokens = 1024,
         temperature = 0.5,
     )
     response = completions.choices[0]["message"]["content"].strip()

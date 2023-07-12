@@ -16,21 +16,22 @@ from PIL import Image
 
 openai.api_key = st.secrets["OPENAI_KEY"]
 
-st.set_page_config(
-    page_icon='🏢',
-    page_title='Phat Giao Online',
-    menu_items={
-        'Get Help': 'https://join.slack.com/t/officechatbot/shared_invite/zt-14rlr8chh-C~rwJN~~KUAX~DOkvcno1g',
-        'Report a bug': "https://github.com/anhn/streamlit-example/issues/new",
-        'About': "This chatbot is developed by CMAT JSC for supporting dissemination of Budhism "
-    }
-)
+#st.set_page_config(
+#    page_icon='🏢',
+#    page_title='Phat Giao Online',
+#    menu_items={
+#        'Get Help': 'https://join.slack.com/t/officechatbot/shared_invite/zt-14rlr8chh-C~rwJN~~KUAX~DOkvcno1g',
+#        'Report a bug': "https://github.com/anhn/streamlit-example/issues/new",
+#        'About': "This chatbot is developed by CMAT JSC for supporting dissemination of Budhism "
+#    }
+#)
 #st.title("🏢 Trợ lý sáng đạo trong đời")
 image = Image.open("law1.jpg")
 st.image(image, width=1024)
 
-st.sidebar.title("🏢 Trợ lý sáng đạo trong đời")
-st.sidebar.markdown("""
+#st.sidebar.title("🏢 Trợ lý sáng đạo trong đời")
+#st.sidebar.markdown("""
+st.markdown("""
 
 **Feedback/Questions**: 
 [join our slack workspace](https://join.slack.com/t/officechatbot/shared_invite/zt-14rlr8chh-C~rwJN~~KUAX~DOkvcno1g)

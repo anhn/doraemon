@@ -17,16 +17,16 @@ openai.api_key = st.secrets["OPENAI_KEY"]
 
 st.set_page_config(
     page_icon='🏢',
-    page_title='CMAT DIGITAL - Your Virtual AI Assistant',
+    page_title='Phat Giao Online',
     menu_items={
         'Get Help': 'https://join.slack.com/t/officechatbot/shared_invite/zt-14rlr8chh-C~rwJN~~KUAX~DOkvcno1g',
         'Report a bug': "https://github.com/anhn/streamlit-example/issues/new",
-        'About': "This chatbot is tailored by Anh Nguyen-Duc for trying a virtual project assistant "
+        'About': "This chatbot is developed by CMAT JSC for supporting dissemination of Budhism "
     }
 )
-st.title("🏢 CMAT Digital - Trợ lý khởi nghiệp vạn năng")
+st.title("🏢 Trợ lý sáng đạo trong đời")
 
-st.sidebar.title("🏢 Trợ lý khởi nghiệp vạn năng")
+st.sidebar.title("🏢 Trợ lý sáng đạo trong đời")
 st.sidebar.markdown("""
 
 **Feedback/Questions**: 
@@ -36,7 +36,7 @@ Like 🏢 **The Office Chatbot** and want to say thanks? [:coffee: buy me a coff
 """)
 cathy_line =''
 john_line = ''
-jim_line = 'Bạn là trợ lý ảo vạn năng!'
+jim_line = 'bạn đóng vai một nhà sư với kiến thức về phật giáo uyên bác. Bạn sẽ trả lời các câu hỏi từ người dùng một cách chi tiết và dễ hiểu nhất có thể. Bạn sẽ xưng là thầy, và gọi người dùng là con.'
 
 stt_button = Button(label="Nói", width=100)
 stt_button.js_on_event("button_click", CustomJS(code="""
@@ -67,14 +67,14 @@ result = streamlit_bokeh_events(
     debounce_time=0)
 if result:
     if "GET_TEXT" in result:
-        st.write(":pig: Bạn: " + result.get("GET_TEXT"))
+        st.write(":pig: Phật tử: " + result.get("GET_TEXT"))
         jim_line = result.get("GET_TEXT")
         
 def get_response(jim_line):
     completions = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": "Bạn là một trợ lý ảo cho lập trình viên và người khởi nghiệp"},
+            {"role": "system", "content": "bạn đóng vai một nhà sư với kiến thức về phật giáo uyên bác. Bạn sẽ trả lời các câu hỏi từ người dùng một cách chi tiết và dễ hiểu nhất có thể. Bạn sẽ xưng là thầy, và gọi người dùng là con."},
             {"role": "user", "content": jim_line},
         ],
         max_tokens = 1024,
@@ -94,8 +94,8 @@ if 'past' not in st.session_state:
     #input_text = st.text_area("Can not speak?","Say something to Hannah:", height=10, key='option')
     #return input_text
 
-with st.expander("Viết yêu cầu tại đây"):         
-    john_line = st.text_area("Viết câu hỏi của bạn",value='', height=5, key='input')
+with st.expander("Viết câu hỏi tại đây nếu bạn không dùng micro"):         
+    john_line = st.text_area("",value='', height=5, key='input')
 if john_line:
     cathy_line = get_response(john_line)
     jim_line = ''
@@ -108,7 +108,7 @@ if jim_line != '':
 if cathy_line != '':
     st.session_state.generated = cathy_line
     
-st.markdown(""" :mailbox: CMAT Digital:     """ + cathy_line)
+st.markdown(""" :mailbox: Thầy:     """ + cathy_line)
 
 try:
     os.mkdir("temp")

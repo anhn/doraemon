@@ -26,7 +26,7 @@ st.set_page_config(
     }
 )
 #st.title("🏢 Trợ lý sáng đạo trong đời")
-image = Image.open("/law1.jpg")
+image = Image.open("law1.jpg")
 st.image(image, width=1024)
 
 st.sidebar.title("🏢 Trợ lý sáng đạo trong đời")

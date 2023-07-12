@@ -12,6 +12,7 @@ import time
 import glob
 from gtts import gTTS
 from googletrans import Translator
+from PIL import Image
 
 openai.api_key = st.secrets["OPENAI_KEY"]
 
@@ -24,7 +25,9 @@ st.set_page_config(
         'About': "This chatbot is developed by CMAT JSC for supporting dissemination of Budhism "
     }
 )
-st.title("🏢 Trợ lý sáng đạo trong đời")
+#st.title("🏢 Trợ lý sáng đạo trong đời")
+image = Image.open("photo/law1.jpg")
+st.image(image, width=1024)
 
 st.sidebar.title("🏢 Trợ lý sáng đạo trong đời")
 st.sidebar.markdown("""

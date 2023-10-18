@@ -100,18 +100,19 @@ if 'past' not in st.session_state:
 #with st.expander("Viết câu hỏi tại đây nếu bạn không dùng micro"):         
 john_line = st.text_area("Viết câu hỏi tại đây",value='', height=5, key='input')
 if john_line:
-    cathy_line = get_response(john_line)
-    jim_line = ''
+    st.session_state.generated = john_line
+##    cathy_line = get_response(john_line)
+##    jim_line = ''
 
-if jim_line != '':
+##if jim_line != '':
 #jim_line = get_text()
-    cathy_line = get_response(jim_line)
+##    cathy_line = get_response(jim_line)
 #st.session_state.past.append(jim_line)
 
-if cathy_line != '':
-    st.session_state.generated = cathy_line
+##if cathy_line != '':
+##    st.session_state.generated = cathy_line
     
-st.markdown(""" :mailbox: Lecturer:     """ + cathy_line)
+##st.markdown(""" :mailbox: Lecturer:     """ + cathy_line)
 
 try:
     os.mkdir("temp")

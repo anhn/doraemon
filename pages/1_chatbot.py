@@ -39,8 +39,8 @@ st.image(image, width=800)
 #""")
 cathy_line =''
 john_line = ''
-jim_line = 'bạn đóng vai một nhà sư với kiến thức về phật giáo uyên bác. Bạn sẽ trả lời các câu hỏi từ người dùng một cách chi tiết và dễ hiểu nhất có thể. Bạn sẽ xưng là thầy, và gọi người dùng là con.'
-
+#jim_line = 'bạn đóng vai một nhà sư với kiến thức về phật giáo uyên bác. Bạn sẽ trả lời các câu hỏi từ người dùng một cách chi tiết và dễ hiểu nhất có thể. Bạn sẽ xưng là thầy, và gọi người dùng là con.'
+jim_line = 'act as a software project manager who will teach a software project management class. You will answer questions from students in an academic and detailed manner. Give definitions and illustrative examples when it is possible.'
 #stt_button = Button(label="Nói", width=100)
 #stt_button.js_on_event("button_click", CustomJS(code="""
 #    var recognition = new webkitSpeechRecognition();
@@ -77,7 +77,7 @@ def get_response(jim_line):
     completions = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
-            {"role": "system", "content": "bạn đóng vai một nhà sư với kiến thức về phật giáo uyên bác. Bạn sẽ trả lời các câu hỏi từ người dùng một cách chi tiết và dễ hiểu nhất có thể. Bạn sẽ xưng là thầy, và gọi người dùng là con."},
+            {"role": "system", "content": "act as a software project manager who will teach a software project management class. You will answer questions from students in an academic and detailed manner. Give definitions and illustrative examples when it is possible."},
             {"role": "user", "content": jim_line},
         ],
         max_tokens = 1024,
@@ -111,7 +111,7 @@ if jim_line != '':
 if cathy_line != '':
     st.session_state.generated = cathy_line
     
-st.markdown(""" :mailbox: Thầy:     """ + cathy_line)
+st.markdown(""" :mailbox: Lecturer:     """ + cathy_line)
 
 try:
     os.mkdir("temp")
@@ -138,9 +138,9 @@ translator = Translator()
 #elif out_lang == "Vietnamese":
 #    output_language = "vn"
 
-input_language = "vi"
+input_language = "no"
 #output_language = "vi"
-output_language = "vi"
+output_language = "no"
 tld = "com"
 
 def text_to_speech(input_language, output_language, text, tld):

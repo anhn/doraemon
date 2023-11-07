@@ -15,7 +15,6 @@ from googletrans import Translator
 from PIL import Image
 
 openai.api_key = st.secrets["OPENAI_KEY"]
-client = OpenAI()
 
 #st.set_page_config(
 #    page_icon='🏢',

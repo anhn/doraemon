@@ -121,7 +121,7 @@ else:
 #except:
 #    pass
 
-#translator = Translator()
+translator = Translator()
 
 #in_lang = st.selectbox(
 #    "Select your input language",

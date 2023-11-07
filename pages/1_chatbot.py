@@ -3,8 +3,7 @@ import os
 from decouple import config
 import openai
 import streamlit as st
-from pathlib import Path
-from openai import OpenAI
+
 
 from bokeh.models.widgets import Button
 from bokeh.models import CustomJS

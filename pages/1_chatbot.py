@@ -3,6 +3,8 @@ import os
 from decouple import config
 import openai
 import streamlit as st
+from pathlib import Path
+from openai import OpenAI
 
 from bokeh.models.widgets import Button
 from bokeh.models import CustomJS
@@ -15,6 +17,7 @@ from googletrans import Translator
 from PIL import Image
 
 openai.api_key = st.secrets["OPENAI_KEY"]
+client = OpenAI()
 
 #st.set_page_config(
 #    page_icon='🏢',
@@ -101,6 +104,8 @@ if 'past' not in st.session_state:
 john_line = st.text_area("Viết câu hỏi tại đây",value='', height=5, key='input')
 if john_line:
     st.session_state.generated = john_line
+else
+    st.session_state.generated = 'say something'
 ##    cathy_line = get_response(john_line)
 ##    jim_line = ''
 
@@ -114,12 +119,12 @@ if john_line:
     
 ##st.markdown(""" :mailbox: Lecturer:     """ + cathy_line)
 
-try:
-    os.mkdir("temp")
-except:
-    pass
+#try:
+#    os.mkdir("temp")
+#except:
+#    pass
 
-translator = Translator()
+#translator = Translator()
 
 #in_lang = st.selectbox(
 #    "Select your input language",
@@ -144,26 +149,33 @@ input_language = "no"
 output_language = "no"
 tld = "com"
 
-def text_to_speech(input_language, output_language, text, tld):
+#def text_to_speech(input_language, output_language, text, tld):
 #    translation = translator.translate(text, src=input_language, dest=output_language)
 #    trans_text = translation.text
 #    tts = gTTS(trans_text, lang=output_language, tld=tld, slow=False)
-    tts = gTTS(text, lang=output_language, tld=tld, slow=False)
-    try:
-        my_file_name = text[0:20]
-    except:
-        my_file_name = "audio"
-    tts.save(f"temp/{my_file_name}.mp3")
+#    tts = gTTS(text, lang=output_language, tld=tld, slow=False)
+#    try:
+#        my_file_name = text[0:20]
+#    except:
+#        my_file_name = "audio"
+#    tts.save(f"temp/{my_file_name}.mp3")
 #    return my_file_name, trans_text
-    return my_file_name, text
+#    return my_file_name, text
 
+speech_file_path = Path(__file__).parent / "speech.mp3"
+response = client.audio.speech.create(
+  model="tts-1",
+  voice="alloy",
+  input=st.session_state.generated
+)
 
+response.stream_to_file(speech_file_path)
 #display_output_text = st.checkbox("Display output text")
-result, output_text = text_to_speech(input_language, output_language, st.session_state.generated, tld)
-audio_file = open(f"temp/{result}.mp3", "rb")
-audio_bytes = audio_file.read()
-st.markdown(f"## Nghe lời giảng:")
-st.audio(audio_bytes, format="audio/mp3", start_time=0)
+#result, output_text = text_to_speech(input_language, output_language, st.session_state.generated, tld)
+#audio_file = open(f"temp/{result}.mp3", "rb")
+#audio_bytes = audio_file.read()
+#st.markdown(f"## Nghe lời giảng:")
+#st.audio(audio_bytes, format="audio/mp3", start_time=0)
 
 #if st.button("convert"):
 #    result, output_text = text_to_speech(input_language, output_language, st.session_state.generated, tld)
@@ -175,17 +187,17 @@ st.audio(audio_bytes, format="audio/mp3", start_time=0)
 #        st.markdown(f"## Output text:")
 #        st.write(f" {output_text}")
 
-def remove_files(n):
-    mp3_files = glob.glob("temp/*mp3")
-    if len(mp3_files) != 0:
-        now = time.time()
-        n_days = n * 86400
-        for f in mp3_files:
-            if os.stat(f).st_mtime < now - n_days:
-                os.remove(f)
-                print("Deleted ", f)
+#def remove_files(n):
+#    mp3_files = glob.glob("temp/*mp3")
+#    if len(mp3_files) != 0:
+#        now = time.time()
+#        n_days = n * 86400
+#        for f in mp3_files:
+#            if os.stat(f).st_mtime < now - n_days:
+#                os.remove(f)
+#                print("Deleted ", f)
 
-remove_files(7)
+#remove_files(7)
 #if jim_line:
 #    output = get_response(jim_line)
 #    # store the output 

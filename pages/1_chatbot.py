@@ -162,7 +162,7 @@ tld = "com"
 #    return my_file_name, trans_text
 #    return my_file_name, text
 
-speech_file_path = Path(__file__).parent / "speech.mp3"
+speech_file_path = "speech.mp3"
 response = client.audio.speech.create(
   model="tts-1",
   voice="alloy",

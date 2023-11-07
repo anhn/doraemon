@@ -104,7 +104,7 @@ if 'past' not in st.session_state:
 john_line = st.text_area("Viết câu hỏi tại đây",value='', height=5, key='input')
 if john_line:
     st.session_state.generated = john_line
-else
+else:
     st.session_state.generated = 'say something'
 ##    cathy_line = get_response(john_line)
 ##    jim_line = ''

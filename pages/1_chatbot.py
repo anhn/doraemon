@@ -146,6 +146,13 @@ input_language = "no"
 output_language = "no"
 tld = "com"
 
+def list_mp3_files(folder_path):
+    # List all files in the specified directory
+    all_files = os.listdir(folder_path)
+    # Filter out files that are not MP3
+    mp3_files = [file for file in all_files if file.endswith('.mp3')]
+    return mp3_files
+    
 def text_to_speech(input_language, output_language, text, tld):
     translation = translator.translate(text, src=input_language, dest=output_language)
     trans_text = translation.text
@@ -159,6 +166,16 @@ def text_to_speech(input_language, output_language, text, tld):
     return my_file_name, trans_text
     
 display_output_text = st.checkbox("Display output text")
+# Streamlit user interface to input the folder path
+
+mp3_files = list_mp3_files("temp")
+if mp3_files:
+    st.write("MP3 Files in the folder:")
+    for file in mp3_files:
+        st.write(file)
+else:
+    st.write("No MP3 files found in the specified folder.")
+
 if john_line!= '':
     st.session_state.generated = john_line
     result, output_text = text_to_speech(input_language, output_language, st.session_state.generated, tld)

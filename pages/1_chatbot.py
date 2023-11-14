@@ -168,7 +168,7 @@ def text_to_speech(input_language, output_language, text, tld):
 display_output_text = st.checkbox("Display output text")
 # Streamlit user interface to input the folder path
 
-mp3_files = list_mp3_files("temp")
+mp3_files = list_mp3_files(os.getcwd())
 if mp3_files:
     st.write("MP3 Files in the folder:")
     for file in mp3_files:

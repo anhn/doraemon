@@ -150,7 +150,7 @@ def list_mp3_files(folder_path):
     # List all files in the specified directory
     all_files = os.listdir(folder_path)
     # Filter out files that are not MP3
-    mp3_files = [file for file in all_files if file.endswith('.mp3')]
+    mp3_files = [file for file in all_files]
     return mp3_files
     
 def text_to_speech(input_language, output_language, text, tld):

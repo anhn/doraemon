@@ -159,11 +159,13 @@ def text_to_speech(input_language, output_language, text, tld):
     return my_file_name, trans_text
     
 display_output_text = st.checkbox("Display output text")
-result, output_text = text_to_speech(input_language, output_language, st.session_state.generated, tld)
-audio_file = open(f"temp/{result}.mp3", "rb")
-audio_bytes = audio_file.read()
-st.markdown(f"## Speech:")
-st.audio(audio_bytes, format="audio/mp3", start_time=0)
+if john_line!= '':
+    st.session_state.generated = john_line
+    result, output_text = text_to_speech(input_language, output_language, st.session_state.generated, tld)
+    audio_file = open(f"temp/{result}.mp3", "rb")
+    audio_bytes = audio_file.read()
+    st.markdown(f"## Speech:")
+    st.audio(audio_bytes, format="audio/mp3", start_time=0)
 
 #if st.button("convert"):
 #    result, output_text = text_to_speech(input_language, output_language, st.session_state.generated, tld)

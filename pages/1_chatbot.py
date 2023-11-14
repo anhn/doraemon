@@ -29,6 +29,8 @@ openai.api_key = st.secrets["OPENAI_KEY"]
 image = Image.open("law1.jpg")
 st.image(image, width=800)
 
+if not os.path.exists('temp'):
+    os.makedirs('temp')
 #st.sidebar.title("🏢 Trợ lý sáng đạo trong đời")
 #st.sidebar.markdown("""
 #

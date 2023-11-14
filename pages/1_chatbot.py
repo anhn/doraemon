@@ -102,7 +102,7 @@ john_line = st.text_area("Viết câu hỏi tại đây",value='', height=5, key
 if john_line:
     st.session_state.generated = john_line
 else:
-    st.session_state.generated = 'say something'
+    st.session_state.generated = 'something'
 ##    cathy_line = get_response(john_line)
 ##    jim_line = ''
 

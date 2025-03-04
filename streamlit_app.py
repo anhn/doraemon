@@ -1,23 +1,60 @@
 import streamlit as st
+import os
+from openai import OpenAI
+import faiss
+import numpy as np
+from sentence_transformers import SentenceTransformer, util
+from pymongo import MongoClient
+from datetime import datetime
+from streamlit_feedback import streamlit_feedback
+import requests
+import uuid
+import time
+
+MONGO_URI = st.secrets["mongo"]["uri"]  # Load MongoDB URI from secrets
+DB_NAME = "utt_detai25"
+FAQ_COLLECTION = "faqtuyensinh"
+CHATLOG_COLLECTION = "chatlog"
+
+client_mongo = MongoClient(MONGO_URI)
+db = client_mongo[DB_NAME]
+faq_collection = db[FAQ_COLLECTION]
+chatlog_collection = db[CHATLOG_COLLECTION]
+
 
 st.set_page_config(
     page_title="Hello",
     page_icon="👋",
 )
 
-st.write("# Welcome to my learning space! 👋")
+st.write("# Admin page for the UTT Tuyen sinh 👋")
+# File uploader
+uploaded_file = st.file_uploader("Upload an Excel file with FAQ data", type=["xlsx", "xls"])
 
-st.sidebar.success("Select a demo above.")
+if uploaded_file is not None:
+    # Read the Excel file
+    df = pd.read_excel(uploaded_file)
+    
+    # Ensure required columns are present
+    required_columns = {"Question", "Answer"}
+    if not required_columns.issubset(df.columns):
+        st.error(f"The uploaded file must contain the following columns: {required_columns}")
+    else:
+        # Convert DataFrame to list of dictionaries
+        faq_data = df.to_dict(orient="records")
+        
+        # Insert data into MongoDB
+        if faq_data:
+            faq_collection.insert_many(faq_data)
+            st.success(f"Successfully added {len(faq_data)} FAQs to the database.")
+        else:
+            st.warning("The uploaded file is empty or has no valid data.")
 
-st.markdown(
-    """
-    As a researcher who believes in the power of automation in education, my experiment space with chatbots has been a fascinating journey. By leveraging the advancements in artificial intelligence and natural language processing, I have been exploring the potential of chatbots as an effective tool for automating learning and teaching processes. With the ability to engage learners in personalized conversations, provide instant feedback, and offer customized learning paths, chatbots have the potential to transform the traditional classroom experience. My research aims to identify the most effective ways to design and implement chatbots in education to enhance the learning outcomes and create a more accessible and inclusive learning environment for all.
-    You can findout more about me:
-    Linkedin: https://www.linkedin.com/in/anhnguyenduc/
-    Google Scholar: https://scholar.google.no/citations?user=ia02J_oAAAAJ&hl=no
-    My current affliation: 
-        USN: https://www.usn.no/english/about/contact-us/employees/anh-nguyen-duc
-        NTNU: https://www.ntnu.no/ansatte/anhn
-        Fulbright: https://fulbright.edu.vn/our-team/nguyen-duc-anh/
-"""
-)
+# Display existing FAQ entries
+st.subheader("Existing FAQs")
+faqs = list(faq_collection.find({}, {"_id": 0}))
+if faqs:
+    st.table(pd.DataFrame(faqs))
+else:
+    st.write("No FAQs found in the database.")
+

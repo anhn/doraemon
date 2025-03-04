@@ -1,15 +1,7 @@
 import streamlit as st
+import pandas as pd
 import os
-from openai import OpenAI
-import faiss
-import numpy as np
-from sentence_transformers import SentenceTransformer, util
 from pymongo import MongoClient
-from datetime import datetime
-from streamlit_feedback import streamlit_feedback
-import requests
-import uuid
-import time
 
 MONGO_URI = st.secrets["mongo"]["uri"]  # Load MongoDB URI from secrets
 DB_NAME = "utt_detai25"

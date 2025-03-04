@@ -11,4 +11,4 @@ sentence-transformers
 streamlit_feedback
 pymongo
 datetime
-pandas==3.1.0
+pandas>=3.1.0

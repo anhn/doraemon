@@ -22,12 +22,11 @@ st.set_page_config(
 st.write("# Admin page for the UTT Tuyen sinh 👋")
 
 # File uploader
-uploaded_file = st.file_uploader("Upload an Excel file with FAQ data", type=["xlsx", "xls"])
+uploaded_file = st.file_uploader("Upload an Excel file with FAQ data", type=["csv"])
 
 if uploaded_file is not None:
-    # Read the Excel file
-    df = pd.read_excel(uploaded_file)
-    
+    # Read the CSV file
+    df = pd.read_csv(uploaded_file)
     # Ensure required columns are present
     required_columns = {"Question", "Answer", "Type"}
     if not required_columns.issubset(df.columns):

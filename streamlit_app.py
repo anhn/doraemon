@@ -25,7 +25,7 @@ uploaded_file = st.file_uploader("Upload an Excel file with FAQ data", type=["cs
 
 if uploaded_file is not None:
     # Read the CSV file
-    df = pd.read_csv(uploaded_file, encoding="utf-8")
+    df = pd.read_csv(uploaded_file, encoding="utf-8",  delimiter=";")
     
     # Ensure required columns are present
     required_columns = {"Question", "Answer", "Type"}

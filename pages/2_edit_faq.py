@@ -3,6 +3,8 @@ import pandas as pd
 import os
 from pymongo import MongoClient
 
+st.set_page_config(layout="wide") 
+
 # Load MongoDB URI from secrets
 MONGO_URI = st.secrets["mongo"]["uri"]  
 DB_NAME = "utt_detai25"

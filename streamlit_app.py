@@ -213,9 +213,24 @@ if user_input:
     )
     print(feedback)
     if feedback: 
-        # Update chat log in MongoDB to include feedback
-        chatlog_collection.update_one(
-            {"user_ip": user_ip, "timestamp": chat_entry["timestamp"]},  # Find the saved entry
-            {"$set": {"is_good": False if feedback else True, "problem_detail": feedback}}
+        # Retrieve the latest chat log entry for the current user
+        last_chat = chatlog_collection.find_one(
+            {"user_ip": user_ip},
+            sort=[("timestamp", -1)]  # Get the latest entry by sorting timestamp descending
         )
-        st.success("✅ Cảm ơn bạn đã đánh giá!")
+        if last_chat:
+            # Update the existing log with feedback details, user input, and bot response
+            chatlog_collection.update_one(
+                {"_id": last_chat["_id"]},  # Find the correct entry
+                {
+                    "$set": {
+                        "is_good": False if feedback else True,
+                        "problem_detail": feedback,
+                        "user_message": user_input,  # Update user question
+                        "bot_response": bot_response  # Update bot response
+                    }
+                }
+            )
+            st.success("✅ Cảm ơn bạn đã đánh giá! Nhật ký chat đã được cập nhật.")
+        else:
+            st.warning("⚠️ Không tìm thấy nhật ký chat để cập nhật phản hồi.")

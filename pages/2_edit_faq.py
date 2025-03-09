@@ -15,11 +15,6 @@ client_mongo = MongoClient(MONGO_URI)
 db = client_mongo[DB_NAME]
 faq_collection = db[FAQ_COLLECTION]
 
-st.set_page_config(
-    page_title="Admin Page for UTT Tuyển Sinh",
-    page_icon="👋",
-)
-
 st.write("# Admin Page for UTT Tuyển Sinh 👋")
 
 # Load existing FAQ data from MongoDB

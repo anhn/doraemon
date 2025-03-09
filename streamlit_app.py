@@ -211,8 +211,12 @@ if user_input:
         feedback_type="thumbs",
         optional_text_label="[Tùy chọn] Vui lòng giải thích",
     )
-    print(feedback)
-    if feedback: 
+    if "feedback_value" not in st.session_state:
+        st.session_state["feedback_value"] = None  # Default state
+    
+    if feedback and feedback != st.session_state["feedback_value"]:
+        st.session_state["feedback_value"] = feedback  # Store feedback when changed
+        print(feedback)  # Now, this will be executed
         # Retrieve the latest chat log entry for the current user
         last_chat = chatlog_collection.find_one(
             {"user_ip": user_ip},

@@ -1,59 +1,221 @@
 import streamlit as st
-import pandas as pd
 import os
+from openai import OpenAI
+import faiss
+import numpy as np
+from sentence_transformers import SentenceTransformer, util
 from pymongo import MongoClient
+from datetime import datetime
+from streamlit_feedback import streamlit_feedback
+import requests
+import uuid
+import time
 
+# Load SBERT model
+sbert_model = SentenceTransformer("all-MiniLM-L6-v2")
+
+# MongoDB Connection
 MONGO_URI = st.secrets["mongo"]["uri"]  # Load MongoDB URI from secrets
+PERPLEXITY_API = st.secrets["perplexity"]["key"]
 DB_NAME = "utt_detai25"
 FAQ_COLLECTION = "faqtuyensinh"
 CHATLOG_COLLECTION = "chatlog"
+
+# Load OpenAI embedding model
+EMBEDDING_MODEL = "text-embedding-ada-002"
+GPT_MODEL = "gpt-4-turbo"
 
 client_mongo = MongoClient(MONGO_URI)
 db = client_mongo[DB_NAME]
 faq_collection = db[FAQ_COLLECTION]
 chatlog_collection = db[CHATLOG_COLLECTION]
 
-st.set_page_config(
-    page_title="Hello",
-    page_icon="👋",
-)
+def get_ip():
+    try:
+        return requests.get("https://api64.ipify.org?format=json").json()["ip"]
+    except:
+        return "Unknown"
 
-st.write("# Admin page for the UTT Tuyen sinh 👋")
+user_ip = get_ip()
 
-# File uploader
-uploaded_file = st.file_uploader("Upload an Excel file with FAQ data", type=["csv"])
+# Initialize chat history in session state
+if "chat_log" not in st.session_state:
+    st.session_state["chat_log"] = []
 
-if uploaded_file is not None:
-    # Read the CSV file
-    df = pd.read_csv(uploaded_file, encoding="utf-8",  delimiter=";")
+# Set OpenAI API Key in the environment
+os.environ["OPENAI_API_KEY"] = st.secrets["api"]["key"]
+
+openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
+client = OpenAI(api_key=PERPLEXITY_API, base_url="https://api.perplexity.ai")
+
+
+def load_faq_data():
+    # Sample FAQ database
+    faq_data = list(faq_collection.find({}, {"_id": 0}))
+    return faq_data
+# Convert FAQ questions to embeddings
+
+faq_questions = [item["Question"] for item in load_faq_data()]
+faq_embeddings = sbert_model.encode(faq_questions, convert_to_tensor=True).cpu().numpy()
+
+# Build FAISS index
+faiss_index = faiss.IndexFlatL2(faq_embeddings.shape[1])
+faiss_index.add(faq_embeddings)
+
+# Function to find best match using SBERT
+def find_best_match(user_query):
+    query_embedding = sbert_model.encode([user_query], convert_to_tensor=True).cpu().numpy()
+    _, best_match_idx = faiss_index.search(query_embedding, 1)
+    best_match = load_faq_data()[best_match_idx[0][0]]
+    # Compute similarity
+    best_match_embedding = faq_embeddings[best_match_idx[0][0]]
+    similarity = util.cos_sim(query_embedding, best_match_embedding).item()
+    return best_match, similarity
+
     
-    # Ensure required columns are present
-    required_columns = {"Question", "Answer", "Type"}
-    if not required_columns.issubset(df.columns):
-        st.error(f"The uploaded file must contain the following columns: {required_columns}")
-    else:
-        # Filter only Type 1 entries
-        df_filtered = df[df["Type"] == 1]
-        
-        # Show the first 10 rows
-        st.subheader("Preview of Uploaded Data (First 10 Rows)")
-        st.dataframe(df_filtered.head(10))
-        
-        # Convert DataFrame to list of dictionaries
-        faq_data = df_filtered.drop(columns=["Type"]).to_dict(orient="records")
-        
-        # Button to save data to the database
-        if st.button("Save to Database"):
-            if faq_data:
-                faq_collection.insert_many(faq_data)
-                st.success(f"Successfully added {len(faq_data)} FAQs of Type 1 to the database.")
-            else:
-                st.warning("No valid Type 1 FAQs found in the uploaded file.")
+# Function to generate GPT-4 response
+def generate_gpt4_response(question, context):
+    prompt = (
+        f"Một sinh viên hỏi: {question}\n\n"
+        f"Dựa trên thông tin tìm được trên internett, hãy cung cấp một câu trả lời hữu ích, ngắn gọn và thân thiện. Dẫn nguồn nếu có thể."
+    )   
+    try:
+        response = client.chat.completions.create(
+        model="sonar-pro",
+        messages=[
+                {"role": "system", "content": "Bạn là một trợ lý tuyển sinh đại học hữu ích."},
+                {"role": "user", "content": prompt}
+            ],
+            stream=True,
+            max_tokens=3500  # Limit response length to ~250 words
+        )
+        for message in response:
+            content = message.choices[0].delta.content
+            if content:  # Some parts may be None, skip them
+                yield content
+    except Exception as e:
+        return f"⚠️ Lỗi: {str(e)}"
 
-# Display existing FAQ entries
-st.subheader("Existing FAQs")
-faqs = list(faq_collection.find({}, {"_id": 0}))
-if faqs:
-    st.table(pd.DataFrame(faqs))
-else:
-    st.write("No FAQs found in the database.")
+# Function to save chat logs to MongoDB
+def save_chat_log(user_ip, user_message, bot_response, feedback):
+    """Stores chat log into MongoDB, grouped by user IP"""
+    if feedback and feedback.strip():
+        chat_entry = {
+                "user_ip": user_ip,
+                "timestamp": datetime.utcnow(),
+                "user_message": user_message,
+                "bot_response": bot_response,
+                "is_good": False,
+                "problem_detail": feedback
+            }    
+    else:    
+        chat_entry = {
+            "user_ip": user_ip,
+            "timestamp": datetime.utcnow(),
+            "user_message": user_message,
+            "bot_response": bot_response,
+            "is_good": True,
+            "problem_detail" : ""
+        }
+    chatlog_collection.insert_one(chat_entry)
+    
+def stream_text(text):
+    """Converts a string into a generator to work with `st.write_stream()`."""
+    for word in text.split():
+        yield word + " "  # Stream words with a space for a natural effect
+        
+# Banner Image (Replace with your actual image URL or file path)
+BANNER_URL = "https://utt.edu.vn/uploads/images/site/1722045380banner-utt.png"  # Example banner image
+
+st.markdown(
+    f"""
+    <style>
+        .center {{
+            text-align: center;
+        }}
+        .banner {{
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            width: 450px; /* Adjust size as needed */
+        }}
+        .title {{
+            font-size: 28px;
+            font-weight: bold;
+            color: #1E88E5; /* Education-themed blue */
+            margin-top: 15px;
+        }}
+        .subtitle {{
+            font-size: 18px;
+            color: #333;
+            margin-top: 5px;
+        }}
+    </style>
+
+    <div class="center">
+        <img class="banner" src="{BANNER_URL}">
+        <p class="title">🎓 Hỗ trợ tư vấn tuyển sinh - UTT</p>
+        <p class="subtitle">Hỏi tôi bất kỳ điều gì về tuyển sinh đại học!</p>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+# **Chat Interface**
+st.subheader("💬 Chatbot Tuyển Sinh")
+
+# **Display Chat History**
+for chat in st.session_state["chat_log"]:
+    with st.chat_message("user"):
+        st.write(chat["user"])
+    with st.chat_message("assistant"):
+        st.write(chat["bot"])
+        
+user_input = st.chat_input("Nhập câu hỏi của bạn...")
+
+if user_input:
+    # Show user message
+    with st.chat_message("user"):
+        st.write(user_input)
+
+    # Find best match in FAQ
+    best_match, similarity = find_best_match(user_input)
+    threshold = 0.7  # Minimum similarity to use FAQ answer
+    # Extract and sanitize the answer field
+    best_answer = best_match.get("Answer", "")
+    print(best_answer)
+    if isinstance(best_answer, float) and np.isnan(best_answer):
+        best_answer = ""  # Replace NaN with empty string
+    best_answer = str(best_answer)  # Convert non-string values to string
+    use_gpt = similarity < threshold or best_answer.strip().lower() in [""]
+    print(use_gpt)
+    # Select response source
+    if use_gpt:
+        response_stream = generate_gpt4_response(user_input, best_match["Answer"])  # Now a generator
+    else:
+        response_stream = stream_text(best_match["Answer"])  # FAQ converted to a generator
+    with st.chat_message("assistant"):
+        bot_response_container = st.empty()  # Create an empty container
+        bot_response = ""  # Collect the full response
+        for chunk in response_stream:
+            bot_response += chunk  # Append streamed content
+            bot_response_container.write(bot_response)  # Update UI in real-time
+
+    # Save to session history
+    st.session_state["chat_log"].append(
+        {"user": user_input, "bot": bot_response, "is_gpt": use_gpt}
+    )
+    feedback=""
+    # Save chat log to MongoDB
+    save_chat_log(user_ip, user_input, bot_response, feedback)
+    feedback = streamlit_feedback(
+        feedback_type="thumbs",
+        optional_text_label="[Tùy chọn] Vui lòng giải thích",
+    )
+    print(feedback)
+    if feedback: 
+        # Update chat log in MongoDB to include feedback
+        chatlog_collection.update_one(
+            {"user_ip": user_ip, "timestamp": chat_entry["timestamp"]},  # Find the saved entry
+            {"$set": {"is_good": False if feedback else True, "problem_detail": feedback}}
+        )
+        st.success("✅ Cảm ơn bạn đã đánh giá!")

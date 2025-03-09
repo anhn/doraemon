@@ -207,34 +207,16 @@ if user_input:
     feedback=""
     # Save chat log to MongoDB
     save_chat_log(user_ip, user_input, bot_response, feedback)
-    feedback = streamlit_feedback(
-        feedback_type="thumbs",
-        optional_text_label="[Tùy chọn] Vui lòng giải thích",
-    )
-    if "feedback_value" not in st.session_state:
-        st.session_state["feedback_value"] = None  # Default state
-    
-    if feedback and feedback != st.session_state["feedback_value"]:
-        st.session_state["feedback_value"] = feedback  # Store feedback when changed
-        print(feedback)  # Now, this will be executed
-        # Retrieve the latest chat log entry for the current user
-        last_chat = chatlog_collection.find_one(
-            {"user_ip": user_ip},
-            sort=[("timestamp", -1)]  # Get the latest entry by sorting timestamp descending
-        )
-        if last_chat:
-            # Update the existing log with feedback details, user input, and bot response
-            chatlog_collection.update_one(
-                {"_id": last_chat["_id"]},  # Find the correct entry
-                {
-                    "$set": {
-                        "is_good": False if feedback else True,
-                        "problem_detail": feedback,
-                        "user_message": user_input,  # Update user question
-                        "bot_response": bot_response  # Update bot response
-                    }
-                }
-            )
-            st.success("✅ Cảm ơn bạn đã đánh giá! Nhật ký chat đã được cập nhật.")
-        else:
-            st.warning("⚠️ Không tìm thấy nhật ký chat để cập nhật phản hồi.")
+
+    sentiment_mapping = [":material/thumb_down:", ":material/thumb_up:"]
+    selected = st.feedback("thumbs")
+    if selected is not None:
+        st.markdown(f"You selected: {sentiment_mapping[selected]}")
+        if selected == 0:
+            feedback_text = st.text_area("What can we improve?", key="feedback_input")
+            if st.button("Submit Feedback"):
+                if feedback_text.strip():
+                    st.success("✅ Thank you for your feedback!")
+                    # Here you can process the feedback_text (e.g., save it to a database)
+                else:
+                    st.warning("⚠️ Please enter some feedback before submitting.")

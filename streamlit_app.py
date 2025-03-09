@@ -216,15 +216,8 @@ if st.session_state["response"]:
         feedback_type="thumbs",
         optional_text_label="[Tùy chọn] Vui lòng giải thích",
     )
-    if st.session_state["response"]:
-        feedback = streamlit_feedback(
-            feedback_type="thumbs",
-            optional_text_label="[Tuỳ chọn] Vui lòng giải thích",
-            key=f"feedback_{len(messages)}",
-        )
-            if "feedback_value" not in st.session_state:
+    if "feedback_value" not in st.session_state:
         st.session_state["feedback_value"] = None  # Default state
-    
     if feedback and feedback != st.session_state["feedback_value"]:
         st.session_state["feedback_value"] = feedback  # Store feedback when changed
         print(feedback)  # Now, this will be executed

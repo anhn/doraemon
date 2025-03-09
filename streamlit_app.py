@@ -235,8 +235,8 @@ if st.session_state["response"]:
                     "$set": {
                         "is_good": False if feedback else True,
                         "problem_detail": feedback,
-                        "user_message": user_input,  # Update user question
-                        "bot_response": bot_response  # Update bot response
+                        "user_message": st.session_state["chat_log"][-1]["user"],  # Update user question
+                        "bot_response": st.session_state["chat_log"][-1]["bot"]  # Update bot response
                     }
                 }
             )

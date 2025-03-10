@@ -197,8 +197,8 @@ def format_gpt4_response(question, answer, context):
         response = openai_client.chat.completions.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "Bạn là một chị tư vấn viên tuyển sinh trả lời các em sinh viên một cách thân thiện, rõ ràng theo giọng miền Bắc Việt Nam."},
-                {"role": "user", "content": prompt}
+                {"role": "system", "content": "Chỉnh lại câu trả lời như một chị tư vấn viên tuyển sinh trả lời các em sinh viên một cách thân thiện, rõ ràng theo giọng miền Bắc Việt Nam."},
+                {"role": "user", "content": answer}
             ],
             max_tokens=500
         )

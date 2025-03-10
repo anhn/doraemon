@@ -176,7 +176,7 @@ if st.button("Add Tinh Hinh Viec Lam - De An tuyen sinh 24"):
     ("Số sinh viên nhập học ngành Khai thác vận tải là bao nhiêu?", "425"),
     ("Số sinh viên tốt nghiệp ngành Khai thác vận tải là bao nhiêu?", "72"),
     ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Khai thác vận tải là bao nhiêu?", "100%"),
-]
+   ]
     # Gán ID và type cho dữ liệu metadata
     tuyensinh24_data = [{"ID": f"Q24{str(i+1).zfill(3)}", "Question": item[0], "Answer": item[1], "Type": 1} for i, item in enumerate(qa_data_table)]
     tuyensinh24_collection.insert_many(tuyensinh24_data)

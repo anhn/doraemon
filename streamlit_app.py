@@ -247,7 +247,6 @@ if user_input:
     result = search_database(user_input)
     use_gpt = False
     if result:
-            st.success(f"✅ **Kết quả từ {collections_info[best_collection]['name']}:**\n\n{result}")
             response_stream = stream_text(result)  # FAQ converted to a generator
     else:
             st.warning("⚠️ Không tìm thấy trong cơ sở dữ liệu. Đang tìm kiếm bằng AI...")

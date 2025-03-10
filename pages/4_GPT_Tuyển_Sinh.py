@@ -516,10 +516,8 @@ for chat in st.session_state["chat_log"]:
 user_input = st.chat_input("Nhập câu hỏi của bạn...")
 
 if user_input:
-	# Show user message
 	with st.chat_message("user"):
- 		st.write(user_input)
-  	
+ 		st.write(user_input)	
 	result = search_database(user_input)
  	use_gpt = False
   	if result:

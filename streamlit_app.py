@@ -20,6 +20,12 @@ PERPLEXITY_API = st.secrets["perplexity"]["key"]
 DB_NAME = "utt_detai25"
 FAQ_COLLECTION = "faqtuyensinh"
 CHATLOG_COLLECTION = "chatlog"
+METAINFO_COLLECTION = "metainfo"
+TS24_VIECLAM_COLLECTION = "ts24_vieclam"
+TS24_CHITIEU_COLLECTION = "ts24_chitieu"
+TS24_ADMISSION_COLLECTION = "ts24_admission"
+TS24_CHITIEU_TRUNGCAP_COLLECTION = "ts24_chitieu_trungcap"
+
 
 # Load OpenAI embedding model
 EMBEDDING_MODEL = "text-embedding-ada-002"
@@ -27,7 +33,6 @@ GPT_MODEL = "gpt-4-turbo"
 
 client_mongo = MongoClient(MONGO_URI)
 db = client_mongo[DB_NAME]
-faq_collection = db[FAQ_COLLECTION]
 chatlog_collection = db[CHATLOG_COLLECTION]
 
 def get_ip():
@@ -48,14 +53,155 @@ os.environ["OPENAI_API_KEY"] = st.secrets["api"]["key"]
 openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 client = OpenAI(api_key=PERPLEXITY_API, base_url="https://api.perplexity.ai")
 
+# Database Collections
+collections_info = {
+    "faqtuyensinh": {
+        "name": "FAQ Tuyển Sinh",
+        "description": "Câu hỏi thường gặp về tuyển sinh và nhập học.",
+        "search_field": "Question",
+        "response_field": "Answer"
+    },
+    "metainfo": {
+        "name": "Thông Tin Chung về Trường",
+        "description": "Thông tin chung về trường, liên hệ, địa điểm, các khoa đào tạo.",
+        "search_field": "Question",
+        "response_field": "Answer"
+    },
+    "ts24_vieclam": {
+        "name": "Thống kê Việc Làm Sinh Viên Tốt nghiệp 2024",
+        "description": "Thống kê sinh viên tốt nghiệp 2024, số lượng có việc làm theo ngành học.",
+        "search_field": "Question",
+        "response_field": "Answer"
+    },
+    "ts24_chitieu": {
+        "name": "Chỉ Tiêu Tuyển Sinh 2024",
+        "description": "Chỉ tiêu tuyển sinh năm 2024 theo ngành và phương thức xét tuyển.",
+        "search_field": ["FieldName", "FieldCode", "FieldCodeStandard"]
+        "response_field": ["TranscriptBasedAdmission", "SchoolScoreBasedAdmission", "CompetenceBasedAdmission"]
+    },
+    "ts24_admission": {
+        "name": "Điểm Xét Tuyển",
+        "description": "Phương thức xét tuyển và cách tính điểm cho từng ngành học.",
+        "search_field": "methods.name",
+        "response_field": ["methods.description", "methods.criteria", "exam_combinations"]
+    },
+    "ts24_chitieu_trungcap": {
+        "name": "Chỉ Tiêu Trung Cấp 2024",
+        "description": "Chỉ tiêu tuyển sinh cho các chương trình trung cấp.",
+        "search_field": "category",
+        "response_field": "programs"
+    }
+}
 
-def load_faq_data():
-    # Sample FAQ database
-    faq_data = list(faq_collection.find({}, {"_id": 0}))
-    return faq_data
-# Convert FAQ questions to embeddings
+def load_data():
+    """Loads data from MongoDB for semantic search."""
+    all_data = []
+    for collection_name, info in collections_info.items():
+        collection = db[collection_name]
+        docs = list(collection.find({}, {"_id": 0}))  # Exclude MongoDB _id field
 
-faq_questions = [item["Question"] for item in load_faq_data()]
+        for doc in docs:
+            # If `search_field` is a list, extract multiple fields
+            if isinstance(info["search_field"], list):
+                searchable_texts = [doc.get(field, "") for field in info["search_field"] if field in doc]
+                searchable_texts = [text for text in searchable_texts if text]  # Remove empty values
+            else:
+                searchable_texts = [doc.get(info["search_field"], "")]
+
+            # If `response_field` is a list, extract multiple responses
+            if isinstance(info["response_field"], list):
+                answer = {k: doc.get(k, "") for k in info["response_field"] if k in doc}
+            else:
+                answer = doc.get(info["response_field"], "")
+
+            # Ensure valid text and answer exist before adding
+            for searchable_text in searchable_texts:
+                if searchable_text and answer:
+                    all_data.append({
+                        "question": searchable_text,
+                        "answer": answer,
+                        "source": collection_name,
+                        "collection_description": info["description"]
+                    })
+
+    return all_data
+
+data = load_data()
+questions = [entry["question"] for entry in data]
+answers = [entry["answer"] for entry in data]
+sources = [entry["source"] for entry in data]
+collection_descriptions = [entry["collection_description"] for entry in data]
+
+# Generate embeddings
+if questions:
+    question_embeddings = sbert_model.encode(questions, convert_to_tensor=True).cpu().numpy()
+    collection_embeddings = sbert_model.encode(collection_descriptions, convert_to_tensor=True).cpu().numpy()
+
+    # Create FAISS index
+    dimension = question_embeddings.shape[1]
+    faiss_index = faiss.IndexFlatL2(dimension)
+    faiss_index.add(question_embeddings)
+else:
+    question_embeddings = []
+    faiss_index = None
+
+# --- FUNCTION TO FIND BEST MATCHING COLLECTION ---
+def find_best_collection(query):
+    """Finds the most relevant database collection based on query context."""
+    query_embedding = sbert_model.encode([query], convert_to_tensor=True).cpu().numpy()
+    _, best_match_idx = faiss.IndexFlatL2(collection_embeddings.shape[1]).search(query_embedding, 1)
+    
+    best_collection = list(collections_info.keys())[best_match_idx[0][0]]
+    return best_collection
+
+# --- FUNCTION FOR SEMANTIC SEARCH ---
+def search_database(query, collection_name, threshold=0.7):
+    """Finds the best-matching answer from the specified collection using FAISS."""
+    info = collections_info[collection_name]
+    collection = db[collection_name]
+
+    # Special queries based on collection structure
+    if collection_name in ["ts24_chitieu", "ts24_admission"]:
+        result = collection.find_one({info["search_field"]: {"$regex": query, "$options": "i"}})
+        if result:
+            return {key: result[key] for key in info["response_field"] if key in result}
+
+    elif collection_name in ["faqtuyensinh", "metainfo", "ts24_vieclam"]:
+        result = collection.find_one({info["search_field"]: {"$regex": query, "$options": "i"}})
+        return result[info["response_field"]] if result else None
+
+    elif collection_name == "ts24_chitieu_trungcap":
+        result = collection.find_one({"category": {"$regex": query, "$options": "i"}})
+        return result["programs"] if result else None
+
+    # Default: Perform semantic search
+    filtered_data = [entry for entry in data if entry["source"] == collection_name]
+    if not filtered_data:
+        return None  # No data available
+
+    filtered_questions = [entry["question"] for entry in filtered_data]
+    filtered_answers = [entry["answer"] for entry in filtered_data]
+
+    filtered_embeddings = sbert_model.encode(filtered_questions, convert_to_tensor=True).cpu().numpy()
+    faiss_index_filtered = faiss.IndexFlatL2(filtered_embeddings.shape[1])
+    faiss_index_filtered.add(filtered_embeddings)
+
+    query_embedding = sbert_model.encode([query], convert_to_tensor=True).cpu().numpy()
+    _, best_match_idx = faiss_index_filtered.search(query_embedding, 1)
+
+    best_match = filtered_data[best_match_idx[0][0]]
+    similarity = np.dot(query_embedding, filtered_embeddings[best_match_idx[0][0]]) / (
+        np.linalg.norm(query_embedding) * np.linalg.norm(filtered_embeddings[best_match_idx[0][0]])
+    )
+    
+    if similarity >= threshold:
+        return best_match
+    return None
+
+
+
+
+faq_questions = [item["Question"] for item in load_data()]
 faq_embeddings = sbert_model.encode(faq_questions, convert_to_tensor=True).cpu().numpy()
 
 # Build FAISS index
@@ -178,23 +324,32 @@ if user_input:
     # Show user message
     with st.chat_message("user"):
         st.write(user_input)
-
-    # Find best match in FAQ
-    best_match, similarity = find_best_match(user_input)
-    threshold = 0.7  # Minimum similarity to use FAQ answer
-    # Extract and sanitize the answer field
-    best_answer = best_match.get("Answer", "")
-    print(best_answer)
-    if isinstance(best_answer, float) and np.isnan(best_answer):
-        best_answer = ""  # Replace NaN with empty string
-    best_answer = str(best_answer)  # Convert non-string values to string
-    use_gpt = similarity < threshold or best_answer.strip().lower() in [""]
-    print(use_gpt)
-    # Select response source
-    if use_gpt:
-        response_stream = generate_gpt4_response(user_input, best_match["Answer"])  # Now a generator
+    best_collection = find_best_collection(user_query)
+    st.info(f"🔍 Đang tìm kiếm trong danh mục: **{collections_info[best_collection]['name']}**")
+    # Search in the selected collection
+    result = search_database(user_query, best_collection)
+    use_gpt = False
+    if result:
+            st.success(f"✅ **Kết quả từ {collections_info[best_collection]['name']}:**\n\n{result}")
+            response_stream = stream_text(result)  # FAQ converted to a generator
     else:
-        response_stream = stream_text(best_match["Answer"])  # FAQ converted to a generator
+            st.warning("⚠️ Không tìm thấy trong cơ sở dữ liệu. Đang tìm kiếm bằng AI...")
+            use_gpt = True
+            response_stream = generate_gpt4_response(user_input, "")  # Now a generator
+    # Find best match in FAQ
+    #best_match, similarity = find_best_match(user_input)
+    #threshold = 0.7  # Minimum similarity to use FAQ answer
+    # Extract and sanitize the answer field
+    #best_answer = best_match.get("Answer", "")
+    #print(best_answer)
+    #if isinstance(best_answer, float) and np.isnan(best_answer):
+    #    best_answer = ""  # Replace NaN with empty string
+    #best_answer = str(best_answer)  # Convert non-string values to string
+    #use_gpt = similarity < threshold or best_answer.strip().lower() in [""]
+    #print(use_gpt)
+    # Select response source
+    # if use_gpt:   
+    # else:
     with st.chat_message("assistant"):
         bot_response_container = st.empty()  # Create an empty container
         bot_response = ""  # Collect the full response
@@ -211,6 +366,7 @@ if user_input:
     feedback=""
     # Save chat log to MongoDB
     save_chat_log(user_ip, user_input, bot_response, feedback)
+    
 feedback=""
 if st.session_state["response"]:
     feedback = streamlit_feedback(

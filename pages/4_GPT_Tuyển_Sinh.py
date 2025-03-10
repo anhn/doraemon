@@ -521,14 +521,13 @@ if user_input:
  		st.write(user_input)
   	
 	result = search_database(user_input)
-    use_gpt = False
-    if result:
+ 	use_gpt = False
+  	if result:
 		response_stream = stream_text(result)
   	else:
   		st.warning("⚠️ Không tìm thấy trong cơ sở dữ liệu. Đang tìm kiếm bằng AI...")
 		use_gpt = True
     	response_stream = generate_gpt4_response(user_input,context_string)  # Now a generator
-
 	with st.chat_message("assistant"):
 		bot_response_container = st.empty()  # Create an empty container
 		bot_response = ""  # Collect the full response
@@ -536,10 +535,7 @@ if user_input:
 			bot_response += chunk  # Append streamed content
 			bot_response_container.write(bot_response)  # Update UI in real-time
 		st.session_state["response"] = bot_response
-
-	st.session_state["chat_log"].append(
-        {"user": user_input, "bot": bot_response, "is_gpt": use_gpt}
-    )
+	st.session_state["chat_log"].append({"user": user_input, "bot": bot_response, "is_gpt": use_gpt})
     feedback=""
     # Save chat log to MongoDB
     save_chat_log(user_ip, user_input, bot_response, feedback)

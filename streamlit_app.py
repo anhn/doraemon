@@ -76,7 +76,7 @@ collections_info = {
     "ts24_chitieu": {
         "name": "Chỉ Tiêu Tuyển Sinh 2024",
         "description": "Chỉ tiêu tuyển sinh năm 2024 theo ngành và phương thức xét tuyển.",
-        "search_field": ["FieldName", "FieldCode", "FieldCodeStandard"]
+        "search_field": ["FieldName", "FieldCode", "FieldCodeStandard"],
         "response_field": ["TranscriptBasedAdmission", "SchoolScoreBasedAdmission", "CompetenceBasedAdmission"]
     },
     "ts24_admission": {

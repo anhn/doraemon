@@ -53,12 +53,12 @@ if uploaded_file is not None:
                 st.warning("No valid Type 1 FAQs found in the uploaded file.")
 
 # Display existing FAQ entries
-st.subheader("Existing FAQs")
-faqs = list(faq_collection.find({}, {"_id": 0}))
-if faqs:
-    st.table(pd.DataFrame(faqs))
-else:
-    st.write("No FAQs found in the database.")
+#st.subheader("Existing FAQs")
+#faqs = list(faq_collection.find({}, {"_id": 0}))
+#if faqs:
+#    st.table(pd.DataFrame(faqs))
+#else:
+#    st.write("No FAQs found in the database.")
 
 # Button to save data to MongoDB
 if st.button("Add Meta Info"):

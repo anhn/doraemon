@@ -488,45 +488,13 @@ if user_input:
         st.write(user_input)
 
     response_stream = generate_gpt4_response(user_input,context_string)  # Now a generator
-
-    with st.chat_message("assistant"):
-        bot_response_container = st.empty()  # Create an empty container
-        bot_response = ""  # Collect the full response
-        for chunk in response_stream:
-            bot_response += chunk  # Append streamed content
-            bot_response_container.write(bot_response)  # Update UI in real-time
+    st.write(response_stream)
 
     # Save to session history
-    st.session_state["chat_log"].append(
-        {"user": user_input, "bot": bot_response, "is_gpt": True}
-    )
-    feedback=""
+    #st.session_state["chat_log"].append(
+    #    {"user": user_input, "bot": bot_response, "is_gpt": True}
+    #)
+    #feedback=""
     # Save chat log to MongoDB
-    save_chat_log(user_ip, user_input, bot_response, feedback)
-    feedback = streamlit_feedback(
-        feedback_type="thumbs",
-        optional_text_label="[Tùy chọn] Vui lòng giải thích",
-    )
-    print(feedback)
-    if feedback: 
-        # Retrieve the latest chat log entry for the current user
-        last_chat = chatlog_collection.find_one(
-            {"user_ip": user_ip},
-            sort=[("timestamp", -1)]  # Get the latest entry by sorting timestamp descending
-        )
-        if last_chat:
-            # Update the existing log with feedback details, user input, and bot response
-            chatlog_collection.update_one(
-                {"_id": last_chat["_id"]},  # Find the correct entry
-                {
-                    "$set": {
-                        "is_good": False if feedback else True,
-                        "problem_detail": feedback,
-                        "user_message": user_input,  # Update user question
-                        "bot_response": bot_response  # Update bot response
-                    }
-                }
-            )
-            st.success("✅ Cảm ơn bạn đã đánh giá! Nhật ký chat đã được cập nhật.")
-        else:
-            st.warning("⚠️ Không tìm thấy nhật ký chat để cập nhật phản hồi.")
+    #save_chat_log(user_ip, user_input, bot_response, feedback)
+

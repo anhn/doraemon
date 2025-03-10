@@ -96,25 +96,24 @@ collections_info = {
 def load_data():
     """Loads data from MongoDB for semantic search."""
     all_data = []
+    collection_texts = []  # Collect descriptions for embeddings
+
     for collection_name, info in collections_info.items():
         collection = db[collection_name]
         docs = list(collection.find({}, {"_id": 0}))  # Exclude MongoDB _id field
 
         for doc in docs:
-            # If `search_field` is a list, extract multiple fields
             if isinstance(info["search_field"], list):
                 searchable_texts = [doc.get(field, "") for field in info["search_field"] if field in doc]
                 searchable_texts = [text for text in searchable_texts if text]  # Remove empty values
             else:
                 searchable_texts = [doc.get(info["search_field"], "")]
 
-            # If `response_field` is a list, extract multiple responses
             if isinstance(info["response_field"], list):
                 answer = {k: doc.get(k, "") for k in info["response_field"] if k in doc}
             else:
                 answer = doc.get(info["response_field"], "")
 
-            # Ensure valid text and answer exist before adding
             for searchable_text in searchable_texts:
                 if searchable_text and answer:
                     all_data.append({
@@ -124,16 +123,25 @@ def load_data():
                         "collection_description": info["description"]
                     })
 
+        collection_texts.append(info["description"])  # Store descriptions
+
+    if collection_texts:
+        global collection_embeddings  # Define globally
+        collection_embeddings = sbert_model.encode(collection_texts, convert_to_tensor=True).cpu().numpy()
+
     return all_data
 
 # --- FUNCTION TO FIND BEST MATCHING COLLECTION ---
 def find_best_collection(query):
     """Finds the most relevant database collection based on query context."""
+    if "collection_embeddings" not in globals():
+        return "faqtuyensinh"  # Default to FAQ if no embeddings
+
     query_embedding = sbert_model.encode([query], convert_to_tensor=True).cpu().numpy()
     _, best_match_idx = faiss.IndexFlatL2(collection_embeddings.shape[1]).search(query_embedding, 1)
-    
-    best_collection = list(collections_info.keys())[best_match_idx[0][0]]
-    return best_collection
+
+    return list(collections_info.keys())[best_match_idx[0][0]]
+
 
 # --- FUNCTION FOR SEMANTIC SEARCH ---
 def search_database(query, collection_name, threshold=0.7):
@@ -202,9 +210,9 @@ else:
 def find_best_match(user_query):
     query_embedding = sbert_model.encode([user_query], convert_to_tensor=True).cpu().numpy()
     _, best_match_idx = faiss_index.search(query_embedding, 1)
-    best_match = load_faq_data()[best_match_idx[0][0]]
+    best_match = load_data()[best_match_idx[0][0]]
     # Compute similarity
-    best_match_embedding = faq_embeddings[best_match_idx[0][0]]
+    best_match_embedding = question_embeddings[best_match_idx[0][0]]
     similarity = util.cos_sim(query_embedding, best_match_embedding).item()
     return best_match, similarity
 
@@ -314,10 +322,10 @@ if user_input:
     # Show user message
     with st.chat_message("user"):
         st.write(user_input)
-    best_collection = find_best_collection(user_query)
+    best_collection = find_best_collection(user_input)
     st.info(f"🔍 Đang tìm kiếm trong danh mục: **{collections_info[best_collection]['name']}**")
     # Search in the selected collection
-    result = search_database(user_query, best_collection)
+    result = search_database(user_input, best_collection)
     use_gpt = False
     if result:
             st.success(f"✅ **Kết quả từ {collections_info[best_collection]['name']}:**\n\n{result}")

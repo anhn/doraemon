@@ -518,16 +518,20 @@ user_input = st.chat_input("Nhập câu hỏi của bạn...")
 if user_input:
     with st.chat_message("user"):
         st.write(user_input)	
-
-    result = find_best_match(user_input)
-    use_gpt = False
-
-    if result:
-        response_stream = stream_text(result)
-    else:
-        st.warning("⚠️ Không tìm thấy trong cơ sở dữ liệu. Đang tìm kiếm bằng AI...")
-        use_gpt = True
+    best_match, similarity = find_best_match(user_input)
+    threshold = 0.7  # Minimum similarity to use FAQ answer
+    best_answer = best_match.get("Answer", "")
+    if isinstance(best_answer, float) and np.isnan(best_answer):
+        best_answer = ""  # Replace NaN with empty string
+    best_answer = str(best_answer)  # Convert non-string values to string
+    use_gpt = similarity < threshold or best_answer.strip().lower() in [""]
+    print(similarity)
+    
+    if use_gpt:
+        st.warning("⚠️ Không tìm thấy trong cơ sở dữ liệu. Đang tìm kiếm bằng mô hình ngôn ngữ lớn...")
         response_stream = generate_gpt4_response(user_input, context_string)  # Now a generator
+    else:
+        response_stream = stream_text(result)
 
     with st.chat_message("assistant"):
         bot_response_container = st.empty()  # Create an empty container

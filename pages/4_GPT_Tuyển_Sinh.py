@@ -441,7 +441,27 @@ def generate_gpt4_response(question, context):
     except Exception as e:
         return f"Lỗi khi tạo phản hồi: {str(e)}"
 
-
+def reformat_answer(answer):
+    prompt = (
+        f"Câu trả lời gốc: {answer}\n\n"
+        f"Vui lòng mở rộng và diễn đạt lại câu trả lời trên một cách tự nhiên, đầy đủ, với giọng văn của một tư vấn viên nữ thân thiện và chuyên nghiệp."
+    )
+    try:
+        response = openai_client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "Bạn là một tư vấn viên tuyển sinh đại học chuyên nghiệp, có giọng điệu thân thiện và hỗ trợ."},
+                {"role": "user", "content": prompt}
+            ],
+            stream=True
+        )
+        for message in response:
+            content = message.choices[0].delta.content
+            if content:  # Some parts may be None, skip them
+                yield content
+    except Exception as e:
+        return f"Lỗi khi tạo phản hồi: {str(e)}"
+	    
 # Function to save chat logs to MongoDB
 def save_chat_log(user_ip, user_message, bot_response, feedback):
     """Stores chat log into MongoDB, grouped by user IP"""
@@ -535,7 +555,7 @@ if user_input:
         st.warning("⚠️ Không tìm thấy trong cơ sở dữ liệu. Đang tìm kiếm bằng mô hình ngôn ngữ lớn...")
         response_stream = generate_gpt4_response(user_input, context_string)  # Now a generator
     else:
-        response_stream = stream_text(best_match["Answer"])
+        response_stream = reformat_answer(best_match["Answer"])
 
     with st.chat_message("assistant"):
         bot_response_container = st.empty()  # Create an empty container

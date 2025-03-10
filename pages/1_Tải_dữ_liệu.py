@@ -365,6 +365,28 @@ if st.button("Add Chi Tieu Tuyen Sinh cho Trung Cap - De An tuyen sinh 24"):
     quota_data = [
         {
             "category": "Chỉ tiêu tuyển sinh 2024 chính quy",
+            "admission_requirements": {
+                "eligible_candidates": "Thí sinh đã tốt nghiệp cao đẳng của Trường ĐH CNGTVT hoặc các trường Đại học, Cao đẳng khác có cùng ngành đào tạo.",
+                "admission_scope": "Tuyển sinh trong cả nước",
+                "admission_method": {
+                    "type": "Xét tuyển",
+                    "criteria": {
+                        "total_score_required": "Tổng điểm môn cơ sở ngành và chuyên ngành, tổng điểm ≥ 11.0 (theo thang điểm 20)",
+                        "selection_criteria": "Xét tuyển điểm lấy từ cao xuống thấp đến khi đủ chỉ tiêu. Điểm xét tuyển lấy đến 2 chữ số thập phân. Nếu nhiều hồ sơ có điểm xét tuyển bằng nhau thì lấy điểm môn cơ sở ngành."
+                    }
+                },
+                "admission_schedule": {
+                    "rounds_per_year": 4,
+                    "months": ["Tháng 2", "Tháng 5", "Tháng 8", "Tháng 12"],
+                    "application_submission": "Hồ sơ xét tuyển nộp tại Khoa Đào tạo tại chức",
+                    "exam_subjects": ["Cơ sở ngành", "Chuyên ngành"]
+                }
+            },
+            "tuition_and_fees": {
+                "admission_fee": "Theo quy định",
+                "tuition_fee": "Mức học phí năm học 2024-2025 thực hiện theo Nghị định 81/2021/NĐ-CP ngày 27/8/2021 của Chính phủ"
+            },
+            "priority_policies": "Xét tuyển thẳng; ưu tiên xét tuyển",
             "programs": [
                 {
                     "education_level": "ĐH Liên thông",
@@ -418,6 +440,23 @@ if st.button("Add Chi Tieu Tuyen Sinh cho Trung Cap - De An tuyen sinh 24"):
         },
         {
             "category": "Chỉ tiêu tuyển sinh 2024 văn bằng hai",
+            "admission_requirements": {
+                "eligible_candidates": "Thí sinh đã tốt nghiệp đại học",
+                "admission_scope": "Tuyển sinh trong cả nước",
+                "admission_method": "Xét tuyển",
+                "minimum_entry_requirement": "Đã có bằng tốt nghiệp đại học",
+                "selection_criteria": "Xét tuyển điểm lấy từ cao xuống thấp đến khi đủ chỉ tiêu (căn cứ vào điểm TBC tốt nghiệp)",
+                "admission_schedule": {
+                    "rounds_per_year": 4,
+                    "months": ["Tháng 2", "Tháng 5", "Tháng 8", "Tháng 12"],
+                    "application_submission": "Hồ sơ xét tuyển nộp tại Khoa Đào tạo tại chức"
+                }
+            },
+            "tuition_and_fees": {
+                "admission_fee": "Theo quy định",
+                "tuition_fee": "Mức học phí năm học 2024-2025 thực hiện theo Nghị định 81/2021/NĐ-CP ngày 27/8/2021 của Chính phủ"
+            },
+            "priority_policies": "Chính sách ưu tiên theo quy định",
             "programs": [
                 {
                     "education_level": "ĐH Văn bằng 2",

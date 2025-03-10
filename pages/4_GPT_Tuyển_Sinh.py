@@ -19,6 +19,8 @@ MONGO_URI = st.secrets["mongo"]["uri"]  # Load MongoDB URI from secrets
 PERPLEXITY_API = st.secrets["perplexity"]["key"]
 DB_NAME = "utt_detai25"
 FAQ_COLLECTION = "faqtuyensinh"
+METAINFO_COLLECTION = "metainfo"
+VIECLAM_COLLECTION = "ts24_vieclam"
 CHATLOG_COLLECTION = "chatlog"
 
 # Load OpenAI embedding model
@@ -28,6 +30,8 @@ GPT_MODEL = "gpt-4-turbo"
 client_mongo = MongoClient(MONGO_URI)
 db = client_mongo[DB_NAME]
 faq_collection = db[FAQ_COLLECTION]
+metainfo_collection = db[METAINFO_COLLECTION]
+vieclam_collection = db[VIECLAM_COLLECTION]
 chatlog_collection = db[CHATLOG_COLLECTION]
 
 context_string = """ĐỀ ÁN TUYỂN SINH  NĂM 2024
@@ -386,6 +390,34 @@ os.environ["OPENAI_API_KEY"] = st.secrets["api"]["key"]
 
 openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
+def load_faq_data():
+    # Fetch data from all three collections, selecting only 'Question' and 'Answer' fields
+    faq_data = list(faq_collection.find({}, {"_id": 0, "Question": 1, "Answer": 1}))
+    metainfo_data = list(metainfo_collection.find({}, {"_id": 0, "Question": 1, "Answer": 1}))
+    vieclam_data = list(vieclam_collection.find({}, {"_id": 0, "Question": 1, "Answer": 1}))
+    
+    # Combine all data into one list
+    combined_data = faq_data + metainfo_data + vieclam_data
+    
+    return combined_data
+
+
+faq_questions = [item["Question"] for item in load_faq_data()]
+faq_embeddings = sbert_model.encode(faq_questions, convert_to_tensor=True).cpu().numpy()
+
+# Build FAISS index
+faiss_index = faiss.IndexFlatL2(faq_embeddings.shape[1])
+faiss_index.add(faq_embeddings)
+
+def find_best_match(user_query):
+    query_embedding = sbert_model.encode([user_query], convert_to_tensor=True).cpu().numpy()
+    _, best_match_idx = faiss_index.search(query_embedding, 1)
+    best_match = load_faq_data()[best_match_idx[0][0]]
+    # Compute similarity
+    best_match_embedding = faq_embeddings[best_match_idx[0][0]]
+    similarity = util.cos_sim(query_embedding, best_match_embedding).item()
+    return best_match, similarity
+	
 def generate_gpt4_response(question, context):
     prompt = (
         f"Một sinh viên hỏi: {question}\n\n"
@@ -470,6 +502,7 @@ st.markdown(
     """,
     unsafe_allow_html=True
 )
+
 # **Chat Interface**
 st.subheader("💬 Chatbot Tuyển Sinh")
 
@@ -486,15 +519,27 @@ if user_input:
     # Show user message
     with st.chat_message("user"):
         st.write(user_input)
+	result = search_database(user_input)
+    use_gpt = False
+    if result:
+		response_stream = stream_text(result)
+  	else:
+  		st.warning("⚠️ Không tìm thấy trong cơ sở dữ liệu. Đang tìm kiếm bằng AI...")
+		use_gpt = True
+    	response_stream = generate_gpt4_response(user_input,context_string)  # Now a generator
 
-    response_stream = generate_gpt4_response(user_input,context_string)  # Now a generator
-    st.write(response_stream)
+	with st.chat_message("assistant"):
+		bot_response_container = st.empty()  # Create an empty container
+		bot_response = ""  # Collect the full response
+		for chunk in response_stream:
+			bot_response += chunk  # Append streamed content
+			bot_response_container.write(bot_response)  # Update UI in real-time
+		st.session_state["response"] = bot_response
 
-    # Save to session history
-    #st.session_state["chat_log"].append(
-    #    {"user": user_input, "bot": bot_response, "is_gpt": True}
-    #)
-    #feedback=""
+	st.session_state["chat_log"].append(
+        {"user": user_input, "bot": bot_response, "is_gpt": use_gpt}
+    )
+    feedback=""
     # Save chat log to MongoDB
-    #save_chat_log(user_ip, user_input, bot_response, feedback)
+    save_chat_log(user_ip, user_input, bot_response, feedback)
 

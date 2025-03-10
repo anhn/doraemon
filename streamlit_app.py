@@ -75,6 +75,24 @@ collections_info = {
     }
 }
 
+def load_context():
+    collections = {
+    "ts24_chitieu": "Chỉ tiêu tuyển sinh 2024",
+    "ts24_admission": "Phương thức xét tuyển 2024",
+    "ts24_chitieu_trungcap": "Chỉ tiêu tuyển sinh trung cấp 2024"
+    }
+    context_parts = []
+    for collection_name, description in collections.items():
+        collection = db[collection_name]
+        docs = list(collection.find({}, {"_id": 0}))  # Exclude MongoDB _id field  
+        collection_text = f"{description}:\n"
+        for doc in docs:
+            doc_text = ", ".join([f"{key}: {value}" for key, value in doc.items()])
+            collection_text += f"- {doc_text}\n"
+        context_parts.append(collection_text)
+    return "\n".join(context_parts)
+
+context_string = load_context()
 def load_data():
     """Loads data from MongoDB and converts to searchable format."""
     all_data = []
@@ -171,6 +189,25 @@ def generate_gpt4_response(question, context):
     except Exception as e:
         return f"⚠️ Lỗi: {str(e)}"
 
+def format_gpt4_response(question, answer, context):
+    prompt = (
+        f"Dựa vào câu trả lời {answer} cho câu hỏi {question}. Kiểm tra tính chính xác của câu trả lời bằng thông tin từ {context} hoặc từ Internet. Nếu đúng hãy cho câu trả lời ngắn gọn, dễ hiểu, và thân thiện như một tư vấn viên tuyển sinh chuyên nghiệp.
+        f"Hãy giữ giọng văn chuẩn mực, lịch sự và mang sắc thái thân thiện, gần gũi theo phong cách miền Bắc Việt Nam"
+        f"Nểu bạn thấy câu trả lời sai, đưa ra lý giải."
+    )   
+    try:
+        response = openai_client.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "Bạn là một tư vấn viên tuyển sinh chuyên nghiệp, cung cấp câu trả lời thân thiện, rõ ràng theo giọng miền Bắc Việt Nam."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=500
+        )
+        return response["choices"][0]["message"]["content"].strip()
+    except Exception as e:
+        return f"⚠️ Lỗi: {str(e)}"
+        
 # Function to save chat logs to MongoDB
 def save_chat_log(user_ip, user_message, bot_response, feedback):
     """Stores chat log into MongoDB."""
@@ -247,11 +284,11 @@ if user_input:
     result = search_database(user_input)
     use_gpt = False
     if result:
-            response_stream = stream_text(result)  # FAQ converted to a generator
+            response_stream = stream_text(format_gpt4_response(user_input,result,context_string))  # FAQ converted to a generator
     else:
             st.warning("⚠️ Không tìm thấy trong cơ sở dữ liệu. Đang tìm kiếm bằng AI...")
             use_gpt = True
-            response_stream = generate_gpt4_response(user_input, "")  # Now a generator
+            response_stream = format_gpt4_response(user_input,generate_gpt4_response(user_input, ""),context_string)  # Now a generator
     with st.chat_message("assistant"):
         bot_response_container = st.empty()  # Create an empty container
         bot_response = ""  # Collect the full response

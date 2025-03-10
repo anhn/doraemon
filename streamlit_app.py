@@ -126,30 +126,6 @@ def load_data():
 
     return all_data
 
-data = load_data()
-questions = [entry["question"] for entry in data]
-print(questions)
-answers = [entry["answer"] for entry in data]
-print(answers)
-sources = [entry["source"] for entry in data]
-print(sources)
-
-collection_descriptions = [entry["collection_description"] for entry in data]
-print(collection_descriptions)
-
-# Generate embeddings
-if questions:
-    question_embeddings = sbert_model.encode(questions, convert_to_tensor=True).cpu().numpy()
-    collection_embeddings = sbert_model.encode(collection_descriptions, convert_to_tensor=True).cpu().numpy()
-
-    # Create FAISS index
-    dimension = question_embeddings.shape[1]
-    faiss_index = faiss.IndexFlatL2(dimension)
-    faiss_index.add(question_embeddings)
-else:
-    question_embeddings = []
-    faiss_index = None
-
 # --- FUNCTION TO FIND BEST MATCHING COLLECTION ---
 def find_best_collection(query):
     """Finds the most relevant database collection based on query context."""
@@ -202,13 +178,25 @@ def search_database(query, collection_name, threshold=0.7):
     if similarity >= threshold:
         return best_match
     return None
+    
+data = load_data()
+questions = [entry["question"] for entry in data]
+answers = [entry["answer"] for entry in data]
+sources = [entry["source"] for entry in data]
+collection_descriptions = [entry["collection_description"] for entry in data]
 
-faq_questions = [item["Question"] for item in load_data()]
-faq_embeddings = sbert_model.encode(faq_questions, convert_to_tensor=True).cpu().numpy()
+# Generate embeddings
+if questions:
+    question_embeddings = sbert_model.encode(questions, convert_to_tensor=True).cpu().numpy()
+    collection_embeddings = sbert_model.encode(collection_descriptions, convert_to_tensor=True).cpu().numpy()
 
-# Build FAISS index
-faiss_index = faiss.IndexFlatL2(faq_embeddings.shape[1])
-faiss_index.add(faq_embeddings)
+    # Create FAISS index
+    dimension = question_embeddings.shape[1]
+    faiss_index = faiss.IndexFlatL2(dimension)
+    faiss_index.add(question_embeddings)
+else:
+    question_embeddings = []
+    faiss_index = None
 
 # Function to find best match using SBERT
 def find_best_match(user_query):

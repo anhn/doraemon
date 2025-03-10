@@ -97,90 +97,89 @@ if st.button("Add Meta Info"):
 
 if st.button("Add Tinh Hinh Viec Lam - De An tuyen sinh 24"):
    qa_data_table = [
-    ("Số chỉ tiêu tuyển sinh của ngành Quản trị kinh doanh là bao nhiêu?", "440"),
-    ("Số sinh viên nhập học ngành Quản trị kinh doanh là bao nhiêu?", "391"),
-    ("Số sinh viên tốt nghiệp ngành Quản trị kinh doanh là bao nhiêu?", "180"),
-    ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Quản trị kinh doanh là bao nhiêu?", "90.24%"),
-    
-    ("Số chỉ tiêu tuyển sinh của ngành Thương mại điện tử là bao nhiêu?", "230"),
-    ("Số sinh viên nhập học ngành Thương mại điện tử là bao nhiêu?", "204"),
-    ("Số sinh viên tốt nghiệp ngành Thương mại điện tử là bao nhiêu?", "114"),
-    ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Thương mại điện tử là bao nhiêu?", "96.04%"),
-    
-    ("Số chỉ tiêu tuyển sinh của ngành Tài chính - Ngân hàng là bao nhiêu?", "360"),
-    ("Số sinh viên nhập học ngành Tài chính - Ngân hàng là bao nhiêu?", "334"),
-    ("Số sinh viên tốt nghiệp ngành Tài chính - Ngân hàng là bao nhiêu?", "88"),
-    ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Tài chính - Ngân hàng là bao nhiêu?", "93.41%"),
-    
-    ("Số chỉ tiêu tuyển sinh của ngành Kế toán là bao nhiêu?", "410"),
-    ("Số sinh viên nhập học ngành Kế toán là bao nhiêu?", "477"),
-    ("Số sinh viên tốt nghiệp ngành Kế toán là bao nhiêu?", "282"),
-    ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Kế toán là bao nhiêu?", "92.51%"),
-    
-    ("Số chỉ tiêu tuyển sinh của ngành Hệ thống thông tin là bao nhiêu?", "300"),
-    ("Số sinh viên nhập học ngành Hệ thống thông tin là bao nhiêu?", "275"),
-    ("Số sinh viên tốt nghiệp ngành Hệ thống thông tin là bao nhiêu?", "177"),
-    ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Hệ thống thông tin là bao nhiêu?", "95.45%"),
-    
-    ("Số chỉ tiêu tuyển sinh của ngành Công nghệ thông tin là bao nhiêu?", "630"),
-    ("Số sinh viên nhập học ngành Công nghệ thông tin là bao nhiêu?", "634"),
-    ("Số sinh viên tốt nghiệp ngành Công nghệ thông tin là bao nhiêu?", "121"),
-    ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ thông tin là bao nhiêu?", "91.38%"),
-    
-    ("Số chỉ tiêu tuyển sinh của ngành Công nghệ kỹ thuật công trình xây dựng là bao nhiêu?", "290"),
-    ("Số sinh viên nhập học ngành Công nghệ kỹ thuật công trình xây dựng là bao nhiêu?", "261"),
-    ("Số sinh viên tốt nghiệp ngành Công nghệ kỹ thuật công trình xây dựng là bao nhiêu?", "101"),
-    ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ kỹ thuật công trình xây dựng là bao nhiêu?", "94.85%"),
-    
-    ("Số chỉ tiêu tuyển sinh của ngành Công nghệ kỹ thuật giao thông là bao nhiêu?", "270"),
-    ("Số sinh viên nhập học ngành Công nghệ kỹ thuật giao thông là bao nhiêu?", "201"),
-    ("Số sinh viên tốt nghiệp ngành Công nghệ kỹ thuật giao thông là bao nhiêu?", "156"),
-    ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ kỹ thuật giao thông là bao nhiêu?", "94.15%"),
-    
-    ("Số chỉ tiêu tuyển sinh của ngành Công nghệ kỹ thuật cơ khí là bao nhiêu?", "250"),
-    ("Số sinh viên nhập học ngành Công nghệ kỹ thuật cơ khí là bao nhiêu?", "290"),
-    ("Số sinh viên tốt nghiệp ngành Công nghệ kỹ thuật cơ khí là bao nhiêu?", "168"),
-    ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ kỹ thuật cơ khí là bao nhiêu?", "91.95%"),
-    
-    ("Số chỉ tiêu tuyển sinh của ngành Công nghệ kỹ thuật cơ điện tử là bao nhiêu?", "320"),
-    ("Số sinh viên nhập học ngành Công nghệ kỹ thuật cơ điện tử là bao nhiêu?", "364"),
-    ("Số sinh viên tốt nghiệp ngành Công nghệ kỹ thuật cơ điện tử là bao nhiêu?", "162"),
-    ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ kỹ thuật cơ điện tử là bao nhiêu?", "92.65%"),
-    
-    ("Số chỉ tiêu tuyển sinh của ngành Công nghệ kỹ thuật ô tô là bao nhiêu?", "510"),
-    ("Số sinh viên nhập học ngành Công nghệ kỹ thuật ô tô là bao nhiêu?", "489"),
-    ("Số sinh viên tốt nghiệp ngành Công nghệ kỹ thuật ô tô là bao nhiêu?", "520"),
-    ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ kỹ thuật ô tô là bao nhiêu?", "96.15%"),
-    
-    ("Số chỉ tiêu tuyển sinh của ngành Công nghệ kỹ thuật điện tử - viễn thông là bao nhiêu?", "250"),
-    ("Số sinh viên nhập học ngành Công nghệ kỹ thuật điện tử - viễn thông là bao nhiêu?", "267"),
-    ("Số sinh viên tốt nghiệp ngành Công nghệ kỹ thuật điện tử - viễn thông là bao nhiêu?", "98"),
-    ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ kỹ thuật điện tử - viễn thông là bao nhiêu?", "93.81%"),
-    
-    ("Số chỉ tiêu tuyển sinh của ngành Công nghệ kỹ thuật môi trường là bao nhiêu?", "100"),
-    ("Số sinh viên nhập học ngành Công nghệ kỹ thuật môi trường là bao nhiêu?", "62"),
-    ("Số sinh viên tốt nghiệp ngành Công nghệ kỹ thuật môi trường là bao nhiêu?", "7"),
-    ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ kỹ thuật môi trường là bao nhiêu?", "92.62%"),
-    
-    ("Số chỉ tiêu tuyển sinh của ngành Logistics và quản lý chuỗi cung ứng là bao nhiêu?", "350"),
-    ("Số sinh viên nhập học ngành Logistics và quản lý chuỗi cung ứng là bao nhiêu?", "346"),
-    ("Số sinh viên tốt nghiệp ngành Logistics và quản lý chuỗi cung ứng là bao nhiêu?", "113"),
-    ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Logistics và quản lý chuỗi cung ứng là bao nhiêu?", "96.63%"),
-    
-    ("Số chỉ tiêu tuyển sinh của ngành Kinh tế xây dựng là bao nhiêu?", "340"),
-    ("Số sinh viên nhập học ngành Kinh tế xây dựng là bao nhiêu?", "262"),
-    ("Số sinh viên tốt nghiệp ngành Kinh tế xây dựng là bao nhiêu?", "57"),
-    ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Kinh tế xây dựng là bao nhiêu?", "95.38%"),
-    
-    ("Số chỉ tiêu tuyển sinh của ngành Khai thác vận tải là bao nhiêu?", "425"),
-    ("Số sinh viên nhập học ngành Khai thác vận tải là bao nhiêu?", "425"),
-    ("Số sinh viên tốt nghiệp ngành Khai thác vận tải là bao nhiêu?", "72"),
-    ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Khai thác vận tải là bao nhiêu?", "100%"),
-   ]
+        ("Số chỉ tiêu tuyển sinh của ngành Quản trị kinh doanh là bao nhiêu?", "440"),
+        ("Số sinh viên nhập học ngành Quản trị kinh doanh là bao nhiêu?", "391"),
+        ("Số sinh viên tốt nghiệp ngành Quản trị kinh doanh là bao nhiêu?", "180"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Quản trị kinh doanh là bao nhiêu?", "90.24%"),
+        
+        ("Số chỉ tiêu tuyển sinh của ngành Thương mại điện tử là bao nhiêu?", "230"),
+        ("Số sinh viên nhập học ngành Thương mại điện tử là bao nhiêu?", "204"),
+        ("Số sinh viên tốt nghiệp ngành Thương mại điện tử là bao nhiêu?", "114"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Thương mại điện tử là bao nhiêu?", "96.04%"),
+        
+        ("Số chỉ tiêu tuyển sinh của ngành Tài chính - Ngân hàng là bao nhiêu?", "360"),
+        ("Số sinh viên nhập học ngành Tài chính - Ngân hàng là bao nhiêu?", "334"),
+        ("Số sinh viên tốt nghiệp ngành Tài chính - Ngân hàng là bao nhiêu?", "88"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Tài chính - Ngân hàng là bao nhiêu?", "93.41%"),
+        
+        ("Số chỉ tiêu tuyển sinh của ngành Kế toán là bao nhiêu?", "410"),
+        ("Số sinh viên nhập học ngành Kế toán là bao nhiêu?", "477"),
+        ("Số sinh viên tốt nghiệp ngành Kế toán là bao nhiêu?", "282"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Kế toán là bao nhiêu?", "92.51%"),
+        
+        ("Số chỉ tiêu tuyển sinh của ngành Hệ thống thông tin là bao nhiêu?", "300"),
+        ("Số sinh viên nhập học ngành Hệ thống thông tin là bao nhiêu?", "275"),
+        ("Số sinh viên tốt nghiệp ngành Hệ thống thông tin là bao nhiêu?", "177"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Hệ thống thông tin là bao nhiêu?", "95.45%"),
+        
+        ("Số chỉ tiêu tuyển sinh của ngành Công nghệ thông tin là bao nhiêu?", "630"),
+        ("Số sinh viên nhập học ngành Công nghệ thông tin là bao nhiêu?", "634"),
+        ("Số sinh viên tốt nghiệp ngành Công nghệ thông tin là bao nhiêu?", "121"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ thông tin là bao nhiêu?", "91.38%"),
+        
+        ("Số chỉ tiêu tuyển sinh của ngành Công nghệ kỹ thuật công trình xây dựng là bao nhiêu?", "290"),
+        ("Số sinh viên nhập học ngành Công nghệ kỹ thuật công trình xây dựng là bao nhiêu?", "261"),
+        ("Số sinh viên tốt nghiệp ngành Công nghệ kỹ thuật công trình xây dựng là bao nhiêu?", "101"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ kỹ thuật công trình xây dựng là bao nhiêu?", "94.85%"),
+        
+        ("Số chỉ tiêu tuyển sinh của ngành Công nghệ kỹ thuật giao thông là bao nhiêu?", "270"),
+        ("Số sinh viên nhập học ngành Công nghệ kỹ thuật giao thông là bao nhiêu?", "201"),
+        ("Số sinh viên tốt nghiệp ngành Công nghệ kỹ thuật giao thông là bao nhiêu?", "156"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ kỹ thuật giao thông là bao nhiêu?", "94.15%"),
+        
+        ("Số chỉ tiêu tuyển sinh của ngành Công nghệ kỹ thuật cơ khí là bao nhiêu?", "250"),
+        ("Số sinh viên nhập học ngành Công nghệ kỹ thuật cơ khí là bao nhiêu?", "290"),
+        ("Số sinh viên tốt nghiệp ngành Công nghệ kỹ thuật cơ khí là bao nhiêu?", "168"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ kỹ thuật cơ khí là bao nhiêu?", "91.95%"),
+        
+        ("Số chỉ tiêu tuyển sinh của ngành Công nghệ kỹ thuật cơ điện tử là bao nhiêu?", "320"),
+        ("Số sinh viên nhập học ngành Công nghệ kỹ thuật cơ điện tử là bao nhiêu?", "364"),
+        ("Số sinh viên tốt nghiệp ngành Công nghệ kỹ thuật cơ điện tử là bao nhiêu?", "162"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ kỹ thuật cơ điện tử là bao nhiêu?", "92.65%"),
+        
+        ("Số chỉ tiêu tuyển sinh của ngành Công nghệ kỹ thuật ô tô là bao nhiêu?", "510"),
+        ("Số sinh viên nhập học ngành Công nghệ kỹ thuật ô tô là bao nhiêu?", "489"),
+        ("Số sinh viên tốt nghiệp ngành Công nghệ kỹ thuật ô tô là bao nhiêu?", "520"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ kỹ thuật ô tô là bao nhiêu?", "96.15%"),
+        
+        ("Số chỉ tiêu tuyển sinh của ngành Công nghệ kỹ thuật điện tử - viễn thông là bao nhiêu?", "250"),
+        ("Số sinh viên nhập học ngành Công nghệ kỹ thuật điện tử - viễn thông là bao nhiêu?", "267"),
+        ("Số sinh viên tốt nghiệp ngành Công nghệ kỹ thuật điện tử - viễn thông là bao nhiêu?", "98"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ kỹ thuật điện tử - viễn thông là bao nhiêu?", "93.81%"),
+        
+        ("Số chỉ tiêu tuyển sinh của ngành Công nghệ kỹ thuật môi trường là bao nhiêu?", "100"),
+        ("Số sinh viên nhập học ngành Công nghệ kỹ thuật môi trường là bao nhiêu?", "62"),
+        ("Số sinh viên tốt nghiệp ngành Công nghệ kỹ thuật môi trường là bao nhiêu?", "7"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ kỹ thuật môi trường là bao nhiêu?", "92.62%"),
+        
+        ("Số chỉ tiêu tuyển sinh của ngành Logistics và quản lý chuỗi cung ứng là bao nhiêu?", "350"),
+        ("Số sinh viên nhập học ngành Logistics và quản lý chuỗi cung ứng là bao nhiêu?", "346"),
+        ("Số sinh viên tốt nghiệp ngành Logistics và quản lý chuỗi cung ứng là bao nhiêu?", "113"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Logistics và quản lý chuỗi cung ứng là bao nhiêu?", "96.63%"),
+        
+        ("Số chỉ tiêu tuyển sinh của ngành Kinh tế xây dựng là bao nhiêu?", "340"),
+        ("Số sinh viên nhập học ngành Kinh tế xây dựng là bao nhiêu?", "262"),
+        ("Số sinh viên tốt nghiệp ngành Kinh tế xây dựng là bao nhiêu?", "57"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Kinh tế xây dựng là bao nhiêu?", "95.38%"),
+        
+        ("Số chỉ tiêu tuyển sinh của ngành Khai thác vận tải là bao nhiêu?", "425"),
+        ("Số sinh viên nhập học ngành Khai thác vận tải là bao nhiêu?", "425"),
+        ("Số sinh viên tốt nghiệp ngành Khai thác vận tải là bao nhiêu?", "72"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Khai thác vận tải là bao nhiêu?", "100%") ]
     # Gán ID và type cho dữ liệu metadata
-    tuyensinh24_data = [{"ID": f"Q24{str(i+1).zfill(3)}", "Question": item[0], "Answer": item[1], "Type": 1} for i, item in enumerate(qa_data_table)]
-    tuyensinh24_collection.insert_many(tuyensinh24_data)
-    st.success("Dữ liệu Tuyensinh 24 đã được lưu vào MongoDB thành công!")
+   tuyensinh24_data = [{"ID": f"Q24{str(i+1).zfill(3)}", "Question": item[0], "Answer": item[1], "Type": 1} for i, item in enumerate(qa_data_table)]
+   tuyensinh24_collection.insert_many(tuyensinh24_data)
+   st.success("Dữ liệu Tuyensinh 24 đã được lưu vào MongoDB thành công!")
 
 if st.button("Add Chi Tieu Du kien 2024 - De An tuyen sinh 24"):
     qa_data_table = [

@@ -191,10 +191,8 @@ def generate_gpt4_response(question, context):
 
 def format_gpt4_response(question, answer, context):
     prompt = (
-        f"Dựa vào câu trả lời {answer} cho câu hỏi {question}. Kiểm tra tính chính xác của câu trả lời bằng thông tin từ {context} hoặc từ Internet." 
-        f"Nểu bạn thấy câu trả lời sai, đưa ra lý giải."
-        f"Nểu bạn thấy không có trả lời sai, đưa ra câu trả lời dựa trên {context}."
-        f"Nếu đúng hãy cho câu trả lời ngắn gọn, thân thiện, đàn chị trả lời các em."
+        f"Nểu bạn thấy không có trả lời, đưa ra câu trả lời cho {question} dựa trên {context}."
+        f"Nếu có câu trả lời rồi, hãy chỉnh sửa câu từ cho ngắn gọn, thân thiện, như chị trả lời các em."
     )   
     try:
         response = openai_client.chat.completions.create(

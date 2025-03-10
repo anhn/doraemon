@@ -394,7 +394,7 @@ def generate_gpt4_response(question, context):
         f"Thông tin: {context}"
     )
     try:
-        response = client.chat.completions.create(
+        response = openai_client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "Bạn là một trợ lý tuyển sinh đại học hữu ích, chỉ dựa trên nội dung đã cung cấp."},

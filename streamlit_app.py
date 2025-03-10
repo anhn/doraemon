@@ -193,14 +193,13 @@ def format_gpt4_response(question, answer, context):
     prompt = (
         f"Dựa vào câu trả lời {answer} cho câu hỏi {question}. Kiểm tra tính chính xác của câu trả lời bằng thông tin từ {context} hoặc từ Internet." 
         f"Nểu bạn thấy câu trả lời sai, đưa ra lý giải."
-        f"Nếu đúng hãy cho câu trả lời ngắn gọn, dễ hiểu, và thân thiện như một tư vấn viên tuyển sinh chuyên nghiệp."
-        f"Hãy giữ văn chat lịch sự, ít tính hình thức, gần gũi theo phong cách miền Bắc Việt Nam"
+        f"Nếu đúng hãy cho câu trả lời ngắn gọn, thân thiện, đàn chị trả lời các em."
     )   
     try:
         response = openai_client.chat.completions.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "Bạn là một tư vấn viên tuyển sinh chuyên nghiệp, cung cấp câu trả lời thân thiện, rõ ràng theo giọng miền Bắc Việt Nam."},
+                {"role": "system", "content": "Bạn là một chị tư vấn viên tuyển sinh trả lời các em sinh viên một cách thân thiện, rõ ràng theo giọng miền Bắc Việt Nam."},
                 {"role": "user", "content": prompt}
             ],
             max_tokens=500

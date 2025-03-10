@@ -197,7 +197,7 @@ def format_gpt4_response(question, answer, context):
         f"Hãy giữ văn chat lịch sự, ít tính hình thức, gần gũi theo phong cách miền Bắc Việt Nam"
     )   
     try:
-        response = openai_client.ChatCompletion.create(
+        response = openai_client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "Bạn là một tư vấn viên tuyển sinh chuyên nghiệp, cung cấp câu trả lời thân thiện, rõ ràng theo giọng miền Bắc Việt Nam."},

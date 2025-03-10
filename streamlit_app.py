@@ -122,19 +122,6 @@ if texts:
 else:
     faiss_index = None
     
-
-# --- FUNCTION TO FIND BEST MATCHING COLLECTION ---
-def find_best_collection(query):
-    """Finds the most relevant database collection based on query context."""
-    if "collection_embeddings" not in globals():
-        return "faqtuyensinh"  # Default to FAQ if no embeddings
-
-    query_embedding = sbert_model.encode([query], convert_to_tensor=True).cpu().numpy()
-    _, best_match_idx = faiss.IndexFlatL2(collection_embeddings.shape[1]).search(query_embedding, 1)
-
-    return list(collections_info.keys())[best_match_idx[0][0]]
-
-
 # --- FUNCTION FOR SEMANTIC SEARCH ---
 def search_database(query, threshold=0.7):
     """Finds the best-matching answer using FAISS and SBERT."""
@@ -147,25 +134,6 @@ def search_database(query, threshold=0.7):
     if similarity >= threshold:
         return best_match["answer"]
     return None
-    
-data = load_data()
-questions = [entry["question"] for entry in data]
-answers = [entry["answer"] for entry in data]
-sources = [entry["source"] for entry in data]
-collection_descriptions = [entry["collection_description"] for entry in data]
-
-# Generate embeddings
-if questions:
-    question_embeddings = sbert_model.encode(questions, convert_to_tensor=True).cpu().numpy()
-    collection_embeddings = sbert_model.encode(collection_descriptions, convert_to_tensor=True).cpu().numpy()
-
-    # Create FAISS index
-    dimension = question_embeddings.shape[1]
-    faiss_index = faiss.IndexFlatL2(dimension)
-    faiss_index.add(question_embeddings)
-else:
-    question_embeddings = []
-    faiss_index = None
 
 # Function to find best match using SBERT
 def find_best_match(user_query):
@@ -203,25 +171,15 @@ def generate_gpt4_response(question, context):
 
 # Function to save chat logs to MongoDB
 def save_chat_log(user_ip, user_message, bot_response, feedback):
-    """Stores chat log into MongoDB, grouped by user IP"""
-    if feedback and feedback.strip():
-        chat_entry = {
-                "user_ip": user_ip,
-                "timestamp": datetime.utcnow(),
-                "user_message": user_message,
-                "bot_response": bot_response,
-                "is_good": False,
-                "problem_detail": feedback
-            }    
-    else:    
-        chat_entry = {
-            "user_ip": user_ip,
-            "timestamp": datetime.utcnow(),
-            "user_message": user_message,
-            "bot_response": bot_response,
-            "is_good": True,
-            "problem_detail" : ""
-        }
+    """Stores chat log into MongoDB."""
+    chat_entry = {
+        "user_ip": user_ip,
+        "timestamp": datetime.utcnow(),
+        "user_message": user_message,
+        "bot_response": bot_response,
+        "is_good": feedback is None,
+        "problem_detail": feedback or ""
+    }
     chatlog_collection.insert_one(chat_entry)
     
 def stream_text(text):
@@ -283,8 +241,6 @@ if user_input:
     # Show user message
     with st.chat_message("user"):
         st.write(user_input)
-    best_collection = find_best_collection(user_input)
-    st.info(f"🔍 Đang tìm kiếm trong danh mục: **{collections_info[best_collection]['name']}**")
     # Search in the selected collection
     result = search_database(user_input)
     use_gpt = False
@@ -295,20 +251,6 @@ if user_input:
             st.warning("⚠️ Không tìm thấy trong cơ sở dữ liệu. Đang tìm kiếm bằng AI...")
             use_gpt = True
             response_stream = generate_gpt4_response(user_input, "")  # Now a generator
-    # Find best match in FAQ
-    #best_match, similarity = find_best_match(user_input)
-    #threshold = 0.7  # Minimum similarity to use FAQ answer
-    # Extract and sanitize the answer field
-    #best_answer = best_match.get("Answer", "")
-    #print(best_answer)
-    #if isinstance(best_answer, float) and np.isnan(best_answer):
-    #    best_answer = ""  # Replace NaN with empty string
-    #best_answer = str(best_answer)  # Convert non-string values to string
-    #use_gpt = similarity < threshold or best_answer.strip().lower() in [""]
-    #print(use_gpt)
-    # Select response source
-    # if use_gpt:   
-    # else:
     with st.chat_message("assistant"):
         bot_response_container = st.empty()  # Create an empty container
         bot_response = ""  # Collect the full response

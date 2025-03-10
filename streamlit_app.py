@@ -191,8 +191,7 @@ def generate_gpt4_response(question, context):
 
 def format_gpt4_response(question, answer, context):
     prompt = (
-        f"Nểu bạn thấy không có trả lời, đưa ra câu trả lời cho {question} dựa trên {context}."
-        f"Nếu có câu trả lời rồi, hãy chỉnh sửa câu từ cho ngắn gọn, thân thiện, như chị trả lời các em."
+        f"Chỉnh sửa câu từ của {answer} cho ngắn gọn, thân thiện, như chị trả lời các em."
     )   
     try:
         response = openai_client.chat.completions.create(

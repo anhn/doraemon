@@ -434,7 +434,10 @@ def generate_gpt4_response(question, context):
             ],
             stream=True
         )
-        return response  # Assuming response handling is done elsewhere
+	    for message in response:
+            content = message.choices[0].delta.content
+            if content:  # Some parts may be None, skip them
+                yield content
     except Exception as e:
         return f"Lỗi khi tạo phản hồi: {str(e)}"
 

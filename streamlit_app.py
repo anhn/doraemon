@@ -128,9 +128,14 @@ def load_data():
 
 data = load_data()
 questions = [entry["question"] for entry in data]
+print(questions)
 answers = [entry["answer"] for entry in data]
+print(answers)
 sources = [entry["source"] for entry in data]
+print(sources)
+
 collection_descriptions = [entry["collection_description"] for entry in data]
+print(collection_descriptions)
 
 # Generate embeddings
 if questions:
@@ -197,9 +202,6 @@ def search_database(query, collection_name, threshold=0.7):
     if similarity >= threshold:
         return best_match
     return None
-
-
-
 
 faq_questions = [item["Question"] for item in load_data()]
 faq_embeddings = sbert_model.encode(faq_questions, convert_to_tensor=True).cpu().numpy()

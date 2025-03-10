@@ -191,14 +191,14 @@ def generate_gpt4_response(question, context):
 
 def format_gpt4_response(question, answer, context):
     prompt = (
-        f"Chỉnh sửa câu từ của {answer} cho ngắn gọn, thân thiện, như chị trả lời các em."
+        f"Tìm câu trả lời cho {question} từ thông tin strong {context}. Nếu không tìm thấy trả về Không tìm thấy thông tin yêu cầu!"
     )   
     try:
         response = openai_client.chat.completions.create(
             model="gpt-4",
             messages=[
-                {"role": "system", "content": "Chỉnh lại câu trả lời như một chị tư vấn viên tuyển sinh trả lời các em sinh viên một cách thân thiện, rõ ràng theo giọng miền Bắc Việt Nam."},
-                {"role": "user", "content": answer}
+                {"role": "system", "content": "Đóng vai một chị tư vấn viên tuyển sinh trả lời các em sinh viên một cách thân thiện, rõ ràng theo giọng miền Bắc Việt Nam."},
+                {"role": "user", "content": prompt}
             ],
             max_tokens=500
         )
@@ -282,7 +282,8 @@ if user_input:
     result = search_database(user_input)
     use_gpt = False
     if result:
-            response_stream = stream_text(format_gpt4_response(user_input,result,""))  # FAQ converted to a generator
+            #response_stream = stream_text(format_gpt4_response(user_input,result,""))  # FAQ converted to a generator
+            response_stream = stream_text(result)
     else:
             st.warning("⚠️ Không tìm thấy trong cơ sở dữ liệu. Đang tìm kiếm bằng AI...")
             use_gpt = True

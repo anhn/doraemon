@@ -241,7 +241,7 @@ if st.button("Add Chi Tieu Du kien 2024 - De An tuyen sinh 24"):
             "CompetenceBasedAdmission": row[5],
             "Type": 1    
         }
-        for i, row in df_programs.iterrows()
+        for i, row in enumerate(qa_data_table)
     ]
     chitieu24_collection.insert_many(chitieu24_data)
     st.success("Dữ liệu Chi Tieu 24 đã được lưu vào MongoDB thành công!")

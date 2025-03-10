@@ -193,6 +193,7 @@ def format_gpt4_response(question, answer, context):
     prompt = (
         f"Dựa vào câu trả lời {answer} cho câu hỏi {question}. Kiểm tra tính chính xác của câu trả lời bằng thông tin từ {context} hoặc từ Internet." 
         f"Nểu bạn thấy câu trả lời sai, đưa ra lý giải."
+        f"Nểu bạn thấy không có trả lời sai, đưa ra câu trả lời dựa trên {context}."
         f"Nếu đúng hãy cho câu trả lời ngắn gọn, thân thiện, đàn chị trả lời các em."
     )   
     try:
@@ -284,11 +285,14 @@ if user_input:
     result = search_database(user_input)
     use_gpt = False
     if result:
-            response_stream = stream_text(format_gpt4_response(user_input,result,context_string))  # FAQ converted to a generator
+            response_stream = stream_text(format_gpt4_response(user_input,result,""))  # FAQ converted to a generator
     else:
             st.warning("⚠️ Không tìm thấy trong cơ sở dữ liệu. Đang tìm kiếm bằng AI...")
             use_gpt = True
-            response_stream = format_gpt4_response(user_input,generate_gpt4_response(user_input, ""),context_string)  # Now a generator
+            #response_stream = format_gpt4_response(user_input,generate_gpt4_response(user_input, ""),context_string)  # Now a generator
+            print(context_string)
+            response_stream = format_gpt4_response(user_input,"",context_string)  # Now a generator
+
     with st.chat_message("assistant"):
         bot_response_container = st.empty()  # Create an empty container
         bot_response = ""  # Collect the full response

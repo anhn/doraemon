@@ -487,7 +487,7 @@ if user_input:
     with st.chat_message("user"):
         st.write(user_input)
 
-    response_stream = generate_gpt4_response(user_input)  # Now a generator
+    response_stream = generate_gpt4_response(user_input,context_string)  # Now a generator
 
     with st.chat_message("assistant"):
         bot_response_container = st.empty()  # Create an empty container

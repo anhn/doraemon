@@ -555,7 +555,7 @@ if user_input:
         st.warning("⚠️ Không tìm thấy trong cơ sở dữ liệu. Đang tìm kiếm bằng mô hình ngôn ngữ lớn...")
         response_stream = generate_gpt4_response(user_input, context_string)  # Now a generator
     else:
-        response_stream = reformat_answer(best_match["Answer"])
+        response_stream = stream_text(best_match["Answer"])
 
     with st.chat_message("assistant"):
         bot_response_container = st.empty()  # Create an empty container

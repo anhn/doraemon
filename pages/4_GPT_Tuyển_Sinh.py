@@ -434,7 +434,7 @@ def generate_gpt4_response(question, context):
             ],
             stream=True
         )
-	    for message in response:
+	for message in response:
             content = message.choices[0].delta.content
             if content:  # Some parts may be None, skip them
                 yield content

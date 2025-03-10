@@ -30,7 +30,7 @@ db = client_mongo[DB_NAME]
 faq_collection = db[FAQ_COLLECTION]
 chatlog_collection = db[CHATLOG_COLLECTION]
 
-context_string = "ĐỀ ÁN TUYỂN SINH  NĂM 2024
+context_string = """ĐỀ ÁN TUYỂN SINH  NĂM 2024
 
 I. Thông tin chung 
 1. Tên cơ sở đào tạo: TRƯỜNG ĐH CÔNG NGHỆ GIAO THÔNG VẬN TẢI
@@ -145,8 +145,6 @@ STT	Tên ngành	Mã ngành	Số văn bản cho phép mở ngành	Ngày tháng n�
 32	Quản trị kinh doanh	7340101	1165/QĐ-BGDĐT	27/03/2012			Bộ GDĐT	2012	2023
 33	Luật	7380101	4336/QĐ-ĐHCNGTVT	14/06/2024			Trường ĐH Công nghệ GTVT	2024	
 34	Ngôn ngữ anh	7220201	2166/QĐ-ĐHCNGTVT	27/03/2024			Trường ĐH Công nghệ GTVT	2024	
-
- 
 10. Điều kiện bảo đảm chất lượng (Mẫu số 03)
 Đường link công khai các điều kiện đảm bảo chất lượng trên trang thông tin điện tử của CSĐT: https://utt.edu.vn/tuyensinh/tuyen-sinh/dai-hoc-chinh-quy-n756.html
 11. Đường link công khai Đề án tuyển sinh trên trang thông tin điện tử của CSĐT: https://utt.edu.vn/tuyensinh/tuyen-sinh/dai-hoc-chinh-quy-n756.html
@@ -370,7 +368,7 @@ Nguyễn Đức Sơn
 CHỦ TỊCH HĐTS
 PHÓ HIỆU TRƯỞNG
 TS. Nguyễn Văn Lâm
-"
+"""
 def get_ip():
     try:
         return requests.get("https://api64.ipify.org?format=json").json()["ip"]

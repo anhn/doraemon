@@ -129,7 +129,9 @@ def search_database(query, threshold=0.7):
         return None   
     query_embedding = sbert_model.encode([query], convert_to_tensor=True).cpu().numpy()
     _, best_match_idx = faiss_index.search(query_embedding, 1)
+    print(best_match_idx[0][0])
     best_match = data[best_match_idx[0][0]]
+    print(best_match)
     similarity = util.cos_sim(query_embedding, text_embeddings[best_match_idx[0][0]]).item()
     if similarity >= threshold:
         return best_match["answer"]

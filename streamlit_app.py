@@ -72,64 +72,56 @@ collections_info = {
         "description": "Thống kê sinh viên tốt nghiệp 2024, số lượng có việc làm theo ngành học.",
         "search_field": "Question",
         "response_field": "Answer"
-    },
-    "ts24_chitieu": {
-        "name": "Chỉ Tiêu Tuyển Sinh 2024",
-        "description": "Chỉ tiêu tuyển sinh năm 2024 theo ngành và phương thức xét tuyển.",
-        "search_field": ["FieldName", "FieldCode", "FieldCodeStandard"],
-        "response_field": ["TranscriptBasedAdmission", "SchoolScoreBasedAdmission", "CompetenceBasedAdmission"]
-    },
-    "ts24_admission": {
-        "name": "Điểm Xét Tuyển",
-        "description": "Phương thức xét tuyển và cách tính điểm cho từng ngành học.",
-        "search_field": "methods.name",
-        "response_field": ["methods.description", "methods.criteria", "exam_combinations"]
-    },
-    "ts24_chitieu_trungcap": {
-        "name": "Chỉ Tiêu Trung Cấp 2024",
-        "description": "Chỉ tiêu tuyển sinh cho các chương trình trung cấp.",
-        "search_field": "category",
-        "response_field": "programs"
     }
 }
 
 def load_data():
-    """Loads data from MongoDB for semantic search."""
+    """Loads data from MongoDB and converts to searchable format."""
     all_data = []
-    collection_texts = []  # Collect descriptions for embeddings
-
+    
     for collection_name, info in collections_info.items():
         collection = db[collection_name]
         docs = list(collection.find({}, {"_id": 0}))  # Exclude MongoDB _id field
-
+        
         for doc in docs:
             if isinstance(info["search_field"], list):
                 searchable_texts = [doc.get(field, "") for field in info["search_field"] if field in doc]
-                searchable_texts = [text for text in searchable_texts if text]  # Remove empty values
             else:
                 searchable_texts = [doc.get(info["search_field"], "")]
 
             if isinstance(info["response_field"], list):
-                answer = {k: doc.get(k, "") for k in info["response_field"] if k in doc}
+                answer_text = "\n".join(str(doc.get(k, "")) for k in info["response_field"] if k in doc)
             else:
-                answer = doc.get(info["response_field"], "")
-
-            for searchable_text in searchable_texts:
-                if searchable_text and answer:
-                    all_data.append({
-                        "question": searchable_text,
-                        "answer": answer,
-                        "source": collection_name,
-                        "collection_description": info["description"]
-                    })
-
-        collection_texts.append(info["description"])  # Store descriptions
-
-    if collection_texts:
-        global collection_embeddings  # Define globally
-        collection_embeddings = sbert_model.encode(collection_texts, convert_to_tensor=True).cpu().numpy()
-
+                answer_text = str(doc.get(info["response_field"], ""))
+                
+            # Convert into a single searchable text entry
+            searchable_text = f"{info['description']}: {', '.join(searchable_texts)}"
+            
+            if searchable_text.strip() and answer_text.strip():
+                all_data.append({
+                    "text": searchable_text,
+                    "answer": answer_text,
+                    "source": collection_name
+                })
+    
     return all_data
+
+# Load and process data
+data = load_data()
+texts = [entry["text"] for entry in data]
+answers = [entry["answer"] for entry in data]
+
+# Generate embeddings
+if texts:
+    text_embeddings = sbert_model.encode(texts, convert_to_tensor=True).cpu().numpy()
+    
+    # Create FAISS index
+    dimension = text_embeddings.shape[1]
+    faiss_index = faiss.IndexFlatL2(dimension)
+    faiss_index.add(text_embeddings)
+else:
+    faiss_index = None
+    
 
 # --- FUNCTION TO FIND BEST MATCHING COLLECTION ---
 def find_best_collection(query):
@@ -144,47 +136,16 @@ def find_best_collection(query):
 
 
 # --- FUNCTION FOR SEMANTIC SEARCH ---
-def search_database(query, collection_name, threshold=0.7):
-    """Finds the best-matching answer from the specified collection using FAISS."""
-    info = collections_info[collection_name]
-    collection = db[collection_name]
-
-    # Special queries based on collection structure
-    if collection_name in ["ts24_chitieu", "ts24_admission"]:
-        result = collection.find_one({info["search_field"]: {"$regex": query, "$options": "i"}})
-        if result:
-            return {key: result[key] for key in info["response_field"] if key in result}
-
-    elif collection_name in ["faqtuyensinh", "metainfo", "ts24_vieclam"]:
-        result = collection.find_one({info["search_field"]: {"$regex": query, "$options": "i"}})
-        return result[info["response_field"]] if result else None
-
-    elif collection_name == "ts24_chitieu_trungcap":
-        result = collection.find_one({"category": {"$regex": query, "$options": "i"}})
-        return result["programs"] if result else None
-
-    # Default: Perform semantic search
-    filtered_data = [entry for entry in data if entry["source"] == collection_name]
-    if not filtered_data:
-        return None  # No data available
-
-    filtered_questions = [entry["question"] for entry in filtered_data]
-    filtered_answers = [entry["answer"] for entry in filtered_data]
-
-    filtered_embeddings = sbert_model.encode(filtered_questions, convert_to_tensor=True).cpu().numpy()
-    faiss_index_filtered = faiss.IndexFlatL2(filtered_embeddings.shape[1])
-    faiss_index_filtered.add(filtered_embeddings)
-
+def search_database(query, threshold=0.7):
+    """Finds the best-matching answer using FAISS and SBERT."""
+    if not faiss_index:
+        return None   
     query_embedding = sbert_model.encode([query], convert_to_tensor=True).cpu().numpy()
-    _, best_match_idx = faiss_index_filtered.search(query_embedding, 1)
-
-    best_match = filtered_data[best_match_idx[0][0]]
-    similarity = np.dot(query_embedding, filtered_embeddings[best_match_idx[0][0]]) / (
-        np.linalg.norm(query_embedding) * np.linalg.norm(filtered_embeddings[best_match_idx[0][0]])
-    )
-    
+    _, best_match_idx = faiss_index.search(query_embedding, 1)
+    best_match = data[best_match_idx[0][0]]
+    similarity = util.cos_sim(query_embedding, text_embeddings[best_match_idx[0][0]]).item()
     if similarity >= threshold:
-        return best_match
+        return best_match["answer"]
     return None
     
 data = load_data()
@@ -325,7 +286,7 @@ if user_input:
     best_collection = find_best_collection(user_input)
     st.info(f"🔍 Đang tìm kiếm trong danh mục: **{collections_info[best_collection]['name']}**")
     # Search in the selected collection
-    result = search_database(user_input, best_collection)
+    result = search_database(user_input)
     use_gpt = False
     if result:
             st.success(f"✅ **Kết quả từ {collections_info[best_collection]['name']}:**\n\n{result}")

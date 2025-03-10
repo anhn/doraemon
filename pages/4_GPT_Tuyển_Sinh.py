@@ -519,7 +519,7 @@ if user_input:
     with st.chat_message("user"):
         st.write(user_input)	
 
-    result = search_database(user_input)
+    result = find_best_match(user_input)
     use_gpt = False
 
     if result:

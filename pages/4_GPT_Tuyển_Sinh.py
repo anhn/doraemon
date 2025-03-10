@@ -519,7 +519,8 @@ if user_input:
 	# Show user message
 	with st.chat_message("user"):
  		st.write(user_input)
-  	result = search_database(user_input)
+  	
+	result = search_database(user_input)
     use_gpt = False
     if result:
 		response_stream = stream_text(result)

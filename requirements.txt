@@ -12,3 +12,4 @@ streamlit_feedback
 pymongo
 datetime
 pandas
+scikit-learn

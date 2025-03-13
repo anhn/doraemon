@@ -66,6 +66,72 @@ if uploaded_file is not None:
 #    st.table(pd.DataFrame(faqs))
 #else:
 #    st.write("No FAQs found in the database.")
+if st.button("Add additional data!"):
+    current_timestamp = datetime.utcnow()
+    start_id_number = 138  # Corresponds to Q054
+    # Transform data for MongoDB insertion
+    formatted_data = [
+    {"ID": f"Q{start_id_number + 0}", "Question": "Tên cơ sở đào tạo?", "Answer": "TRƯỜNG ĐH CÔNG NGHỆ GIAO THÔNG VẬN TẢI", "Type": 1, "CreatedTime": current_timestamp, "UpdatedTime": current_timestamp},
+    {"ID": f"Q{start_id_number + 1}", "Question": "Mã trường?", "Answer": "GTA", "Type": 1, "CreatedTime": current_timestamp, "UpdatedTime": current_timestamp},
+    {"ID": f"Q{start_id_number + 2}", "Question": "Địa chỉ các trụ sở?", "Answer": "Trụ sở chính: Phường Đồng Tâm, Tp. Vĩnh Yên, Tỉnh Vĩnh Phúc; Phân hiệu Hà Nội: 54 Triều Khúc, Thanh Xuân, Tp. Hà Nội; Trung tâm đào tạo Thái Nguyên: P. Tân Thịnh, Tp. Thái Nguyên, T. Thái Nguyên", "Type": 1, "CreatedTime": current_timestamp, "UpdatedTime": current_timestamp},
+    {"ID": f"Q{start_id_number + 3}", "Question": "Địa chỉ trang thông tin điện tử của cơ sở đào tạo?", "Answer": "utt.edu.vn", "Type": 1, "CreatedTime": current_timestamp, "UpdatedTime": current_timestamp},
+    {"ID": f"Q{start_id_number + 4}", "Question": "Địa chỉ các trang mạng xã hội của cơ sở đào tạo?", "Answer": "Fanpage: https://www.facebook.com/utt.vn; Zalo: https://zalo.me/dhcngtvt", "Type": 1, "CreatedTime": current_timestamp, "UpdatedTime": current_timestamp},
+    {"ID": f"Q{start_id_number + 5}", "Question": "Số điện thoại liên hệ tuyển sinh?", "Answer": "Văn phòng tuyển sinh: 02435526713", "Type": 1, "CreatedTime": current_timestamp, "UpdatedTime": current_timestamp},
+    {
+        "ID": f"Q{start_id_number + 6}",
+        "Question": "Ai là Hiệu trưởng của Trường Đại học Công nghệ Giao thông vận tải?",
+        "Answer": "PGS.TS Nguyễn Hoàng Long",
+        "Type": 1,
+        "CreatedTime": current_timestamp,
+        "UpdatedTime": current_timestamp
+    },
+    {
+        "ID": f"Q{start_id_number + 7}",
+        "Question": "Ai là các Phó Hiệu trưởng của Trường Đại học Công nghệ Giao thông vận tải?",
+        "Answer": "TS. Nguyễn Mạnh Hùng, TS. Nguyễn Văn Lâm, TS. Trần Hà Thanh",
+        "Type": 1,
+        "CreatedTime": current_timestamp,
+        "UpdatedTime": current_timestamp
+    },
+            {
+        "ID": f"Q{start_id_number + 8}",
+        "Question": "Ai là Bí thư Đảng ủy của Trường Đại học Công nghệ Giao thông vận tải?",
+        "Answer": "Đ/c Vũ Ngọc Khiêm",
+        "Type": 1,
+        "CreatedTime": current_timestamp,
+        "UpdatedTime": current_timestamp
+    },
+    {
+        "ID": f"Q{start_id_number + 9}",
+        "Question": "Ai là Phó Bí thư Đảng ủy của Trường Đại học Công nghệ Giao thông vận tải?",
+        "Answer": "Đ/c Nguyễn Hoàng Long",
+        "Type": 1,
+        "CreatedTime": current_timestamp,
+        "UpdatedTime": current_timestamp
+    },
+    {
+        "ID": f"Q{start_id_number + 10}",
+        "Question": "Ai là Ủy viên Ban Thường vụ Đảng ủy, Chủ nhiệm UBKT của Trường Đại học Công nghệ Giao thông vận tải?",
+        "Answer": "Đ/c Nguyễn Mạnh Hùng",
+        "Type": 1,
+        "CreatedTime": current_timestamp,
+        "UpdatedTime": current_timestamp
+    },
+    {
+        "ID": f"Q{start_id_number + 11}",
+        "Question": "Ai là Ủy viên Ban Thường vụ Đảng ủy của Trường Đại học Công nghệ Giao thông vận tải?",
+        "Answer": "Đ/c Nguyễn Văn Lâm",
+        "Type": 1,
+        "CreatedTime": current_timestamp,
+        "UpdatedTime": current_timestamp
+    }
+    ]  
+    if formatted_data:
+        faq_collection.insert_many(formatted_data)
+        st.success("Data successfully inserted into Faq.")
+    else:
+        st.warning("No data to insert.")
+        
 if st.button("Add metainfo into FAQ"):
     meta_data = [
         ("Tên cơ sở đào tạo là gì?", "TRƯỜNG ĐH CÔNG NGHỆ GIAO THÔNG VẬN TẢI"),

@@ -413,7 +413,7 @@ def find_best_match(user_query):
     #st.warning(f"🔹 TF-IDF Best Match: {best_match_tfidf}")
     #st.warning(f"🔹 TF-IDF Cosine Similarity: {tfidf_similarity:.4f}")
 	
-    return best_match, similarity
+    #return best_match, similarity
 	
 def generate_gpt4_response(question, context):
     prompt = (

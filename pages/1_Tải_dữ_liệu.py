@@ -168,7 +168,7 @@ if st.button("Add metainfo into FAQ"):
         for index, item in enumerate(meta_data)
     ]
     if chatlog_data:
-        chatlog_collection.insert_many(meta_data)
+        chatlog_collection.insert_many(chatlog_data)
         st.success("Data successfully inserted into chatlog.")
     else:
         st.warning("No data to insert.")

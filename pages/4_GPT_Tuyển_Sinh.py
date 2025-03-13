@@ -35,48 +35,6 @@ vieclam_collection = db[VIECLAM_COLLECTION]
 chatlog_collection = db[CHATLOG_COLLECTION]
 
 context_string = """ĐỀ ÁN TUYỂN SINH  NĂM 2024
-
-I. Thông tin chung 
-1. Tên cơ sở đào tạo: TRƯỜNG ĐH CÔNG NGHỆ GIAO THÔNG VẬN TẢI
-2. Mã trường: GTA
-3. Địa chỉ các trụ sở (trụ sở chính và phân hiệu)
-- Trụ sở chính: Phường Đồng Tâm, Tp. Vĩnh Yên, Tỉnh Vĩnh Phúc
-- Phân hiệu Hà Nội: 54 Triều Khúc, Thanh Xuân, Tp. Hà Nội
-- Trung tâm đào tạo Thái Nguyên: P. Tân Thịnh, Tp. Thái Nguyên, T. Thái Nguyên
-4. Địa chỉ trang thông tin điện tử của cơ sở đào tạo: 
-Trang thông tin điện tử: utt.edu.vn
-5. Địa chỉ các trang mạng xã hội của cơ sở đào tạo (có thông tin tuyển sinh):
-Fanpage: https://www.facebook.com/utt.vn
-Zalo: https://zalo.me/dhcngtvt
-6. Số điện thoại liên hệ tuyển sinh:
-Văn phòng tuyển sinh: 02435526713; 
-7. Tình hình việc làm của sinh viên sau khi tốt nghiệp
-	 Đường link công khai việc làm của sinh viên sau khi tốt nghiệp trên trang thông tin điện tử  của CSĐT: https://utt.edu.vn/tuyensinh/tuyen-sinh/dai-hoc-chinh-quy-n756.html
- Kết quả khảo sát sinh viên đại học chính quy có việc làm trong khoảng thời gian 12 tháng kể từ khi được công nhận tốt nghiệp được xác định theo từng ngành, lĩnh vực đào tạo, được khảo sát ở năm liền kề trước năm tuyển sinh, đối tượng khảo sát là sinh viên đã tốt nghiệp ở năm trước cách năm tuyển sinh một năm.
-STT	Lĩnh vực /Ngành đào tạo	Chỉ tiêu tuyển sinh	Số SV trúng tuyển nhập học	Số SV  tốt nghiệp	Tỷ lệ SV tốt nghiệp đã có việc làm
-1	Kinh doanh và quản lý	 	 		
-1.1	Quản trị kinh doanh	440	391	180	90.24
-1.2	Thương mại điện tử	230	204	114	96.04
-1.3	Tài chính - Ngân hàng	360	334	88	93.41
-1.4	Kế toán	410	477	282	92.51
-2	Máy tính và công nghệ thông tin				
-2.1	Hệ thống thông tin	300	275	177	95.45
-2.2	Công nghệ thông tin	630	634	121	91.38
-3	Công nghệ kỹ thuật				
-3.1	Công nghệ kỹ thuật công trình xây dựng	290	261	101	94.85
-3.2	Công nghệ kỹ thuật giao thông	270	201	156	94.15
-3.3	Công nghệ kỹ thuật cơ khí	250	290	168	91.95
-3.4	Công nghệ kỹ thuật cơ điện tử	320	364	162	92.65
-3.5	Công nghệ kỹ thuật ô tô	510	489	520	96.15
-3.6	Công nghệ kỹ thuật điện tử – viễn thông	250	267	98	93.81
-3.7	Công nghệ kỹ thuật môi trường	100	62	7	92.62
-3.8	Logistics và quản lý chuỗi cung ứng	350	346	113	96.63
-4	Kiến trúc và xây dựng				
-4.1	Kinh tế xây dựng	340	262	57	95.38
-4.2	Quản lý xây dựng	85	143	-	Ngành mới TS 2022
-5	Dịch vụ vận tải				
-5.1	Khai thác vận tải	425	425	72	100
-	Tổng	5060	5425	2416	
 8. Thông tin về tuyển sinh chính quy của 2 năm gần nhất
 Đường link công khai thông tin về tuyển sinh chính quy của 2 năm gần nhất trên trang thông tin điện tử của CSĐT: https://utt.edu.vn/tuyensinh/tuyen-sinh/dai-hoc-chinh-quy-n756.html
  
@@ -109,8 +67,6 @@ TT	Lĩnh vực/ Ngành/Nhóm ngành/	Năm 2022	Năm 2023
 4.2	Quản lý xây dựng	85	46	38	20	16.75	85	112	31	22	21.1
 5	Dịch vụ vận tải										
 5.1	Khai thác vận tải	250	200	49	22	23.3	42	335	90	25	23.6
-
-
  
 9. Thông tin danh mục ngành được phép đào tạo: Đường link công khai danh mục ngành được phép đào tạo trên trang thông tin điện tử của CSĐT: https://utt.edu.vn/tuyensinh/tuyen-sinh/dai-hoc-chinh-quy-n756.html
 STT	Tên ngành	Mã ngành	Số văn bản cho phép mở ngành	Ngày tháng năm ban hành văn bản cho phép mở ngành	Số quyết định chuyển đổi tên ngành (gần nhất)	Ngày tháng năm ban hành Số quyết định chuyển đổi tên ngành (gần nhất)	Trường tự chủ QĐ hoặc Cơ quan có thẩm quyền cho phép	Năm bắt đầu đào tạo	Năm đã tuyển sinh và đào tạo gần nhất với năm tuyển sinh
@@ -393,12 +349,8 @@ openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 def load_faq_data():
     # Fetch data from all three collections, selecting only 'Question' and 'Answer' fields
     faq_data = list(faq_collection.find({}, {"_id": 0, "Question": 1, "Answer": 1}))
-    metainfo_data = list(metainfo_collection.find({}, {"_id": 0, "Question": 1, "Answer": 1}))
-    vieclam_data = list(vieclam_collection.find({}, {"_id": 0, "Question": 1, "Answer": 1}))
-    
     # Combine all data into one list
-    combined_data = faq_data + metainfo_data + vieclam_data
-    
+    combined_data = faq_data 
     return combined_data
 
 
@@ -413,9 +365,12 @@ def find_best_match(user_query):
     query_embedding = sbert_model.encode([user_query], convert_to_tensor=True).cpu().numpy()
     _, best_match_idx = faiss_index.search(query_embedding, 1)
     best_match = load_faq_data()[best_match_idx[0][0]]
+	print(user_query)
+	print(best_match)
     # Compute similarity
     best_match_embedding = faq_embeddings[best_match_idx[0][0]]
     similarity = util.cos_sim(query_embedding, best_match_embedding).item()
+	print(similarity)
     return best_match, similarity
 	
 def generate_gpt4_response(question, context):
@@ -553,7 +508,8 @@ if user_input:
     
     if use_gpt:
         st.warning("⚠️ Không tìm thấy trong cơ sở dữ liệu. Đang tìm kiếm bằng mô hình ngôn ngữ lớn...")
-        response_stream = generate_gpt4_response(user_input, context_string)  # Now a generator
+        #response_stream = generate_gpt4_response(user_input, context_string)  # Now a generator
+		response_stream = stream_text("Ngắt kết nối tới GPT để test FAQ")
     else:
         response_stream = stream_text(best_match["Answer"])
 

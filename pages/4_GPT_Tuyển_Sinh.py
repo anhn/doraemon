@@ -562,11 +562,12 @@ if user_input:
             # Step 4: Decide whether to use GPT based on similarity
             threshold = 0.4
             use_gpt = selected_similarity < threshold
-            if use_gpt:
-                st.warning("⚠️ Không tìm thấy trong cơ sở dữ liệu. Đang tìm kiếm bằng mô hình ngôn ngữ lớn...")
-                response_stream = stream_text("Ngắt kết nối tới GPT để test FAQ")
-            else:
-                response_stream = stream_text(st.session_state["selected_answer"])
+            response_stream = stream_text(st.session_state["selected_answer"])
+            #if use_gpt:
+            #    st.warning("⚠️ Không tìm thấy trong cơ sở dữ liệu. Đang tìm kiếm bằng mô hình ngôn ngữ lớn...")
+            #    response_stream = stream_text("Ngắt kết nối tới GPT để test FAQ")
+            #else:
+            #    response_stream = stream_text(st.session_state["selected_answer"])
             with st.chat_message("assistant"):
                 bot_response_container = st.empty()
                 bot_response = ""

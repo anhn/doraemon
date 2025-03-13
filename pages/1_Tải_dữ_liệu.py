@@ -65,6 +65,48 @@ if uploaded_file is not None:
 #    st.table(pd.DataFrame(faqs))
 #else:
 #    st.write("No FAQs found in the database.")
+if st.button("Add metainfo into FAQ"):
+    meta_data = [
+        ("Tên cơ sở đào tạo là gì?", "TRƯỜNG ĐH CÔNG NGHỆ GIAO THÔNG VẬN TẢI"),
+        ("Mã trường của cơ sở đào tạo là gì?", "GTA"),
+        ("Địa chỉ trụ sở chính của trường là gì?", "Phường Đồng Tâm, Tp. Vĩnh Yên, Tỉnh Vĩnh Phúc"),
+        ("Cơ sở đào tạo có những phân hiệu nào?", "Phân hiệu Hà Nội: 54 Triều Khúc, Thanh Xuân, Tp. Hà Nội; Trung tâm đào tạo Thái Nguyên: P. Tân Thịnh, Tp. Thái Nguyên, T. Thái Nguyên"),
+        ("Trang thông tin điện tử của trường là gì?", "utt.edu.vn"),
+        ("Fanpage Facebook của trường là gì?", "https://www.facebook.com/utt.vn"),
+        ("Zalo của trường là gì?", "https://zalo.me/dhcngtvt"),
+        ("Số điện thoại liên hệ tuyển sinh là gì?", "02435526713"),
+        ("Tình hình việc làm của sinh viên sau tốt nghiệp như thế nào?", "Kết quả khảo sát cho thấy tỷ lệ sinh viên có việc làm sau 12 tháng từ khi tốt nghiệp được công khai trên trang: https://utt.edu.vn/tuyensinh/tuyen-sinh/dai-hoc-chinh-quy-n756.html"),
+        ("Phương thức tuyển sinh chính của trường trong 2 năm gần nhất là gì?", "Xét tuyển sử dụng kết quả thi tốt nghiệp THPT và xét tuyển kết hợp theo đề án riêng của Trường."),
+        ("Điểm trúng tuyển của ngành Quản trị kinh doanh năm 2023 là bao nhiêu?", "28 (học bạ KH), 22.85 (THPT)"),
+        ("Ngành Công nghệ kỹ thuật ô tô có tỷ lệ sinh viên có việc làm sau tốt nghiệp là bao nhiêu?", "96.15%"),
+        ("Mức học phí dự kiến cho năm học 2024-2025 là bao nhiêu?", "470,000đ/1 tín chỉ cho chương trình đại trà, 1.5 lần mức này cho chương trình tăng cường ngoại ngữ."),
+        ("Các phương thức xét tuyển của trường là gì?", "Xét tuyển thẳng, xét học bạ kết hợp, xét tuyển dựa trên điểm thi tốt nghiệp THPT, xét tuyển dựa trên điểm thi đánh giá tư duy."),
+        ("Tổ hợp môn xét tuyển của trường gồm những tổ hợp nào?", "A00 (Toán, Lý, Hóa), A01 (Toán, Lý, Tiếng Anh), D01 (Toán, Văn, Tiếng Anh), D07 (Toán, Hóa, Tiếng Anh)."),
+        ("Thời gian tuyển sinh đợt 1 năm 2024 của trường là khi nào?", "Từ ngày 15/3/2024 đến ngày 27/4/2024."),
+        ("Chỉ tiêu tuyển sinh của ngành Logistics và quản lý chuỗi cung ứng năm 2024 là bao nhiêu?", "180 (học bạ KH), 70 (THPT)"),
+        ("Trường có tuyển sinh theo phương thức nào khác không?", "Có, xét tuyển dựa trên điểm thi đánh giá tư duy do ĐH Bách khoa Hà Nội tổ chức."),
+        ("Chính sách ưu tiên trong xét tuyển của trường là gì?", "Cộng điểm ưu tiên cho thí sinh đạt giải HSG cấp tỉnh/thành phố, có chứng chỉ IELTS ≥ 4.5, hoặc có thành tích học sinh giỏi."),
+        ("Thời gian dự kiến tuyển sinh bổ sung nếu có là khi nào?", "Sau ngày 22/8/2024."),
+    ]
+    current_timestamp = datetime.utcnow()
+    start_id_number = 54  # Corresponds to Q054
+    # Transform data for MongoDB insertion
+    chatlog_data = [
+        {
+            "ID": f"Q{start_id_number + index:03d}",  # Generates Q053, Q054, ..., Q072
+            "Question": question,
+            "Answer": answer,
+            "Type": "FAQ",
+            "CreatedTime": current_timestamp,
+            "UpdatedTime": current_timestamp
+        }
+        for index, (question, answer) in enumerate(meta_data)
+    ]
+    if chatlog_data:
+        chatlog_collection.insert_many(chatlog_data)
+        print("Data successfully inserted into chatlog.")
+    else:
+        print("No data to insert.")
 
 # Button to save data to MongoDB
 if st.button("Add Meta Info"):
@@ -89,6 +131,70 @@ if st.button("Add Meta Info"):
         ("Trường có tuyển sinh theo phương thức nào khác không?", "Có, xét tuyển dựa trên điểm thi đánh giá tư duy do ĐH Bách khoa Hà Nội tổ chức."),
         ("Chính sách ưu tiên trong xét tuyển của trường là gì?", "Cộng điểm ưu tiên cho thí sinh đạt giải HSG cấp tỉnh/thành phố, có chứng chỉ IELTS ≥ 4.5, hoặc có thành tích học sinh giỏi."),
         ("Thời gian dự kiến tuyển sinh bổ sung nếu có là khi nào?", "Sau ngày 22/8/2024."),
+        ("Số chỉ tiêu tuyển sinh của ngành Quản trị kinh doanh là bao nhiêu?", "440"),
+        ("Số sinh viên nhập học ngành Quản trị kinh doanh là bao nhiêu?", "391"),
+        ("Số sinh viên tốt nghiệp ngành Quản trị kinh doanh là bao nhiêu?", "180"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Quản trị kinh doanh là bao nhiêu?", "90.24%"),
+        ("Số chỉ tiêu tuyển sinh của ngành Thương mại điện tử là bao nhiêu?", "230"),
+        ("Số sinh viên nhập học ngành Thương mại điện tử là bao nhiêu?", "204"),
+        ("Số sinh viên tốt nghiệp ngành Thương mại điện tử là bao nhiêu?", "114"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Thương mại điện tử là bao nhiêu?", "96.04%"),
+        ("Số chỉ tiêu tuyển sinh của ngành Tài chính - Ngân hàng là bao nhiêu?", "360"),
+        ("Số sinh viên nhập học ngành Tài chính - Ngân hàng là bao nhiêu?", "334"),
+        ("Số sinh viên tốt nghiệp ngành Tài chính - Ngân hàng là bao nhiêu?", "88"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Tài chính - Ngân hàng là bao nhiêu?", "93.41%"),
+        ("Số chỉ tiêu tuyển sinh của ngành Kế toán là bao nhiêu?", "410"),
+        ("Số sinh viên nhập học ngành Kế toán là bao nhiêu?", "477"),
+        ("Số sinh viên tốt nghiệp ngành Kế toán là bao nhiêu?", "282"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Kế toán là bao nhiêu?", "92.51%"),
+        ("Số chỉ tiêu tuyển sinh của ngành Hệ thống thông tin là bao nhiêu?", "300"),
+        ("Số sinh viên nhập học ngành Hệ thống thông tin là bao nhiêu?", "275"),
+        ("Số sinh viên tốt nghiệp ngành Hệ thống thông tin là bao nhiêu?", "177"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Hệ thống thông tin là bao nhiêu?", "95.45%"),
+        ("Số chỉ tiêu tuyển sinh của ngành Công nghệ thông tin là bao nhiêu?", "630"),
+        ("Số sinh viên nhập học ngành Công nghệ thông tin là bao nhiêu?", "634"),
+        ("Số sinh viên tốt nghiệp ngành Công nghệ thông tin là bao nhiêu?", "121"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ thông tin là bao nhiêu?", "91.38%"),
+        ("Số chỉ tiêu tuyển sinh của ngành Công nghệ kỹ thuật công trình xây dựng là bao nhiêu?", "290"),
+        ("Số sinh viên nhập học ngành Công nghệ kỹ thuật công trình xây dựng là bao nhiêu?", "261"),
+        ("Số sinh viên tốt nghiệp ngành Công nghệ kỹ thuật công trình xây dựng là bao nhiêu?", "101"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ kỹ thuật công trình xây dựng là bao nhiêu?", "94.85%"),
+        ("Số chỉ tiêu tuyển sinh của ngành Công nghệ kỹ thuật giao thông là bao nhiêu?", "270"),
+        ("Số sinh viên nhập học ngành Công nghệ kỹ thuật giao thông là bao nhiêu?", "201"),
+        ("Số sinh viên tốt nghiệp ngành Công nghệ kỹ thuật giao thông là bao nhiêu?", "156"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ kỹ thuật giao thông là bao nhiêu?", "94.15%"),
+        ("Số chỉ tiêu tuyển sinh của ngành Công nghệ kỹ thuật cơ khí là bao nhiêu?", "250"),
+        ("Số sinh viên nhập học ngành Công nghệ kỹ thuật cơ khí là bao nhiêu?", "290"),
+        ("Số sinh viên tốt nghiệp ngành Công nghệ kỹ thuật cơ khí là bao nhiêu?", "168"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ kỹ thuật cơ khí là bao nhiêu?", "91.95%"),
+        ("Số chỉ tiêu tuyển sinh của ngành Công nghệ kỹ thuật cơ điện tử là bao nhiêu?", "320"),
+        ("Số sinh viên nhập học ngành Công nghệ kỹ thuật cơ điện tử là bao nhiêu?", "364"),
+        ("Số sinh viên tốt nghiệp ngành Công nghệ kỹ thuật cơ điện tử là bao nhiêu?", "162"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ kỹ thuật cơ điện tử là bao nhiêu?", "92.65%"),
+        ("Số chỉ tiêu tuyển sinh của ngành Công nghệ kỹ thuật ô tô là bao nhiêu?", "510"),
+        ("Số sinh viên nhập học ngành Công nghệ kỹ thuật ô tô là bao nhiêu?", "489"),
+        ("Số sinh viên tốt nghiệp ngành Công nghệ kỹ thuật ô tô là bao nhiêu?", "520"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ kỹ thuật ô tô là bao nhiêu?", "96.15%"),
+        ("Số chỉ tiêu tuyển sinh của ngành Công nghệ kỹ thuật điện tử - viễn thông là bao nhiêu?", "250"),
+        ("Số sinh viên nhập học ngành Công nghệ kỹ thuật điện tử - viễn thông là bao nhiêu?", "267"),
+        ("Số sinh viên tốt nghiệp ngành Công nghệ kỹ thuật điện tử - viễn thông là bao nhiêu?", "98"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ kỹ thuật điện tử - viễn thông là bao nhiêu?", "93.81%"),
+        ("Số chỉ tiêu tuyển sinh của ngành Công nghệ kỹ thuật môi trường là bao nhiêu?", "100"),
+        ("Số sinh viên nhập học ngành Công nghệ kỹ thuật môi trường là bao nhiêu?", "62"),
+        ("Số sinh viên tốt nghiệp ngành Công nghệ kỹ thuật môi trường là bao nhiêu?", "7"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Công nghệ kỹ thuật môi trường là bao nhiêu?", "92.62%"),
+        ("Số chỉ tiêu tuyển sinh của ngành Logistics và quản lý chuỗi cung ứng là bao nhiêu?", "350"),
+        ("Số sinh viên nhập học ngành Logistics và quản lý chuỗi cung ứng là bao nhiêu?", "346"),
+        ("Số sinh viên tốt nghiệp ngành Logistics và quản lý chuỗi cung ứng là bao nhiêu?", "113"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Logistics và quản lý chuỗi cung ứng là bao nhiêu?", "96.63%"),
+        ("Số chỉ tiêu tuyển sinh của ngành Kinh tế xây dựng là bao nhiêu?", "340"),
+        ("Số sinh viên nhập học ngành Kinh tế xây dựng là bao nhiêu?", "262"),
+        ("Số sinh viên tốt nghiệp ngành Kinh tế xây dựng là bao nhiêu?", "57"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Kinh tế xây dựng là bao nhiêu?", "95.38%"),
+        ("Số chỉ tiêu tuyển sinh của ngành Khai thác vận tải là bao nhiêu?", "425"),
+        ("Số sinh viên nhập học ngành Khai thác vận tải là bao nhiêu?", "425"),
+        ("Số sinh viên tốt nghiệp ngành Khai thác vận tải là bao nhiêu?", "72"),
+        ("Tỷ lệ sinh viên có việc làm sau tốt nghiệp ngành Khai thác vận tải là bao nhiêu?", "100%")
     ]
     # Gán ID và type cho dữ liệu metadata
     metainfo_data = [{"ID": f"Q{str(i+1).zfill(3)}", "Question": item[0], "Answer": item[1], "Type": 1} for i, item in enumerate(meta_data)]

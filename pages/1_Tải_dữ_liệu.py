@@ -156,7 +156,7 @@ if st.button("Add metainfo into FAQ"):
     current_timestamp = datetime.utcnow()
     start_id_number = 54  # Corresponds to Q054
     # Transform data for MongoDB insertion
-    chatlog_data = [
+    faq_data = [
         {
             "ID": f"Q{start_id_number + index:03d}",  # Generates Q053, Q054, ..., Q072
             "Question": item[0],
@@ -167,9 +167,9 @@ if st.button("Add metainfo into FAQ"):
         }
         for index, item in enumerate(meta_data)
     ]
-    if chatlog_data:
-        chatlog_collection.insert_many(chatlog_data)
-        st.success("Data successfully inserted into chatlog.")
+    if faq_data:
+        faq_collection.insert_many(faq_data)
+        st.success("Data successfully inserted into Faq.")
     else:
         st.warning("No data to insert.")
 

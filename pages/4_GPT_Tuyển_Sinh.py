@@ -369,7 +369,7 @@ faiss_index.add(faq_embeddings)
 	
 def find_best_match(user_query):
     query_embedding = sbert_model.encode([user_query], convert_to_tensor=True).cpu().numpy()
-    _, best_match_idx = faiss_index.search(query_embedding, 3)
+    _, best_match_idxs = faiss_index.search(query_embedding, 3)
     
     # Get best matches from FAISS
     best_matches_faiss = [load_faq_data()[idx] for idx in best_match_idxs[0]]

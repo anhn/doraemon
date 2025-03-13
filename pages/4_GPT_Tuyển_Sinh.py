@@ -512,7 +512,7 @@ if user_input:
     if use_gpt:
         st.warning("⚠️ Không tìm thấy trong cơ sở dữ liệu. Đang tìm kiếm bằng mô hình ngôn ngữ lớn...")
         #response_stream = generate_gpt4_response(user_input, context_string)  # Now a generator
-	response_stream = stream_text("Ngắt kết nối tới GPT để test FAQ")
+        response_stream = stream_text("Ngắt kết nối tới GPT để test FAQ")
     else:
         response_stream = stream_text(best_match["Answer"])
 

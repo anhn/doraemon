@@ -366,6 +366,11 @@ for i in range(5):  # Check first 5 embeddings
 faiss_index = faiss.IndexFlatL2(faq_embeddings.shape[1])
 faiss_index.add(faq_embeddings)
 
+# Initialize session state for selection tracking
+if "selected_question" not in st.session_state:
+    st.session_state["selected_question"] = None
+    st.session_state["selected_answer"] = None
+    st.session_state["selected_similarity"] = None
 	
 def find_best_match(user_query):
     query_embedding = sbert_model.encode([user_query], convert_to_tensor=True).cpu().numpy()
@@ -394,15 +399,17 @@ def find_best_match(user_query):
     st.write("### 🔹 **Select the Most Relevant Question:**")
     selected_match = None  # Store user's choice
     for i in range(3):
-        if st.button(f"🔹 {best_matches_faiss[i]['Question']} (Similarity: {faiss_similarities[i]:.4f})"):
-            selected_match = best_matches_faiss[i]
+        if st.button(f"🔹 {best_matches_faiss[i]['Question']} (Similarity: {faiss_similarities[i]:.4f})", key=f"btn_{i}"):
+            st.session_state["selected_question"] = best_matches_faiss[i]["Question"]
+            st.session_state["selected_answer"] = best_matches_faiss[i]["Answer"]
+            st.session_state["selected_similarity"] = faiss_similarities[i]
     ### **Show Answer When User Clicks**
-    if selected_match:
-        st.success(f"**Selected Question:** {selected_match['Question']}")
-        st.success(f"**Answer:** {selected_match['Answer']}")
-        st.success(f"**Similarity Score:** {faiss_similarities[best_match_idxs[0].tolist().index(faq_questions.index(selected_match['Question']))]:.4f}")
-        return selected_match, faiss_similarities[best_match_idxs[0].tolist().index(faq_questions.index(selected_match['Question']))]
-    return None, None
+    #if selected_match:
+    #    st.success(f"**Selected Question:** {selected_match['Question']}")
+    #    st.success(f"**Answer:** {selected_match['Answer']}")
+    #    st.success(f"**Similarity Score:** {faiss_similarities[best_match_idxs[0].tolist().index(faq_questions.index(selected_match['Question']))]:.4f}")
+    #    return selected_match, faiss_similarities[best_match_idxs[0].tolist().index(faq_questions.index(selected_match['Question']))]
+    #return None, None
     ### **🔎 Compare Results**
     #st.warning(f"User Query: {user_query}")
     # FAISS Result
@@ -539,13 +546,19 @@ user_input = st.chat_input("Nhập câu hỏi của bạn...")
 if user_input:
     with st.chat_message("user"):
         st.write(user_input)	
-    best_match, similarity = find_best_match(user_input)
-    threshold = 0.7  # Minimum similarity to use FAQ answer
-    best_answer = best_match.get("Answer", "")
+    #best_match, similarity = find_best_match(user_input)
+    find_best_match(user_input)
+    if st.session_state["selected_question"]:
+        st.success(f"**Selected Question:** {st.session_state['selected_question']}")
+        st.success(f"**Answer:** {st.session_state['selected_answer']}")
+        st.success(f"**Similarity Score:** {st.session_state['selected_similarity']:.4f}")
+    best_answer = st.session_state["selected_answer"]
+    threshold = 0.3  # Minimum similarity to use FAQ answer
+    #best_answer = best_match.get("Answer", "")
     if isinstance(best_answer, float) and np.isnan(best_answer):
         best_answer = ""  # Replace NaN with empty string
     best_answer = str(best_answer)  # Convert non-string values to string
-    use_gpt = similarity < threshold or best_answer.strip().lower() in [""]
+    use_gpt = float(st.session_state.get("selected_similarity", 0)) < threshold or best_answer.strip().lower() in [""]
     
     if use_gpt:
         st.warning("⚠️ Không tìm thấy trong cơ sở dữ liệu. Đang tìm kiếm bằng mô hình ngôn ngữ lớn...")

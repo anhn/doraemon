@@ -369,37 +369,49 @@ faiss_index.add(faq_embeddings)
 	
 def find_best_match(user_query):
     query_embedding = sbert_model.encode([user_query], convert_to_tensor=True).cpu().numpy()
-    _, best_match_idx = faiss_index.search(query_embedding, 5)
-    # Print the top 3 matches for debugging
-    for i, idx in enumerate(best_match_idx[0]):
-        st.warning(f"Rank {i+1}: {faq_questions[idx]}")
-    best_match = load_faq_data()[best_match_idx[0][0]]
-
-    # Compute similarity
-    best_match_embedding = faq_embeddings[best_match_idx[0][0]]
-    similarity = util.cos_sim(query_embedding, best_match_embedding).item()
+    _, best_match_idx = faiss_index.search(query_embedding, 3)
+    
+    # Get best matches from FAISS
+    best_matches_faiss = [load_faq_data()[idx] for idx in best_match_idxs[0]]
+    # Compute similarity scores
+    faiss_similarities = [
+        util.cos_sim(query_embedding, faq_embeddings[idx]).item()
+        for idx in best_match_idxs[0]
+    ]
 
      ### **2️⃣ TF-IDF + Cosine Similarity Search**
-    vectorizer = TfidfVectorizer()
-    tfidf_question_vectors = vectorizer.fit_transform(faq_questions)  # TF-IDF for all questions
-    tfidf_query_vector = vectorizer.transform([user_query])  # TF-IDF for query
-
+    #vectorizer = TfidfVectorizer()
+    #tfidf_question_vectors = vectorizer.fit_transform(faq_questions)  # TF-IDF for all questions
+    #tfidf_query_vector = vectorizer.transform([user_query])  # TF-IDF for query
     # Compute cosine similarity
-    tfidf_similarities = cosine_similarity(tfidf_query_vector, tfidf_question_vectors).flatten()
-    best_match_tfidf_idx = tfidf_similarities.argmax()
-    best_match_tfidf = faq_questions[best_match_tfidf_idx]
-    tfidf_similarity = tfidf_similarities[best_match_tfidf_idx]
-    
-    ### **🔎 Compare Results**
+    #tfidf_similarities = cosine_similarity(tfidf_query_vector, tfidf_question_vectors).flatten()
+    #best_match_tfidf_idx = tfidf_similarities.argmax()
+    #best_match_tfidf = faq_questions[best_match_tfidf_idx]
+    #tfidf_similarity = tfidf_similarities[best_match_tfidf_idx]
+
+     ### **🔎 Display Options for User to Click**
     st.warning(f"User Query: {user_query}")
-    
+    st.write("### 🔹 **Select the Most Relevant Question:**")
+    selected_match = None  # Store user's choice
+    for i in range(3):
+        if st.button(f"🔹 {best_matches_faiss[i]['Question']} (Similarity: {faiss_similarities[i]:.4f})"):
+            selected_match = best_matches_faiss[i]
+    ### **Show Answer When User Clicks**
+    if selected_match:
+        st.success(f"**Selected Question:** {selected_match['Question']}")
+        st.success(f"**Answer:** {selected_match['Answer']}")
+        st.success(f"**Similarity Score:** {faiss_similarities[best_match_idxs[0].tolist().index(faq_questions.index(selected_match['Question']))]:.4f}")
+        return selected_match, faiss_similarities[best_match_idxs[0].tolist().index(faq_questions.index(selected_match['Question']))]
+    return None, None
+    ### **🔎 Compare Results**
+    #st.warning(f"User Query: {user_query}")
     # FAISS Result
-    st.warning(f"🔹 FAISS Best Match: {best_match}")
-    st.warning(f"🔹 SBERT Cosine Similarity: {similarity:.4f}")
+    #st.warning(f"🔹 FAISS Best Match: {best_match}")
+    #st.warning(f"🔹 SBERT Cosine Similarity: {similarity:.4f}")
     
     # TF-IDF Result
-    st.warning(f"🔹 TF-IDF Best Match: {best_match_tfidf}")
-    st.warning(f"🔹 TF-IDF Cosine Similarity: {tfidf_similarity:.4f}")
+    #st.warning(f"🔹 TF-IDF Best Match: {best_match_tfidf}")
+    #st.warning(f"🔹 TF-IDF Cosine Similarity: {tfidf_similarity:.4f}")
 	
     return best_match, similarity
 	

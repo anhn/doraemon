@@ -10,6 +10,8 @@ from streamlit_feedback import streamlit_feedback
 import requests
 import uuid
 import time
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
 
 # Load SBERT model
 sbert_model = SentenceTransformer("all-MiniLM-L6-v2")
@@ -376,14 +378,33 @@ def find_best_match(user_query):
     _, best_match_idx = faiss_index.search(query_embedding, 1)
     
     best_match = load_faq_data()[best_match_idx[0][0]]
-    st.warning(user_query)
-    st.warning(best_match)
-    
+
     # Compute similarity
     best_match_embedding = faq_embeddings[best_match_idx[0][0]]
     similarity = util.cos_sim(query_embedding, best_match_embedding).item()
+
+     ### **2️⃣ TF-IDF + Cosine Similarity Search**
+    vectorizer = TfidfVectorizer()
+    tfidf_question_vectors = vectorizer.fit_transform(faq_questions)  # TF-IDF for all questions
+    tfidf_query_vector = vectorizer.transform([user_query])  # TF-IDF for query
+
+    # Compute cosine similarity
+    tfidf_similarities = cosine_similarity(tfidf_query_vector, tfidf_question_vectors).flatten()
+    best_match_tfidf_idx = tfidf_similarities.argmax()
+    best_match_tfidf = faq_questions[best_match_tfidf_idx]
+    tfidf_similarity = tfidf_similarities[best_match_tfidf_idx]
     
-    st.warning(similarity)
+    ### **🔎 Compare Results**
+    st.warning(f"User Query: {user_query}")
+    
+    # FAISS Result
+    st.warning(f"🔹 FAISS Best Match: {best_match}")
+    st.warning(f"🔹 SBERT Cosine Similarity: {similarity:.4f}")
+    
+    # TF-IDF Result
+    st.warning(f"🔹 TF-IDF Best Match: {best_match_tfidf}")
+    st.warning(f"🔹 TF-IDF Cosine Similarity: {tfidf_similarity:.4f}")
+	
     return best_match, similarity
 	
 def generate_gpt4_response(question, context):

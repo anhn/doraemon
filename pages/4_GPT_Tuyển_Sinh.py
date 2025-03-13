@@ -349,18 +349,28 @@ openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 def load_faq_data():
     # Fetch data from all three collections, selecting only 'Question' and 'Answer' fields
     faq_data = list(faq_collection.find({}, {"_id": 0, "Question": 1, "Answer": 1}))
-    # Combine all data into one list
-    combined_data = faq_data 
-    return combined_data
+    return faq_data
 
 
 faq_questions = [item["Question"] for item in load_faq_data()]
 faq_embeddings = sbert_model.encode(faq_questions, convert_to_tensor=True).cpu().numpy()
 
+
+for i in range(5):  # Check first 5 embeddings
+    st.write(f"Question {i}: {faq_questions[i]}")
+    st.write(f"Embedding {i}: {faq_embeddings[i][:5]}") 
+	
 # Build FAISS index
 faiss_index = faiss.IndexFlatL2(faq_embeddings.shape[1])
 faiss_index.add(faq_embeddings)
 
+# Ensure the number of questions matches the number of embeddings
+assert len(faq_questions) == faq_embeddings.shape[0], "Mismatch between questions and embeddings!"
+# Ensure FAISS index has the correct number of vectors
+assert faiss_index.ntotal == faq_embeddings.shape[0], "FAISS index size does not match embedding count!"
+st.warning(f"FAISS index contains {faiss_index.ntotal} entries, but we expected {faq_embeddings.shape[0]}")
+
+	
 def find_best_match(user_query):
     query_embedding = sbert_model.encode([user_query], convert_to_tensor=True).cpu().numpy()
     _, best_match_idx = faiss_index.search(query_embedding, 1)

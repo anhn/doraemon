@@ -548,41 +548,35 @@ if user_input:
         st.write(user_input)	
     #best_match, similarity = find_best_match(user_input)
     find_best_match(user_input)
-    if st.session_state["selected_question"]:
+    # EXPERIMENT - OLD CODE IN SUBLIME Step 2: Ensure selected values exist before proceeding
+    if "selected_question" in st.session_state and st.session_state["selected_question"]:
         st.success(f"**Selected Question:** {st.session_state['selected_question']}")
         st.success(f"**Answer:** {st.session_state['selected_answer']}")
-        st.success(f"**Similarity Score:** {st.session_state['selected_similarity']:.4f}")
-    best_answer = st.session_state["selected_answer"]
-    threshold = 0.3  # Minimum similarity to use FAQ answer
-    #best_answer = best_match.get("Answer", "")
-    if isinstance(best_answer, float) and np.isnan(best_answer):
-        best_answer = ""  # Replace NaN with empty string
-    best_answer = str(best_answer)  # Convert non-string values to string
-    use_gpt = float(st.session_state.get("selected_similarity", 0)) < threshold or best_answer.strip().lower() in [""]
-    
-    if use_gpt:
-        st.warning("⚠️ Không tìm thấy trong cơ sở dữ liệu. Đang tìm kiếm bằng mô hình ngôn ngữ lớn...")
-        #response_stream = generate_gpt4_response(user_input, context_string)  # Now a generator
-        response_stream = stream_text("Ngắt kết nối tới GPT để test FAQ")
-    else:
-        response_stream = stream_text(best_match["Answer"])
+        # Step 3: Ensure similarity is available
+        selected_similarity = st.session_state.get("selected_similarity", None)
+        if selected_similarity is None:
+            st.warning("⚠️ Please select a question first!")
+        else:
+            selected_similarity = float(selected_similarity)  # Convert safely
+            st.success(f"**Similarity Score:** {selected_similarity:.4f}")
+            # Step 4: Decide whether to use GPT based on similarity
+            threshold = 0.4
+            use_gpt = selected_similarity < threshold
+            if use_gpt:
+                st.warning("⚠️ Không tìm thấy trong cơ sở dữ liệu. Đang tìm kiếm bằng mô hình ngôn ngữ lớn...")
+                response_stream = stream_text("Ngắt kết nối tới GPT để test FAQ")
+            else:
+                response_stream = stream_text(st.session_state["selected_answer"])
+            with st.chat_message("assistant"):
+                bot_response_container = st.empty()
+                bot_response = ""
+                for chunk in response_stream:
+                    bot_response += chunk
+                    bot_response_container.write(bot_response)
+                st.session_state["response"] = bot_response
+            # Save chat history
+            st.session_state["chat_log"].append(
+                {"user": user_input, "bot": bot_response, "is_gpt": use_gpt}
+            )
 
-    with st.chat_message("assistant"):
-        bot_response_container = st.empty()  # Create an empty container
-        bot_response = ""  # Collect the full response
-
-        for chunk in response_stream:
-            bot_response += chunk  # Append streamed content
-            bot_response_container.write(bot_response)  # Update UI in real-time
-
-        st.session_state["response"] = bot_response
-
-    st.session_state["chat_log"].append(
-        {"user": user_input, "bot": bot_response, "is_gpt": use_gpt}
-    )
-
-    feedback = ""
-
-    # Save chat log to MongoDB
-    save_chat_log(user_ip, user_input, bot_response, feedback)
 

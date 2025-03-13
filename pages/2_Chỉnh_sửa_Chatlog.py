@@ -18,7 +18,7 @@ faq_collection = db[FAQ_COLLECTION]
 st.write("# Admin Page for UTT Tuyển Sinh 👋")
 
 # Load existing FAQ data from MongoDB
-faqs = list(faq_collection.find({}, {"_id": 0}).limit(30))
+faqs = list(faq_collection.find({}, {"_id": 0}).sort("timestamp", 1).limit(100))
 faq_df = pd.DataFrame(faqs)
 
 if faq_df.empty:

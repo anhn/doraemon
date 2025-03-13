@@ -366,18 +366,12 @@ for i in range(5):  # Check first 5 embeddings
 faiss_index = faiss.IndexFlatL2(faq_embeddings.shape[1])
 faiss_index.add(faq_embeddings)
 
-# Ensure the number of questions matches the number of embeddings
-assert len(faq_questions) == faq_embeddings.shape[0], "Mismatch between questions and embeddings!"
-# Ensure FAISS index has the correct number of vectors
-assert faiss_index.ntotal == faq_embeddings.shape[0], "FAISS index size does not match embedding count!"
-st.warning(f"FAISS index contains {faiss_index.ntotal} entries, but we expected {faq_embeddings.shape[0]}")
-
 	
 def find_best_match(user_query):
     query_embedding = sbert_model.encode([user_query], convert_to_tensor=True).cpu().numpy()
     _, best_match_idx = faiss_index.search(query_embedding, 5)
     # Print the top 3 matches for debugging
-    for i, idx in enumerate(best_match_idxs[0]):
+    for i, idx in enumerate(best_match_idx[0]):
         st.warning(f"Rank {i+1}: {faq_questions[idx]}")
     best_match = load_faq_data()[best_match_idx[0][0]]
 

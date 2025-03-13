@@ -168,10 +168,10 @@ if st.button("Add metainfo into FAQ"):
         for index, item in enumerate(meta_data)
     ]
     if chatlog_data:
-        chatlog_collection.insert_many(chatlog_data)
-        print("Data successfully inserted into chatlog.")
+        chatlog_collection.insert_many(meta_data)
+        st.success("Data successfully inserted into chatlog.")
     else:
-        print("No data to insert.")
+        st.warning("No data to insert.")
 
 # Button to save data to MongoDB
 if st.button("Add Meta Info"):

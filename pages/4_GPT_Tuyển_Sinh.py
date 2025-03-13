@@ -544,9 +544,11 @@ if user_input:
     with st.chat_message("user"):
         st.write(user_input)	
     #best_match, similarity = find_best_match(user_input)
+    st.session_state["chat_log"].append({"user": user_input, "bot": ""})
     find_best_match(user_input)
     # EXPERIMENT - OLD CODE IN SUBLIME Step 2: Ensure selected values exist before proceeding
     if "selected_question" in st.session_state and st.session_state["selected_question"]:
+        st.session_state["chat_log"][-1]["bot"] = st.session_state["selected_answer"]  # Update the last entry with the bot's response
         st.success(f"**Selected Question:** {st.session_state['selected_question']}")
         st.success(f"**Answer:** {st.session_state['selected_answer']}")
         # Step 3: Ensure similarity is available

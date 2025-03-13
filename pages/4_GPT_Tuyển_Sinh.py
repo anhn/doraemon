@@ -357,10 +357,6 @@ def load_faq_data():
 faq_questions = [item["Question"] for item in load_faq_data()]
 faq_embeddings = sbert_model.encode(faq_questions, convert_to_tensor=True).cpu().numpy()
 
-
-for i in range(5):  # Check first 5 embeddings
-    st.write(f"Question {i}: {faq_questions[i]}")
-    st.write(f"Embedding {i}: {faq_embeddings[i][:5]}") 
 	
 # Build FAISS index
 faiss_index = faiss.IndexFlatL2(faq_embeddings.shape[1])
@@ -403,6 +399,7 @@ def find_best_match(user_query):
             st.session_state["selected_question"] = best_matches_faiss[i]["Question"]
             st.session_state["selected_answer"] = best_matches_faiss[i]["Answer"]
             st.session_state["selected_similarity"] = faiss_similarities[i]
+            st.rerun()
     ### **Show Answer When User Clicks**
     #if selected_match:
     #    st.success(f"**Selected Question:** {selected_match['Question']}")

@@ -42,7 +42,7 @@ def load_documents():
 documents = load_documents()
 doc_texts = [doc["content"] for doc in documents]
 doc_titles = [doc["title"] for doc in documents]
-print(doc_titles)
+st.write(doc_titles)
 # Encode documents and create FAISS index
 @st.cache_resource
 def create_faiss_index():
@@ -132,7 +132,7 @@ if user_input:
         # Display response
         with st.chat_message("assistant"):
             st.success("📖 Retrieved Context:")
-            st.write(f"🔹 **{best_doc['title']}**: {best_doc['content'][:500]}...")  # Show only a snippet
+            st.write(f"🔹 **{best_doc['title']}**")  # Show only a snippet
             st.success("💡 **Generated Answer:**")
             st.write(generated_answer)
 

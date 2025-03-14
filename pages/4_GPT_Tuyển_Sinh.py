@@ -28,7 +28,7 @@ def generate_gpt4_response(question, context):
         f"Một sinh viên hỏi: {question}\n\n"
         f"Dựa trên thông tin sau đây, hãy cung cấp một câu trả lời hữu ích, ngắn gọn và thân thiện. "
         f"Dẫn nguồn từ nội dung có sẵn nếu cần.\n\n"
-        f"Thông tin: {context}"
+        f"Ngữ cảnh của trường: {context}"
     )
     try:
         response = openai_client.chat.completions.create(
@@ -156,7 +156,7 @@ if st.session_state["show_buttons"] and st.session_state.best_matches_faiss:
     # **New Button: Search via GPT-4**
     if st.button("🔍 Tìm qua Internet cho câu hỏi của bạn"):
         st.session_state.selected_question = st.session_state["last_user_input"]
-        st.session_state.selected_answer = generate_gpt4_response(st.session_state["last_user_input"], "")
+        st.session_state.selected_answer = generate_gpt4_response(st.session_state["last_user_input"], "Đại học công nghệ giao thông vận tải, Hà nội, Việt Nam")
 
         with st.chat_message("assistant"):
             st.success(f"**Tìm kiếm trên Internet:** {st.session_state.selected_question}")

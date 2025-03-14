@@ -10,7 +10,6 @@ from docx import Document
 
 # Print the current working directory
 current_directory = os.getcwd()
-st.write(f"📂 **Current Working Directory:** `{current_directory}`")
 
 # Load SBERT model for embeddings
 sbert_model = SentenceTransformer("all-MiniLM-L6-v2")
@@ -170,7 +169,7 @@ def generate_gpt4o_response(question, context):
         return f"Lỗi khi tạo phản hồi: {str(e)}"
 
 # Streamlit UI
-st.title("📚 Tư vấn tuyển sinh với RAG - FAQ + Document Search")
+st.title("📚 Trang Tư Vấn Tuyển Sinh")
 
 # Display chat history
 for chat in st.session_state.get("chat_history", []):

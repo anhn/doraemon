@@ -245,3 +245,5 @@ if user_input:
             st.session_state["chat_log"].append(
                 {"user": user_input, "bot": bot_response, "is_gpt": use_gpt}
             )
+	else:
+        st.warning(st.session_state["selected_question"])

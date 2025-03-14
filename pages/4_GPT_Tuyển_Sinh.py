@@ -103,7 +103,6 @@ def find_best_match(user_query):
         # **Display Direct Answer**
         with st.chat_message("assistant"):
             st.success(f"**Câu hỏi khớp với độ chính xác cao:** {st.session_state.selected_question}")
-            st.success(f"**Câu trả lời:** {st.session_state.selected_answer}")
             st.write(st.session_state.selected_answer)
 
         # **Append to chat log**

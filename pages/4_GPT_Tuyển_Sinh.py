@@ -246,4 +246,4 @@ if user_input:
                 {"user": user_input, "bot": bot_response, "is_gpt": use_gpt}
             )
 	else:
-        st.warning(st.session_state["selected_question"])
+         st.warning(st.session_state["selected_question"])

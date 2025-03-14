@@ -42,7 +42,7 @@ def load_documents():
 documents = load_documents()
 doc_texts = [doc["content"] for doc in documents]
 doc_titles = [doc["title"] for doc in documents]
-
+print(doc_titles)
 # Encode documents and create FAISS index
 @st.cache_resource
 def create_faiss_index():

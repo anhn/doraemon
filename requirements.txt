@@ -13,3 +13,4 @@ pymongo
 datetime
 pandas
 scikit-learn
+python-docx

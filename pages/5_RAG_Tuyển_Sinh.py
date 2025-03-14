@@ -204,7 +204,5 @@ if user_input:
 
     # Display response
     with st.chat_message("assistant"):
-        st.success("📖 **Nguồn dữ liệu từ FAQ và tài liệu:**")
-        st.write(final_context)
         st.success("💡 **Câu trả lời:**")
         st.write(generated_answer)

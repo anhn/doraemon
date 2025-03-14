@@ -56,6 +56,30 @@ def find_best_match(user_query):
         for idx in best_match_idxs[0]
     ]
 
+    # **Check if the highest similarity is greater than 0.92**
+    max_similarity = max(st.session_state.faiss_similarities)
+    if max_similarity > 0.92:
+        # Find the index of the best match
+        best_idx = st.session_state.faiss_similarities.index(max_similarity)
+
+        # Store the best match as the selected question
+        st.session_state.selected_question = st.session_state.best_matches_faiss[best_idx]["Question"]
+        st.session_state.selected_answer = st.session_state.best_matches_faiss[best_idx]["Answer"]
+        st.session_state.selected_similarity = max_similarity
+
+        # **Display Direct Answer**
+        with st.chat_message("assistant"):
+            st.success(f"**Câu hỏi khớp với độ chính xác cao:** {st.session_state.selected_question}")
+            st.success(f"**Câu trả lời:** {st.session_state.selected_answer}")
+            st.write(st.session_state.selected_answer)
+
+        # **Append to chat log**
+        st.session_state["chat_log"].append(
+            {"user": user_query, "bot": st.session_state.selected_answer, "is_gpt": False}
+        )
+
+        return  # **Exit the function early to avoid showing buttons**
+
 # **Chat Interface**
 st.subheader("💬 Chatbot Tuyển Sinh")
 
@@ -74,16 +98,20 @@ if user_input:
         st.write(user_input)
 
     st.session_state["chat_log"].append({"user": user_input, "bot": ""})
-    find_best_match(user_input)
+    find_best_match(user_input)  # If similarity > 0.92, the function exits here.
 
-# **Display Answer Buttons**
-for i in range(len(st.session_state.best_matches_faiss)):
-    if st.button(
-        f"🔹 {st.session_state.best_matches_faiss[i]['Question']} "
-        f"(Similarity: {st.session_state.faiss_similarities[i]:.4f})",
-        key=f"btn_{i}",
-    ):
-        st.session_state.selected_index = i  # Store selected index in session state
+    # **Only show the message & buttons if no answer was returned directly**
+    if st.session_state.best_matches_faiss:
+        st.info("🤖 **Có phải bạn muốn hỏi một trong các câu sau không?** Nếu không, phiền bạn gõ lại câu hỏi một cách tường minh.")
+
+        # **Display Answer Buttons**
+        for i in range(len(st.session_state.best_matches_faiss)):
+            if st.button(
+                f"🔹 {st.session_state.best_matches_faiss[i]['Question']} "
+                f"(Similarity: {st.session_state.faiss_similarities[i]:.4f})",
+                key=f"btn_{i}",
+            ):
+                st.session_state.selected_index = i  # Store selected index in session state
 
 # **Process Button Click**
 if st.session_state.selected_index is not None:

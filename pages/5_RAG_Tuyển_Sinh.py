@@ -175,7 +175,6 @@ if user_input:
         # Display response
         with st.chat_message("assistant"):
             st.success(f"📖 Retrieved Context (From **{best_doc['title']}**):")
-            st.write(context)
             st.success("💡 **Generated Answer:**")
             st.write(generated_answer)
 

@@ -50,6 +50,9 @@ if "selected_question" not in st.session_state:
 if "selected_answer" not in st.session_state:
     st.session_state["selected_answer"] = None
 
+if "last_user_input" not in st.session_state:
+    st.session_state["last_user_input"] = None  # Stores the last user input
+
 # Function to find best match
 def find_best_match(user_query):
     query_embedding = sbert_model.encode([user_query], convert_to_tensor=True).cpu().numpy()
@@ -83,6 +86,7 @@ def find_best_match(user_query):
         )
 
         return True  # **Indicate that an answer was found directly**
+    
     return False  # **Indicate that no direct match was found**
 
 # **Chat Interface**
@@ -103,22 +107,24 @@ if user_input:
         st.write(user_input)
 
     st.session_state["chat_log"].append({"user": user_input, "bot": ""})
-    
+    st.session_state["last_user_input"] = user_input  # Store user input for button selection
+
     found_answer = find_best_match(user_input)  # Returns True if similarity > 0.92
 
     # **Only show the message & buttons if no answer was returned directly**
     if not found_answer and st.session_state.best_matches_faiss:
         st.info("🤖 **Có phải bạn muốn hỏi một trong các câu sau không?** Nếu không, phiền bạn gõ lại câu hỏi một cách tường minh.")
 
-        # **Display Answer Buttons**
-        for i in range(len(st.session_state.best_matches_faiss)):
-            if st.button(
-                f"🔹 {st.session_state.best_matches_faiss[i]['Question']} "
-                f"(Similarity: {st.session_state.faiss_similarities[i]:.4f})",
-                key=f"btn_{i}",
-            ):
-                st.session_state.selected_index = i  # Store selected index in session state
-                st.experimental_rerun()  # **Force rerun to display answer**
+# **Display Answer Buttons if Similarity < 0.92**
+if st.session_state.selected_answer is None and st.session_state.best_matches_faiss:
+    for i in range(len(st.session_state.best_matches_faiss)):
+        if st.button(
+            f"🔹 {st.session_state.best_matches_faiss[i]['Question']} "
+            f"(Similarity: {st.session_state.faiss_similarities[i]:.4f})",
+            key=f"btn_{i}",
+        ):
+            st.session_state.selected_index = i  # Store selected index in session state
+            st.experimental_rerun()  # **Force rerun to display answer**
 
 # **Process Button Click**
 if st.session_state.selected_index is not None:
@@ -129,13 +135,14 @@ if st.session_state.selected_index is not None:
     # **Display Selected Answer**
     with st.chat_message("assistant"):
         st.success(f"**Selected Question:** {st.session_state.selected_question}")
-        st.success(f"**Answer:** {st.session_state.selected_answer}")
         st.write(st.session_state.selected_answer)
 
     # **Append to chat log**
     st.session_state["chat_log"].append(
-        {"user": user_input, "bot": st.session_state.selected_answer, "is_gpt": False}
+        {"user": st.session_state["last_user_input"], "bot": st.session_state.selected_answer, "is_gpt": False}
     )
 
     # Reset selected_index after processing
     st.session_state.selected_index = None
+    st.session_state.selected_answer = None
+    st.session_state.selected_question = None

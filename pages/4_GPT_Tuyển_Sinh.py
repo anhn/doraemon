@@ -1,6 +1,5 @@
 import streamlit as st
 import os
-from openai import OpenAI
 import faiss
 import numpy as np
 from sentence_transformers import SentenceTransformer, util
@@ -83,7 +82,8 @@ def find_best_match(user_query):
             {"user": user_query, "bot": st.session_state.selected_answer, "is_gpt": False}
         )
 
-        return  # **Exit the function early to avoid showing buttons**
+        return True  # **Indicate that an answer was found directly**
+    return False  # **Indicate that no direct match was found**
 
 # **Chat Interface**
 st.subheader("💬 Chatbot Tuyển Sinh")
@@ -103,10 +103,11 @@ if user_input:
         st.write(user_input)
 
     st.session_state["chat_log"].append({"user": user_input, "bot": ""})
-    find_best_match(user_input)  # If similarity > 0.92, the function exits here.
+    
+    found_answer = find_best_match(user_input)  # Returns True if similarity > 0.92
 
     # **Only show the message & buttons if no answer was returned directly**
-    if st.session_state.best_matches_faiss and st.session_state.selected_answer is None:
+    if not found_answer and st.session_state.best_matches_faiss:
         st.info("🤖 **Có phải bạn muốn hỏi một trong các câu sau không?** Nếu không, phiền bạn gõ lại câu hỏi một cách tường minh.")
 
         # **Display Answer Buttons**

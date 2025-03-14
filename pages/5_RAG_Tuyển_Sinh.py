@@ -6,13 +6,12 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 from openai import OpenAI
 from docx import Document
-import re
 
 # Print the current working directory
 current_directory = os.getcwd()
 st.write(f"📂 **Current Working Directory:** `{current_directory}`")
 
-# Load SBERT model (efficient for embeddings)
+# Load SBERT model
 sbert_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # Load OpenAI API key
@@ -27,7 +26,7 @@ def extract_text_from_docx(docx_path):
     except Exception as e:
         return f"Error reading {docx_path}: {str(e)}"
 
-# Function to split text into overlapping chunks
+# Function to split text into overlapping chunks (512 tokens each)
 def split_text_into_chunks(text, chunk_size=512, overlap=128):
     words = text.split()
     chunks = []
@@ -49,7 +48,7 @@ def load_documents():
             chunks = split_text_into_chunks(doc_text)
             documents.append({"title": os.path.basename(file), "content": doc_text, "chunks": chunks})
             chunked_texts.extend(chunks)
-            chunked_titles.extend([os.path.basename(file)] * len(chunks))  # Associate each chunk with its document
+            chunked_titles.extend([os.path.basename(file)] * len(chunks))  
 
     return documents, chunked_texts, chunked_titles
 
@@ -59,7 +58,7 @@ documents, chunked_texts, chunked_titles = load_documents()
 @st.cache_resource
 def create_faiss_index():
     if not chunked_texts:
-        return None  # Handle empty case
+        return None
     doc_embeddings = sbert_model.encode(chunked_texts, convert_to_tensor=True).cpu().numpy()
     index = faiss.IndexFlatL2(doc_embeddings.shape[1])
     index.add(doc_embeddings)
@@ -77,47 +76,47 @@ if "retrieved_context" not in st.session_state:
 if "generated_answer" not in st.session_state:
     st.session_state["generated_answer"] = None
 
-# Function to retrieve the most relevant document chunk
+# Function to retrieve the best matching document chunk using both semantic & keyword search
 def retrieve_best_chunk(query):
     if not faiss_index or not chunked_texts:
         return None, "No documents found."
 
+    # 1️⃣ **Semantic Search (FAISS)**
     query_embedding = sbert_model.encode([query], convert_to_tensor=True).cpu().numpy()
-    _, best_match_idxs = faiss_index.search(query_embedding, 1)  # Retrieve the best chunk
+    _, best_match_idxs = faiss_index.search(query_embedding, 3)  # Get top 3 chunks
 
-    best_chunk = chunked_texts[best_match_idxs[0][0]]
+    best_chunk_candidates = [chunked_texts[idx] for idx in best_match_idxs[0]]
     best_doc_title = chunked_titles[best_match_idxs[0][0]]
 
     # Find full document that contains this chunk
     best_doc = next((doc for doc in documents if doc["title"] == best_doc_title), None)
-    
+
     if not best_doc:
         return None, "No relevant document found."
 
-    # Extract 3000 tokens around the best chunk
-    context_text = extract_relevant_text(best_doc["content"], best_chunk, max_tokens=3000)
+    # 2️⃣ **Keyword Search inside the best document**
+    keyword_context = extract_relevant_text(best_doc["content"], query, max_tokens=500)
 
-    st.session_state["retrieved_context"] = context_text
-    return best_doc, context_text
+    st.session_state["retrieved_context"] = keyword_context
+    return best_doc, keyword_context
 
-# Function to extract 3000 tokens around the best matching chunk
-def extract_relevant_text(full_text, best_chunk, max_tokens=3000):
+# Function to extract 500 tokens around the best keyword match
+def extract_relevant_text(full_text, query, max_tokens=500):
     words = full_text.split()
-    chunk_words = best_chunk.split()
+    query_words = query.lower().split()
 
-    # Find location of the best matching chunk
-    match_start = None
-    for i in range(len(words) - len(chunk_words) + 1):
-        if words[i:i + len(chunk_words)] == chunk_words:
-            match_start = i
-            break
+    # Find keyword position
+    match_positions = [i for i, word in enumerate(words) if any(q in word.lower() for q in query_words)]
 
-    if match_start is None:
-        return best_chunk  # If we can't find it, return the full chunk
+    if not match_positions:
+        return "No exact keyword match found. Returning semantic match."
 
-    # Extract 3000 tokens around the found location
-    start_idx = max(0, match_start - (max_tokens // 2))
-    end_idx = min(len(words), match_start + (max_tokens // 2))
+    # Use the first found keyword position
+    center_idx = match_positions[0]
+    
+    # Extract 500 tokens around it
+    start_idx = max(0, center_idx - (max_tokens // 2))
+    end_idx = min(len(words), center_idx + (max_tokens // 2))
 
     extracted_text = " ".join(words[start_idx:end_idx])
     return extracted_text
@@ -137,7 +136,7 @@ def generate_gpt4o_response(question, context):
                 {"role": "system", "content": "You are a cost-efficient AI assistant that answers questions based on retrieved documents."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=3000,  # Reduce cost by limiting token usage
+            max_tokens=500,  # Reduce cost by limiting token usage
             temperature=0.2  # Keep responses factual and precise
         )
         return response.choices[0].message.content.strip()
@@ -145,7 +144,7 @@ def generate_gpt4o_response(question, context):
         return f"Error generating response: {str(e)}"
 
 # Streamlit UI
-st.title("📚 Tư vấn tuyển sinh với RAG - Improved Semantic Search")
+st.title("📚 Tư vấn tuyển sinh với RAG - Hybrid Keyword + Semantic Search")
 
 # Display chat history
 for chat in st.session_state["chat_history"]:
@@ -184,5 +183,4 @@ if user_input:
             {"user": user_input, "bot": generated_answer}
         )
 
-        # Store response in session state
-        st.session_state["generated_answer"] = generated_answer
+        # St

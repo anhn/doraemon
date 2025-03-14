@@ -140,7 +140,6 @@ if st.session_state.selected_index is not None:
     # **Display Selected Answer**
     with st.chat_message("assistant"):
         st.success(f"**Selected Question:** {st.session_state.selected_question}")
-        st.success(f"**Answer:** {st.session_state.selected_answer}")
         st.write(st.session_state.selected_answer)
 
     # **Append to chat log**

@@ -152,8 +152,9 @@ if user_input:
             st.error("❌ No relevant documents found. Please add `.docx` files to the current folder.")
     else:
         # Generate response with GPT-4o
+        st.write(context)
         generated_answer = generate_gpt4o_response(user_input, context)
-
+        
         # Display response
         with st.chat_message("assistant"):
             st.success("📖 Retrieved Context:")

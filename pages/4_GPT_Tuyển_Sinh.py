@@ -82,27 +82,24 @@ if "selected_question" not in st.session_state:
 def find_best_match(user_query):
     query_embedding = sbert_model.encode([user_query], convert_to_tensor=True).cpu().numpy()
     _, best_match_idxs = faiss_index.search(query_embedding, 3)
-    
-    # Get best matches from FAISS
+
+    # Store matches and similarities in session state
     st.session_state.best_matches_faiss = [load_faq_data()[idx] for idx in best_match_idxs[0]]
-    # Compute similarity scores
     st.session_state.faiss_similarities = [
         util.cos_sim(query_embedding, faq_embeddings[idx]).item()
         for idx in best_match_idxs[0]
     ]
+
+    # Track which button was clicked
+    if "selected_index" not in st.session_state:
+        st.session_state.selected_index = None
+
+    # Display buttons for each match
     for i in range(3):
         if st.button(f"🔹 {st.session_state.best_matches_faiss[i]['Question']} (Similarity: {st.session_state.faiss_similarities[i]:.4f})", key=f"btn_{i}"):
-            st.session_state["selected_question"] = st.session_state.best_matches_faiss[i]['Question']
-            st.session_state["selected_answer"] = st.session_state.best_matches_faiss[i]["Answer"]
-            st.session_state["selected_similarity"] = st.session_state.faiss_similarities[i]
-            st.session_state["chat_log"][-1]["bot"] = st.session_state["selected_answer"]  # Update the last entry with the bot's response
-            st.success(f"**Selected Question:** {st.session_state['selected_question']}")
-            st.success(f"**Answer:** {st.session_state['selected_answer']}")
-            st.write(st.session_state["selected_answer"])
-            st.session_state["response"] = st.session_state["selected_answer"] 
-            st.session_state["chat_log"].append(
-                    {"user": user_input, "bot": st.session_state["selected_answer"], "is_gpt": False}
-                )
+            st.session_state.selected_index = i  # Store clicked button index
+
+
 
 def generate_gpt4_response(question, context):
     prompt = (
@@ -232,6 +229,21 @@ if user_input:
     st.session_state["chat_log"].append({"user": user_input, "bot": ""})
     find_best_match(user_input)
 
-
+    # **Process button click after function execution**
+    if "selected_index" in st.session_state and st.session_state.selected_index is not None:
+        idx = st.session_state.selected_index
+        st.session_state.selected_question = st.session_state.best_matches_faiss[idx]['Question']
+        st.session_state.selected_answer = st.session_state.best_matches_faiss[idx]['Answer']
+        st.session_state.selected_similarity = st.session_state.faiss_similarities[idx]
+    
+        # Display selection
+        st.success(f"**Selected Question:** {st.session_state['selected_question']}")
+        st.success(f"**Answer:** {st.session_state['selected_answer']}")
+        st.write(st.session_state["selected_answer"])
+    
+        # Append to chat log
+        st.session_state["chat_log"].append(
+            {"user": user_input, "bot": st.session_state["selected_answer"], "is_gpt": False}
+        )
 
 

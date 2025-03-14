@@ -50,6 +50,12 @@ user_ip = get_ip()
 if "chat_log" not in st.session_state:
     st.session_state["chat_log"] = []
 
+if 'best_matches_faiss' not in st.session_state:
+    st.session_state.best_matches_faiss = []
+
+if 'faiss_similarities' not in st.session_state:
+    st.session_state.faiss_similarities = [0.0 for _ in range(3)]
+	
 # Set OpenAI API Key in the environment
 os.environ["OPENAI_API_KEY"] = st.secrets["api"]["key"]
 
@@ -78,17 +84,17 @@ def find_best_match(user_query):
     _, best_match_idxs = faiss_index.search(query_embedding, 3)
     
     # Get best matches from FAISS
-    best_matches_faiss = [load_faq_data()[idx] for idx in best_match_idxs[0]]
+    st.session_state.best_matches_faiss = [load_faq_data()[idx] for idx in best_match_idxs[0]]
     # Compute similarity scores
-    faiss_similarities = [
+    st.session_state.faiss_similarities = [
         util.cos_sim(query_embedding, faq_embeddings[idx]).item()
         for idx in best_match_idxs[0]
     ]
     for i in range(3):
-        if st.button(f"🔹 {best_matches_faiss[i]['Question']} (Similarity: {faiss_similarities[i]:.4f})", key=f"btn_{i}"):
-            st.session_state["selected_question"] = best_matches_faiss[i]["Question"]
-            st.session_state["selected_answer"] = best_matches_faiss[i]["Answer"]
-            st.session_state["selected_similarity"] = faiss_similarities[i]
+        if st.button(f"🔹 {st.session_state.best_matches_faiss[i]['Question']} (Similarity: {st.session_state.faiss_similarities[i]:.4f})", key=f"btn_{i}"):
+            st.session_state["selected_question"] = st.session_state.best_matches_faiss[i]['Question']
+            st.session_state["selected_answer"] = st.session_state.best_matches_faiss[i]["Answer"]
+            st.session_state["selected_similarity"] = st.session_state.faiss_similarities[i]
             st.session_state["chat_log"][-1]["bot"] = st.session_state["selected_answer"]  # Update the last entry with the bot's response
             st.success(f"**Selected Question:** {st.session_state['selected_question']}")
             st.success(f"**Answer:** {st.session_state['selected_answer']}")

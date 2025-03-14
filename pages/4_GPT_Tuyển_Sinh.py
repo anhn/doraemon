@@ -89,7 +89,35 @@ def find_best_match(user_query):
             st.session_state["selected_question"] = best_matches_faiss[i]["Question"]
             st.session_state["selected_answer"] = best_matches_faiss[i]["Answer"]
             st.session_state["selected_similarity"] = faiss_similarities[i]
-            st.rerun()
+            #st.rerun()
+            if st.session_state["selected_question"]:
+                st.session_state["chat_log"][-1]["bot"] = st.session_state["selected_answer"]  # Update the last entry with the bot's response
+                st.success(f"**Selected Question:** {st.session_state['selected_question']}")
+                st.success(f"**Answer:** {st.session_state['selected_answer']}")
+                # Step 3: Ensure similarity is available
+                selected_similarity = st.session_state.get("selected_similarity", None)
+                if selected_similarity is None:
+                    st.warning("⚠️ Please select a question first!")
+                else:
+                    selected_similarity = float(selected_similarity)  # Convert safely
+                    st.success(f"**Similarity Score:** {selected_similarity:.4f}")
+                    # Step 4: Decide whether to use GPT based on similarity
+                    threshold = 0.4
+                    use_gpt = selected_similarity < threshold
+                    response_stream = stream_text(st.session_state["selected_answer"])
+                    with st.chat_message("assistant"):
+                        bot_response_container = st.empty()
+                        bot_response = ""
+                        for chunk in response_stream:
+                            bot_response += chunk
+                            bot_response_container.write(bot_response)
+                        st.session_state["response"] = bot_response
+                    # Save chat history
+                    st.session_state["chat_log"].append(
+                        {"user": user_input, "bot": bot_response, "is_gpt": use_gpt}
+                    )
+            else:
+                st.warning(st.session_state["selected_question"])
 	
 def generate_gpt4_response(question, context):
     prompt = (

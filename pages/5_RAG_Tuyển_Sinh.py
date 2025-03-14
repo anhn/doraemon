@@ -42,7 +42,6 @@ def load_documents():
 documents = load_documents()
 doc_texts = [doc["content"] for doc in documents]
 doc_titles = [doc["title"] for doc in documents]
-st.write(doc_titles)
 # Encode documents and create FAISS index
 @st.cache_resource
 def create_faiss_index():
@@ -75,7 +74,7 @@ def retrieve_best_document(query):
 
     best_doc = documents[best_match_idxs[0][0]]
     context_text = f"{best_doc['title']}: {best_doc['content']}"
-    
+    st.write(context_text)
     st.session_state["retrieved_context"] = context_text
     return best_doc, context_text
 

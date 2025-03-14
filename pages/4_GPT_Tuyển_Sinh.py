@@ -53,6 +53,9 @@ if "selected_answer" not in st.session_state:
 if "last_user_input" not in st.session_state:
     st.session_state["last_user_input"] = None  # Stores the last user input
 
+if "show_buttons" not in st.session_state:
+    st.session_state["show_buttons"] = False  # Ensures buttons show when needed
+
 # Function to find best match
 def find_best_match(user_query):
     query_embedding = sbert_model.encode([user_query], convert_to_tensor=True).cpu().numpy()
@@ -85,8 +88,10 @@ def find_best_match(user_query):
             {"user": user_query, "bot": st.session_state.selected_answer, "is_gpt": False}
         )
 
+        st.session_state["show_buttons"] = False  # Hide buttons if direct answer is given
         return True  # **Indicate that an answer was found directly**
     
+    st.session_state["show_buttons"] = True  # Show buttons if similarity < 0.92
     return False  # **Indicate that no direct match was found**
 
 # **Chat Interface**
@@ -116,7 +121,7 @@ if user_input:
         st.info("🤖 **Có phải bạn muốn hỏi một trong các câu sau không?** Nếu không, phiền bạn gõ lại câu hỏi một cách tường minh.")
 
 # **Display Answer Buttons if Similarity < 0.92**
-if st.session_state.selected_answer is None and st.session_state.best_matches_faiss:
+if st.session_state["show_buttons"] and st.session_state.best_matches_faiss:
     for i in range(len(st.session_state.best_matches_faiss)):
         if st.button(
             f"🔹 {st.session_state.best_matches_faiss[i]['Question']} "
@@ -135,6 +140,7 @@ if st.session_state.selected_index is not None:
     # **Display Selected Answer**
     with st.chat_message("assistant"):
         st.success(f"**Selected Question:** {st.session_state.selected_question}")
+        st.success(f"**Answer:** {st.session_state.selected_answer}")
         st.write(st.session_state.selected_answer)
 
     # **Append to chat log**
@@ -142,7 +148,8 @@ if st.session_state.selected_index is not None:
         {"user": st.session_state["last_user_input"], "bot": st.session_state.selected_answer, "is_gpt": False}
     )
 
-    # Reset selected_index after processing
+    # Reset session state
     st.session_state.selected_index = None
     st.session_state.selected_answer = None
     st.session_state.selected_question = None
+    st.session_state["show_buttons"] = False  # Hide buttons after selecting an answer

@@ -106,7 +106,7 @@ def find_best_faq_matches(user_query, top_k=3):
     return best_matches, similarities
 
 # Function to retrieve the most relevant document chunk
-def retrieve_best_chunk(query, max_tokens=2000):
+def retrieve_best_chunk(query, max_tokens=1000):
     if not faiss_index or not chunked_texts:
         return None, "No documents found."
 
@@ -122,13 +122,13 @@ def retrieve_best_chunk(query, max_tokens=2000):
     if not best_doc:
         return None, "No relevant document found."
 
-    # Extract 2000 tokens around the best chunk
+    # Extract 1000 tokens around the best chunk
     context_text = extract_relevant_text(best_doc["content"], best_chunk, max_tokens=max_tokens)
 
     return best_doc, context_text
 
-# Function to extract up to 2000 tokens around the best chunk
-def extract_relevant_text(full_text, best_chunk, max_tokens=2000):
+# Function to extract up to 1000 tokens around the best chunk
+def extract_relevant_text(full_text, best_chunk, max_tokens=1000):
     words = full_text.split()
     chunk_words = best_chunk.split()
 
@@ -162,7 +162,7 @@ def generate_gpt4o_response(question, context):
                 {"role": "system", "content": "Bạn là một trợ lý tuyển sinh đại học hữu ích, chỉ dựa trên nội dung đã cung cấp."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=500,
+            max_tokens=1000,
             temperature=0.2
         )
         return response.choices[0].message.content.strip()

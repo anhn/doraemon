@@ -94,7 +94,7 @@ def generate_gpt4o_response(question, context):
                 {"role": "system", "content": "You are a cost-efficient AI assistant that answers questions based on retrieved documents."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=300,  # Reduce cost by limiting token usage
+            max_tokens=3000,  # Reduce cost by limiting token usage
             temperature=0.2  # Keep responses factual and precise
         )
         return response.choices[0].message.content.strip()
@@ -102,7 +102,7 @@ def generate_gpt4o_response(question, context):
         return f"Error generating response: {str(e)}"
 
 # Streamlit UI
-st.title("📚 RAG Chatbot - Load `.docx` Files & Answer Questions")
+st.title("📚 Tư vấn tuyển sinh với RAG")
 
 # Display chat history
 for chat in st.session_state["chat_history"]:

@@ -45,6 +45,12 @@ if "faiss_similarities" not in st.session_state:
 if "selected_index" not in st.session_state:
     st.session_state["selected_index"] = None
 
+if "selected_question" not in st.session_state:
+    st.session_state["selected_question"] = None
+
+if "selected_answer" not in st.session_state:
+    st.session_state["selected_answer"] = None
+
 # Function to find best match
 def find_best_match(user_query):
     query_embedding = sbert_model.encode([user_query], convert_to_tensor=True).cpu().numpy()
@@ -65,7 +71,6 @@ def find_best_match(user_query):
         # Store the best match as the selected question
         st.session_state.selected_question = st.session_state.best_matches_faiss[best_idx]["Question"]
         st.session_state.selected_answer = st.session_state.best_matches_faiss[best_idx]["Answer"]
-        st.session_state.selected_similarity = max_similarity
 
         # **Display Direct Answer**
         with st.chat_message("assistant"):
@@ -101,7 +106,7 @@ if user_input:
     find_best_match(user_input)  # If similarity > 0.92, the function exits here.
 
     # **Only show the message & buttons if no answer was returned directly**
-    if st.session_state.best_matches_faiss:
+    if st.session_state.best_matches_faiss and st.session_state.selected_answer is None:
         st.info("🤖 **Có phải bạn muốn hỏi một trong các câu sau không?** Nếu không, phiền bạn gõ lại câu hỏi một cách tường minh.")
 
         # **Display Answer Buttons**
@@ -112,23 +117,23 @@ if user_input:
                 key=f"btn_{i}",
             ):
                 st.session_state.selected_index = i  # Store selected index in session state
+                st.experimental_rerun()  # **Force rerun to display answer**
 
 # **Process Button Click**
 if st.session_state.selected_index is not None:
     idx = st.session_state.selected_index
     st.session_state.selected_question = st.session_state.best_matches_faiss[idx]["Question"]
     st.session_state.selected_answer = st.session_state.best_matches_faiss[idx]["Answer"]
-    st.session_state.selected_similarity = st.session_state.faiss_similarities[idx]
 
     # **Display Selected Answer**
     with st.chat_message("assistant"):
-        st.success(f"**Selected Question:** {st.session_state['selected_question']}")
-        st.success(f"**Answer:** {st.session_state['selected_answer']}")
-        st.write(st.session_state["selected_answer"])
+        st.success(f"**Selected Question:** {st.session_state.selected_question}")
+        st.success(f"**Answer:** {st.session_state.selected_answer}")
+        st.write(st.session_state.selected_answer)
 
     # **Append to chat log**
     st.session_state["chat_log"].append(
-        {"user": user_input, "bot": st.session_state["selected_answer"], "is_gpt": False}
+        {"user": user_input, "bot": st.session_state.selected_answer, "is_gpt": False}
     )
 
     # Reset selected_index after processing

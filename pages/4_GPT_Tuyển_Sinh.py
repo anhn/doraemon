@@ -129,7 +129,7 @@ if st.session_state["show_buttons"] and st.session_state.best_matches_faiss:
             key=f"btn_{i}",
         ):
             st.session_state.selected_index = i  # Store selected index in session state
-            st.experimental_rerun()  # **Force rerun to display answer**
+            st.rerun()  # **Force rerun to display answer**
 
 # **Process Button Click**
 if st.session_state.selected_index is not None:

@@ -131,9 +131,9 @@ def retrieve_best_chunk(query, max_tokens=500):
             # Convert match index to word index
             word_idx = len(doc["content"][:match_idx].split())
 
-            # Extract 200 tokens around the match
-            start_idx = max(0, word_idx - 100)
-            end_idx = min(len(words), word_idx + 100)
+            # Extract 150 tokens around the match
+            start_idx = max(0, word_idx - 10)
+            end_idx = min(len(words), word_idx + 140)
 
             snippet = " ".join(words[start_idx:end_idx])
             keyword_snippets.append(snippet)

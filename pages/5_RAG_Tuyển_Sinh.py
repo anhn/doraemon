@@ -237,7 +237,7 @@ if user_input:
 
     # Generate response with GPT-4o
     generated_answer = generate_gpt4o_response(user_input, final_context)
-
+    st.write(final_context)
     # Display response
     with st.chat_message("assistant"):
         st.success("💡 **Câu trả lời:**")

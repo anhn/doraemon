@@ -7,6 +7,7 @@ from sentence_transformers import SentenceTransformer, util
 from openai import OpenAI
 from pymongo import MongoClient
 from docx import Document
+import re
 
 # Print the current working directory
 current_directory = os.getcwd()
@@ -106,11 +107,43 @@ def find_best_faq_matches(user_query, top_k=3):
 
 # Function to retrieve the most relevant document chunk
 def retrieve_best_chunk(query, max_tokens=1000):
+    """
+    Retrieves the most relevant document chunks by:
+    1. Searching for exact keyword matches and extracting 300-token snippets.
+    2. Using FAISS to find the most semantically relevant chunk.
+    3. Combining both results for a comprehensive context.
+    """
     if not faiss_index or not chunked_texts:
         return None, "No documents found."
 
+    # Convert query to lowercase for case-insensitive search
+    query_lower = query.lower()
+    
+    # 1️⃣ Keyword-based search
+    keyword_snippets = []
+    for doc in documents:
+        words = doc["content"].split()
+        
+        # Find all keyword occurrences
+        matches = [m.start() for m in re.finditer(re.escape(query_lower), doc["content"].lower())]
+
+        for match_idx in matches:
+            # Convert match index to word index
+            word_idx = len(doc["content"][:match_idx].split())
+
+            # Extract 200 tokens around the match
+            start_idx = max(0, word_idx - 100)
+            end_idx = min(len(words), word_idx + 100)
+
+            snippet = " ".join(words[start_idx:end_idx])
+            keyword_snippets.append(snippet)
+
+    # Combine keyword snippets into a single string
+    keyword_context = "\n\n".join(keyword_snippets)
+
+    # 2️⃣ FAISS-based retrieval
     query_embedding = sbert_model.encode([query], convert_to_tensor=True).cpu().numpy()
-    _, best_match_idxs = faiss_index.search(query_embedding, 1)  # Retrieve the best chunk
+    _, best_match_idxs = faiss_index.search(query_embedding, 1)  # Retrieve top-1 chunk
 
     best_chunk = chunked_texts[best_match_idxs[0][0]]
     best_doc_title = chunked_titles[best_match_idxs[0][0]]
@@ -122,9 +155,13 @@ def retrieve_best_chunk(query, max_tokens=1000):
         return None, "No relevant document found."
 
     # Extract 1000 tokens around the best chunk
-    context_text = extract_relevant_text(best_doc["content"], best_chunk, max_tokens=max_tokens)
+    faiss_context = extract_relevant_text(best_doc["content"], best_chunk, max_tokens=max_tokens)
 
-    return best_doc, context_text
+    # 3️⃣ Combine keyword-based and FAISS-based contexts
+    final_context = f"{keyword_context}\n\n{faiss_context}".strip()
+
+    return best_doc, final_context
+
 
 # Function to extract up to 1000 tokens around the best chunk
 def extract_relevant_text(full_text, best_chunk, max_tokens=1000):
@@ -161,7 +198,7 @@ def generate_gpt4o_response(question, context):
                 {"role": "system", "content": "Bạn là một trợ lý tuyển sinh đại học hữu ích, chỉ dựa trên nội dung đã cung cấp."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=1000,
+            max_tokens=3000,
             temperature=0.2
         )
         return response.choices[0].message.content.strip()

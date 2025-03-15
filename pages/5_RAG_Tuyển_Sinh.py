@@ -171,8 +171,8 @@ def generate_gpt4o_response(question, context):
 # Streamlit UI
 st.title("📚 Trang Tư Vấn Tuyển Sinh")
 
-# Display chat history
-for chat in st.session_state.get("chat_history", []):
+# Display chat history from session state
+for chat in st.session_state["chat_history"]:
     with st.chat_message("user"):
         st.write(chat["user"])
     with st.chat_message("assistant"):
@@ -205,3 +205,6 @@ if user_input:
     with st.chat_message("assistant"):
         st.success("💡 **Câu trả lời:**")
         st.write(generated_answer)
+
+    # Append conversation to session history
+    st.session_state["chat_history"].append({"user": user_input, "bot": generated_answer})

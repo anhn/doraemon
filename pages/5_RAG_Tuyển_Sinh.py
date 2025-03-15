@@ -185,11 +185,22 @@ def extract_relevant_text(full_text, best_chunk, max_tokens=1000):
 
 # Function to generate a response using GPT-4o with combined FAQ + document context
 def generate_gpt4o_response(question, context):
+    """
+    Generates a response using GPT-4o while incorporating previous chat history.
+    """
+    # Include previous chat history (last 5 exchanges for context)
+    chat_history_context = "\n\n".join(
+        [f"User: {chat['user']}\nAssistant: {chat['bot']}" for chat in st.session_state["chat_history"][-5:]]
+    )
+
+    # Combine chat history and retrieved context
+    combined_context = f"{chat_history_context}\n\n{context}".strip()
+    # Construct prompt
     prompt = (
         f"Một sinh viên hỏi: {question}\n\n"
-        f"Dựa trên thông tin sau đây, hãy cung cấp một câu trả lời hữu ích, ngắn gọn và thân thiện. "
+        f"Dựa trên cuộc trò chuyện trước đó và thông tin sau đây, hãy cung cấp một câu trả lời hữu ích, ngắn gọn và thân thiện. "
         f"Dẫn nguồn từ nội dung có sẵn nếu cần.\n\n"
-        f"Ngữ cảnh từ FAQ và tài liệu: {context}"
+        f"Ngữ cảnh từ cuộc trò chuyện trước và tài liệu:\n{combined_context}"
     )
     try:
         response = openai_client.chat.completions.create(

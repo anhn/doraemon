@@ -106,7 +106,7 @@ def find_best_faq_matches(user_query, top_k=3):
     return best_matches, similarities
 
 # Function to retrieve the most relevant document chunk
-def retrieve_best_chunk(query, max_tokens=1000):
+def retrieve_best_chunk(query, max_tokens=500):
     """
     Retrieves the most relevant document chunks by:
     1. Searching for exact keyword matches and extracting 300-token snippets.
@@ -164,7 +164,7 @@ def retrieve_best_chunk(query, max_tokens=1000):
 
 
 # Function to extract up to 1000 tokens around the best chunk
-def extract_relevant_text(full_text, best_chunk, max_tokens=1000):
+def extract_relevant_text(full_text, best_chunk, max_tokens=500):
     words = full_text.split()
     chunk_words = best_chunk.split()
 
@@ -192,10 +192,10 @@ def generate_gpt4o_response(question, context):
     chat_history_context = "\n\n".join(
         [f"User: {chat['user']}\nAssistant: {chat['bot']}" for chat in st.session_state["chat_history"][-5:]]
     )
-
     # Combine chat history and retrieved context
     combined_context = f"{chat_history_context}\n\n{context}".strip()
-    # Construct prompt
+    st.write(combined_context)
+   # Construct prompt
     prompt = (
         f"Một sinh viên hỏi: {question}\n\n"
         f"Dựa trên cuộc trò chuyện trước đó và thông tin sau đây, hãy cung cấp một câu trả lời hữu ích, ngắn gọn và thân thiện. "
@@ -248,7 +248,6 @@ if user_input:
 
     # Generate response with GPT-4o
     generated_answer = generate_gpt4o_response(user_input, final_context)
-    st.write(final_context)
     # Display response
     with st.chat_message("assistant"):
         st.success("💡 **Câu trả lời:**")

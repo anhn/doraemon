@@ -31,7 +31,7 @@ openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 # Initialize NLTK and SpaCy for text preprocessing
 stop_words = set(stopwords.words("english"))
 lemmatizer = WordNetLemmatizer()
-nlp = spacy.load("en_core_web_sm")
+nlp = spacy.load("vi_core_news_sm")
 
 # Function to extract text from .docx files
 def extract_text_from_docx(docx_path):

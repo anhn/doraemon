@@ -15,3 +15,4 @@ pandas
 scikit-learn
 python-docx
 nltk
+spacy

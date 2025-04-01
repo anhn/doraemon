@@ -16,4 +16,4 @@ scikit-learn
 python-docx
 nltk
 spacy
-vi_core_news_sm
+xx_sent_ud_sm

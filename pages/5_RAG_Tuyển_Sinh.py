@@ -194,7 +194,7 @@ def generate_gpt4o_response(question, context):
     )
     # Combine chat history and retrieved context
     combined_context = f"{chat_history_context}\n\n{context}".strip()
-    #st.write(combined_context)
+    st.write(combined_context)
    # Construct prompt
     prompt = (
         f"Một sinh viên hỏi: {question}\n\n"

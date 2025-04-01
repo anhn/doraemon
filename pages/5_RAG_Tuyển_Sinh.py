@@ -194,7 +194,7 @@ def generate_gpt4o_response(question, context):
     )
     # Combine chat history and retrieved context
     combined_context = f"{chat_history_context}\n\n{context}".strip()
-    st.write(combined_context)
+    #st.write(combined_context)
    # Construct prompt
     prompt = (
         f"Một sinh viên hỏi: {question}\n\n"
@@ -210,7 +210,7 @@ def generate_gpt4o_response(question, context):
                 {"role": "user", "content": prompt}
             ],
             max_tokens=3000,
-            temperature=0.2
+            temperature=0.7
         )
         return response.choices[0].message.content.strip()
     except Exception as e:

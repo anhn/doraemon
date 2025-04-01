@@ -16,4 +16,3 @@ scikit-learn
 python-docx
 nltk
 spacy
-xx_sent_ud_sm

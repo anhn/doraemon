@@ -8,9 +8,9 @@ from openai import OpenAI
 from pymongo import MongoClient
 from docx import Document
 import re
-from nltk.corpus import stopwords
-from nltk.stem import WordNetLemmatizer
-import spacy
+
+# Print the current working directory
+current_directory = os.getcwd()
 
 # Load SBERT model for embeddings
 sbert_model = SentenceTransformer("all-MiniLM-L6-v2")
@@ -28,11 +28,6 @@ faq_collection = db[FAQ_COLLECTION]
 os.environ["OPENAI_API_KEY"] = st.secrets["api"]["key"]
 openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
-# Initialize NLTK and SpaCy for text preprocessing
-stop_words = set(stopwords.words("english"))
-lemmatizer = WordNetLemmatizer()
-nlp = spacy.load("vi_core_news_sm")
-
 # Function to extract text from .docx files
 def extract_text_from_docx(docx_path):
     try:
@@ -49,27 +44,55 @@ def split_text_into_chunks(text, chunk_size=512, overlap=128):
         chunks.append(" ".join(words[i:i + chunk_size]))
     return chunks
 
-# Function to clean and preprocess user query
-def preprocess_user_query(query):
-    # Convert to lowercase
-    query = query.lower()
-
-    # Remove stopwords using NLTK
-    words = query.split()
-    words = [word for word in words if word not in stop_words]
-
-    # Lemmatize the query to get root words using WordNetLemmatizer
-    lemmatized_query = " ".join([lemmatizer.lemmatize(word) for word in words])
-
-    # Use SpaCy's NER to extract named entities for better search
-    doc = nlp(lemmatized_query)
-    entities = [ent.text for ent in doc.ents]
+# Load all .docx files from the current directory
+@st.cache_data
+def load_documents():
+    docx_files = glob.glob(os.path.join(current_directory, "*.docx"))
+    documents = []
+    chunked_texts = []
+    chunked_titles = []
     
-    # Optionally: Expand the query using synonyms (can be done through a thesaurus or pre-trained embeddings)
+    for file in docx_files:
+        doc_text = extract_text_from_docx(file)
+        if doc_text:
+            chunks = split_text_into_chunks(doc_text)
+            documents.append({"title": os.path.basename(file), "content": doc_text, "chunks": chunks})
+            chunked_texts.extend(chunks)
+            chunked_titles.extend([os.path.basename(file)] * len(chunks))  # Associate each chunk with its document
 
-    return lemmatized_query, entities
+    return documents, chunked_texts, chunked_titles
 
-# Function to optimize FAQ search based on query expansion
+documents, chunked_texts, chunked_titles = load_documents()
+
+# Encode document chunks and create FAISS index
+@st.cache_resource
+def create_faiss_index():
+    if not chunked_texts:
+        return None
+    doc_embeddings = sbert_model.encode(chunked_texts, convert_to_tensor=True).cpu().numpy()
+    index = faiss.IndexFlatL2(doc_embeddings.shape[1])
+    index.add(doc_embeddings)
+    return index
+
+faiss_index = create_faiss_index()
+
+# Load FAQ Data
+def load_faq_data():
+    return list(faq_collection.find({}, {"_id": 0, "Question": 1, "Answer": 1}))
+
+faq_data = load_faq_data()
+faq_questions = [item["Question"] for item in faq_data]
+faq_embeddings = sbert_model.encode(faq_questions, convert_to_tensor=True).cpu().numpy()
+
+# Build FAISS index for FAQ search
+faiss_faq_index = faiss.IndexFlatL2(faq_embeddings.shape[1])
+faiss_faq_index.add(faq_embeddings)
+
+# Initialize session state
+if "chat_history" not in st.session_state:
+    st.session_state["chat_history"] = []
+
+# Function to find the best FAQ matches
 def find_best_faq_matches(user_query, top_k=3):
     query_embedding = sbert_model.encode([user_query], convert_to_tensor=True).cpu().numpy()
     _, best_match_idxs = faiss_faq_index.search(query_embedding, top_k)
@@ -93,19 +116,34 @@ def retrieve_best_chunk(query, max_tokens=500):
     if not faiss_index or not chunked_texts:
         return None, "No documents found."
 
-    # Preprocess the query (lemmatization, NER)
-    processed_query, entities = preprocess_user_query(query)
-    processed_query_embedding = sbert_model.encode([processed_query], convert_to_tensor=True).cpu().numpy()
-
-    # 1️⃣ Keyword-based search (Semantic Search - Optimize for RAG)
-    keyword_snippets = []
-    faiss_index.search(processed_query_embedding, len(chunked_texts)) # Get all similarities for better keyword ranking
+    # Convert query to lowercase for case-insensitive search
+    query_lower = query.lower()
     
-    # Ranking based on similarity to ensure keyword match is meaningful
-    keyword_snippets.extend([chunk for i, chunk in enumerate(chunked_texts) if util.cos_sim(processed_query_embedding, doc_embeddings[i]).item() > 0.5])
+    # 1️⃣ Keyword-based search
+    keyword_snippets = []
+    for doc in documents:
+        words = doc["content"].split()
+        
+        # Find all keyword occurrences
+        matches = [m.start() for m in re.finditer(re.escape(query_lower), doc["content"].lower())]
+
+        for match_idx in matches:
+            # Convert match index to word index
+            word_idx = len(doc["content"][:match_idx].split())
+
+            # Extract 150 tokens around the match
+            start_idx = max(0, word_idx - 10)
+            end_idx = min(len(words), word_idx + 140)
+
+            snippet = " ".join(words[start_idx:end_idx])
+            keyword_snippets.append(snippet)
+
+    # Combine keyword snippets into a single string
+    keyword_context = "\n\n".join(keyword_snippets)
 
     # 2️⃣ FAISS-based retrieval
-    _, best_match_idxs = faiss_index.search(processed_query_embedding, 1)  # Retrieve top-1 chunk
+    query_embedding = sbert_model.encode([query], convert_to_tensor=True).cpu().numpy()
+    _, best_match_idxs = faiss_index.search(query_embedding, 1)  # Retrieve top-1 chunk
 
     best_chunk = chunked_texts[best_match_idxs[0][0]]
     best_doc_title = chunked_titles[best_match_idxs[0][0]]
@@ -116,20 +154,48 @@ def retrieve_best_chunk(query, max_tokens=500):
     if not best_doc:
         return None, "No relevant document found."
 
-    # Extract relevant text around the best chunk
+    # Extract 1000 tokens around the best chunk
     faiss_context = extract_relevant_text(best_doc["content"], best_chunk, max_tokens=max_tokens)
 
     # 3️⃣ Combine keyword-based and FAISS-based contexts
-    final_context = f"{' '.join(keyword_snippets)}\n\n{faiss_context}".strip()
+    final_context = f"{keyword_context}\n\n{faiss_context}".strip()
 
     return best_doc, final_context
 
+
+# Function to extract up to 1000 tokens around the best chunk
+def extract_relevant_text(full_text, best_chunk, max_tokens=500):
+    words = full_text.split()
+    chunk_words = best_chunk.split()
+
+    match_start = None
+    for i in range(len(words) - len(chunk_words) + 1):
+        if words[i:i + len(chunk_words)] == chunk_words:
+            match_start = i
+            break
+
+    if match_start is None:
+        return best_chunk
+
+    start_idx = max(0, match_start - (max_tokens // 2))
+    end_idx = min(len(words), match_start + (max_tokens // 2))
+
+    extracted_text = " ".join(words[start_idx:end_idx])
+    return extracted_text
 
 # Function to generate a response using GPT-4o with combined FAQ + document context
 def generate_gpt4o_response(question, context):
     """
     Generates a response using GPT-4o while incorporating previous chat history.
     """
+    # Include previous chat history (last 5 exchanges for context)
+    #chat_history_context = "\n\n".join(
+    #    [f"User: {chat['user']}\nAssistant: {chat['bot']}" for chat in st.session_state["chat_history"][-5:]]
+    #)
+    # Combine chat history and retrieved context
+    #combined_context = f"{chat_history_context}\n\n{context}".strip()
+    #st.write(combined_context)
+   # Construct prompt
     prompt = (
         f"Một sinh viên hỏi: {question}\n\n"
         f"Dựa trên cuộc trò chuyện trước đó và thông tin sau đây, hãy cung cấp một câu trả lời hữu ích, ngắn gọn và thân thiện. "

@@ -213,10 +213,11 @@ def generate_gpt_response(question, context):
             max_tokens=3000,
             temperature=0.7
         )
-        
+        st.write(response)
         # Extract the response and the token usage
         #generated_answer = response.choices[0].message.content.strip()
         generated_answer = response['choices'][0]['message']['content'].strip()  
+        st.write(generated_answer)
         
         # Get token usage details
         token_usage = response['usage']

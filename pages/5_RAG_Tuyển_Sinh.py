@@ -215,9 +215,10 @@ def generate_gpt_response(question, context):
         )
         #st.write(response)
         # Extract the response and the token usage
-        #generated_answer = response.choices[0].message.content.strip()
-        generated_answer = response['choices'][0]['message']['content'].strip()  
+        generated_answer = response.choices[0].message.content.strip()
         st.write(generated_answer)
+        generated_answer2 = response['choices'][0]['message']['content'].strip()  
+        st.write(generated_answer2)
         
         # Get token usage details
         token_usage = response['usage']

@@ -215,7 +215,8 @@ def generate_gpt_response(question, context):
         )
         
         # Extract the response and the token usage
-        generated_answer = response.choices[0].message.content.strip()
+        #generated_answer = response.choices[0].message.content.strip()
+        generated_answer = response['choices'][0]['message']['content'].strip()  
         
         # Get token usage details
         token_usage = response['usage']
@@ -227,7 +228,7 @@ def generate_gpt_response(question, context):
         st.write(f"Tokens used: Input = {input_tokens}, Output = {output_tokens}, Total = {total_tokens}")
         
         return generated_answer, input_tokens, output_tokens, total_tokens
-        
+
     except Exception as e:
         return f"Lỗi khi tạo phản hồi: {str(e)}", 0, 0, 0
 

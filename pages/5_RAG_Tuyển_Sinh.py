@@ -60,6 +60,7 @@ if "chat_history" not in st.session_state:
     st.session_state["chat_history"] = []
 
 # Function to find the best FAQ matches using SBERT
+# Function to find the best FAQ matches using SBERT
 def find_best_faq_matches(user_query, top_k=3):
     # Encode the user query using the SBERT model
     query_embedding = sbert_model.encode([user_query], convert_to_tensor=True)
@@ -70,11 +71,19 @@ def find_best_faq_matches(user_query, top_k=3):
     # Calculate cosine similarities between the user query and each FAQ
     similarities = util.cos_sim(query_embedding, faq_embeddings)[0]
     
+    # If there are no similarities or no matches, return an empty list
+    if similarities is None or len(similarities) == 0:
+        return [], []
+
+    # Ensure that top_k does not exceed the number of FAQ entries
+    top_k = min(top_k, len(faq_data))
+    
     # Get the top_k most similar FAQ questions
     top_k_indices = similarities.argsort()[-top_k:][::-1]
     
     best_matches = [faq_data[idx] for idx in top_k_indices]
-    return best_matches
+    return best_matches, similarities
+
 
 # Function to combine all document text as context
 def combine_all_document_texts():

@@ -58,13 +58,13 @@ if "chat_history" not in st.session_state:
 # Function to find the best FAQ matches
 def find_best_faq_matches(user_query, top_k=3):
     query_embedding = openai_client.embeddings.create(
-        model="text-davinci-003", input=user_query
+        model="gpt-4", input=user_query
     )["data"][0]["embedding"]
     
     best_matches = []
     for faq in faq_data:
         faq_embedding = openai_client.embeddings.create(
-            model="text-davinci-003", input=faq["Question"]
+            model="gpt-4", input=faq["Question"]
         )["data"][0]["embedding"]
         
         # Calculate cosine similarity

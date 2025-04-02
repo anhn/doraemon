@@ -213,7 +213,7 @@ def generate_gpt_response(question, context):
             max_tokens=3000,
             temperature=0.7
         )
-        st.write(response)
+        #st.write(response)
         # Extract the response and the token usage
         #generated_answer = response.choices[0].message.content.strip()
         generated_answer = response['choices'][0]['message']['content'].strip()  
@@ -224,7 +224,7 @@ def generate_gpt_response(question, context):
         input_tokens = token_usage['prompt_tokens']
         output_tokens = token_usage['completion_tokens']
         total_tokens = input_tokens + output_tokens
-        
+
         # Log the token usage
         st.write(f"Tokens used: Input = {input_tokens}, Output = {output_tokens}, Total = {total_tokens}")
         

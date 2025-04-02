@@ -196,27 +196,16 @@ def extract_relevant_text(full_text, best_chunk, max_tokens=500):
     return extracted_text
 
 # Function to generate a response using GPT-4o with combined FAQ + document context
-def generate_gpt4o_response(question, context):
-    """
-    Generates a response using GPT-4o while incorporating previous chat history.
-    """
-    # Include previous chat history (last 5 exchanges for context)
-    #chat_history_context = "\n\n".join(
-    #    [f"User: {chat['user']}\nAssistant: {chat['bot']}" for chat in st.session_state["chat_history"][-5:]]
-    #)
-    # Combine chat history and retrieved context
-    #combined_context = f"{chat_history_context}\n\n{context}".strip()
-    #st.write(combined_context)
-   # Construct prompt
+def generate_gpt_response(question, context):
     prompt = (
         f"Một sinh viên hỏi: {question}\n\n"
-        f"Dựa trên cuộc trò chuyện trước đó và thông tin sau đây, hãy cung cấp một câu trả lời hữu ích, ngắn gọn và thân thiện. "
+        f"Dựa trên thông tin sau đây, hãy cung cấp một câu trả lời hữu ích, ngắn gọn và thân thiện. "
         f"Dẫn nguồn từ nội dung có sẵn nếu cần.\n\n"
-        f"Ngữ cảnh từ cuộc trò chuyện trước và tài liệu:\n{context}"
+        f"Ngữ cảnh từ tài liệu:\n{context}"
     )
     try:
         response = openai_client.chat.completions.create(
-            model="gpt-4o",
+            model="gpt-4",
             messages=[
                 {"role": "system", "content": "Bạn là một trợ lý tuyển sinh đại học hữu ích, chỉ dựa trên nội dung đã cung cấp."},
                 {"role": "user", "content": prompt}
@@ -224,9 +213,24 @@ def generate_gpt4o_response(question, context):
             max_tokens=3000,
             temperature=0.7
         )
-        return response.choices[0].message.content.strip()
+        
+        # Extract the response and the token usage
+        generated_answer = response.choices[0].message.content.strip()
+        
+        # Get token usage details
+        token_usage = response['usage']
+        input_tokens = token_usage['prompt_tokens']
+        output_tokens = token_usage['completion_tokens']
+        total_tokens = input_tokens + output_tokens
+        
+        # Log the token usage
+        st.write(f"Tokens used: Input = {input_tokens}, Output = {output_tokens}, Total = {total_tokens}")
+        
+        return generated_answer, input_tokens, output_tokens, total_tokens
+        
     except Exception as e:
-        return f"Lỗi khi tạo phản hồi: {str(e)}"
+        return f"Lỗi khi tạo phản hồi: {str(e)}", 0, 0, 0
+
 
 # Streamlit UI
 st.title("📚 Trang Tư Vấn Tuyển Sinh")
@@ -267,12 +271,16 @@ if user_input:
     # Combine FAQ context and document context
     #final_context = f"{faq_context}\n\n{doc_context}" if faq_context else doc_context
 
-    # Generate response with GPT-4o
-    generated_answer = generate_gpt4o_response(user_input, final_context)
-    # Display response
+    # Generate response with GPT
+    generated_answer, input_tokens, output_tokens, total_tokens = generate_gpt_response(user_input, final_context)
+    
+    # Display the response
     with st.chat_message("assistant"):
         st.success("💡 **Câu trả lời:**")
         st.write(generated_answer)
+
+    # Display the number of tokens used
+    st.write(f"Tokens used: Input = {input_tokens}, Output = {output_tokens}, Total = {total_tokens}")
 
     # Append conversation to session history
     st.session_state["chat_history"].append({"user": user_input, "bot": generated_answer})

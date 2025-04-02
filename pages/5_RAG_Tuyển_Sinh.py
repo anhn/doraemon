@@ -5,7 +5,7 @@ from openai import OpenAI
 from pymongo import MongoClient
 from docx import Document
 from sentence_transformers import SentenceTransformer, util
-import numpy as np
+import re
 
 # Print the current working directory
 current_directory = os.getcwd()
@@ -59,33 +59,18 @@ faq_data = load_faq_data()
 if "chat_history" not in st.session_state:
     st.session_state["chat_history"] = []
 
-# Function to find the best FAQ matches using SBERT
-# Function to find the best FAQ matches using SBERT
+# Function to find the best FAQ matches
 def find_best_faq_matches(user_query, top_k=3):
-    # Encode the user query using the SBERT model
-    query_embedding = sbert_model.encode([user_query], convert_to_tensor=True)
-    
-    # Get the embeddings for FAQ questions
-    faq_embeddings = sbert_model.encode([faq["Question"] for faq in faq_data], convert_to_tensor=True)
-    
-    # Calculate cosine similarities between the user query and each FAQ
-    similarities = util.cos_sim(query_embedding, faq_embeddings)[0]
-    
-    # If there are no similarities or no matches, return an empty list
-    if similarities is None or len(similarities) == 0:
-        return [], []
+    query_embedding = sbert_model.encode([user_query], convert_to_tensor=True).cpu().numpy()
+    faq_embeddings = sbert_model.encode([faq["Question"] for faq in faq_data], convert_to_tensor=True).cpu().numpy()
 
-    # Ensure that top_k does not exceed the number of FAQ entries
-    top_k = min(top_k, len(faq_data))
-    
-    # Get the top_k most similar FAQ questions
+    similarities = util.cos_sim(query_embedding, faq_embeddings)[0]
     top_k_indices = similarities.argsort()[-top_k:][::-1]
     
     best_matches = [faq_data[idx] for idx in top_k_indices]
-    return best_matches, similarities
+    return best_matches
 
-
-# Function to combine all document text as context
+# Function to combine all document text as context (no chunking, just combining all document text)
 def combine_all_document_texts():
     # Combine all document texts into a single string as context
     combined_context = "\n\n".join([doc["content"] for doc in documents])
@@ -100,7 +85,6 @@ def generate_gpt_response(question, context):
         f"Ngữ cảnh từ tài liệu:\n{context}"
     )
     try:
-        # Send the request to OpenAI API
         response = openai_client.chat.completions.create(
             model="gpt-4",
             messages=[
@@ -152,12 +136,12 @@ if user_input:
         [f"Q: {match['Question']}\nA: {match['Answer']}" for match in best_faq_matches]
     ) if best_faq_matches else ""
 
-    if faq_context:
-        final_context = faq_context
-    else:
-        # Use all document text as context if no good FAQ match is found
+    # Use all document text as context if no good FAQ match is found
+    if not faq_context:
         all_documents_context = combine_all_document_texts()
         final_context = all_documents_context
+    else:
+        final_context = faq_context
 
     # Generate response with GPT
     generated_answer, input_tokens, output_tokens, total_tokens = generate_gpt_response(user_input, final_context)

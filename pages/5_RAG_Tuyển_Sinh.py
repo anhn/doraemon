@@ -62,13 +62,16 @@ if "chat_history" not in st.session_state:
 # Function to find the best FAQ matches
 def find_best_faq_matches(user_query, top_k=3):
     query_embedding = sbert_model.encode([user_query], convert_to_tensor=True).cpu().numpy()
-    faq_embeddings = sbert_model.encode([faq["Question"] for faq in faq_data], convert_to_tensor=True).cpu().numpy()
+    _, best_match_idxs = faiss_faq_index.search(query_embedding, top_k)
 
-    similarities = util.cos_sim(query_embedding, faq_embeddings)[0]
-    top_k_indices = similarities.argsort()[-top_k:][::-1]
-    
-    best_matches = [faq_data[idx] for idx in top_k_indices]
-    return best_matches
+    best_matches = [faq_data[idx] for idx in best_match_idxs[0]]
+    similarities = [
+        util.cos_sim(query_embedding, faq_embeddings[idx]).item()
+        for idx in best_match_idxs[0]
+    ]
+
+    return best_matches, similarities
+
 
 # Function to combine all document text as context (no chunking, just combining all document text)
 def combine_all_document_texts():
@@ -130,12 +133,11 @@ if user_input:
         st.write(user_input)
 
     # Retrieve FAQ-based responses
-    best_faq_matches = find_best_faq_matches(user_input)
-
-    faq_context = "\n\n".join(
-        [f"Q: {match['Question']}\nA: {match['Answer']}" for match in best_faq_matches]
-    ) if best_faq_matches else ""
-
+    faq_context = ""
+    for i, similarity in enumerate(faq_similarities):
+        if similarity > 0.8:
+            faq_context += f"Q: {best_faq_matches[i]['Question']}\nA: {best_faq_matches[i]['Answer']}\n\n"
+    
     # Use all document text as context if no good FAQ match is found
     if not faq_context:
         all_documents_context = combine_all_document_texts()

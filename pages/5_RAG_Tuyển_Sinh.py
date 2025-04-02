@@ -1,13 +1,17 @@
 import streamlit as st
 import os
 import glob
-import numpy as np
 from openai import OpenAI
 from pymongo import MongoClient
 from docx import Document
+from sentence_transformers import SentenceTransformer, util
+import numpy as np
 
 # Print the current working directory
 current_directory = os.getcwd()
+
+# Load SBERT model for embeddings
+sbert_model = SentenceTransformer("all-MiniLM-L6-v2")
 
 # Load OpenAI API Key
 os.environ["OPENAI_API_KEY"] = st.secrets["api"]["key"]
@@ -55,23 +59,21 @@ faq_data = load_faq_data()
 if "chat_history" not in st.session_state:
     st.session_state["chat_history"] = []
 
-# Function to find the best FAQ matches
+# Function to find the best FAQ matches using SBERT
 def find_best_faq_matches(user_query, top_k=3):
-    query_embedding = openai_client.embeddings.create(
-        model="gpt-4", input=user_query
-    )["data"][0]["embedding"]
+    # Encode the user query using the SBERT model
+    query_embedding = sbert_model.encode([user_query], convert_to_tensor=True)
     
-    best_matches = []
-    for faq in faq_data:
-        faq_embedding = openai_client.embeddings.create(
-            model="gpt-4", input=faq["Question"]
-        )["data"][0]["embedding"]
-        
-        # Calculate cosine similarity
-        similarity = np.dot(query_embedding, faq_embedding) / (np.linalg.norm(query_embedding) * np.linalg.norm(faq_embedding))
-        if similarity > 0.7:  # Adjust threshold as needed
-            best_matches.append(faq)
-
+    # Get the embeddings for FAQ questions
+    faq_embeddings = sbert_model.encode([faq["Question"] for faq in faq_data], convert_to_tensor=True)
+    
+    # Calculate cosine similarities between the user query and each FAQ
+    similarities = util.cos_sim(query_embedding, faq_embeddings)[0]
+    
+    # Get the top_k most similar FAQ questions
+    top_k_indices = similarities.argsort()[-top_k:][::-1]
+    
+    best_matches = [faq_data[idx] for idx in top_k_indices]
     return best_matches
 
 # Function to combine all document text as context
@@ -117,7 +119,6 @@ def generate_gpt_response(question, context):
     except Exception as e:
         return f"Lỗi khi tạo phản hồi: {str(e)}", 0, 0, 0
 
-
 # Streamlit UI
 st.title("📚 Trang Tư Vấn Tuyển Sinh")
 
@@ -162,4 +163,3 @@ if user_input:
 
     # Append conversation to session history
     st.session_state["chat_history"].append({"user": user_input, "bot": generated_answer})
-

@@ -131,6 +131,8 @@ user_input = st.chat_input("Nhập câu hỏi của bạn...")
 if user_input:
     with st.chat_message("user"):
         st.write(user_input)
+    
+    best_faq_matches, faq_similarities = find_best_faq_matches(user_input)
 
     # Retrieve FAQ-based responses
     faq_context = ""

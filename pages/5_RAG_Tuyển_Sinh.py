@@ -258,18 +258,18 @@ if user_input:
             faq_context += f"Q: {best_faq_matches[i]['Question']}\nA: {best_faq_matches[i]['Answer']}\n\n"
 
     # If no good FAQ match is found, use all document text as context
-    if not faq_context:
-        all_documents_context = combine_all_document_texts()
-        preview_documents(documents)
-        final_context = all_documents_context
-    else:
-        final_context = faq_context
+    #if not faq_context:
+    #    all_documents_context = combine_all_document_texts()
+    #    preview_documents(documents)
+    #    final_context = all_documents_context
+    #else:
+    #    final_context = faq_context
 
     # Retrieve document-based context
-    #doc_context = retrieve_best_chunk(user_input)[1] if best_faq_matches else ""
+    doc_context = retrieve_best_chunk(user_input)[1] if best_faq_matches else ""
 
     # Combine FAQ context and document context
-    #final_context = f"{faq_context}\n\n{doc_context}" if faq_context else doc_context
+    final_context = f"{faq_context}\n\n{doc_context}" if faq_context else doc_context
 
     # Generate response with GPT
     generated_answer, input_tokens, output_tokens, total_tokens = generate_gpt_response(user_input, final_context)

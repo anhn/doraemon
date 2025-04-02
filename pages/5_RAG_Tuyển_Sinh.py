@@ -69,6 +69,13 @@ def combine_all_document_texts():
     combined_context = "\n\n".join([doc["content"] for doc in documents])
     return combined_context
 
+def preview_documents(documents):
+    for i, doc in enumerate(documents):
+        content_words = doc["content"].split()
+        preview = " ".join(content_words[:100])
+        st.write(f"### Document {i + 1} Preview")
+        st.write(preview)
+
 # Encode document chunks and create FAISS index
 @st.cache_resource
 def create_faiss_index():
@@ -249,6 +256,7 @@ if user_input:
     # If no good FAQ match is found, use all document text as context
     if not faq_context:
         all_documents_context = combine_all_document_texts()
+        preview_documents(documents)
         final_context = all_documents_context
     else:
         final_context = faq_context

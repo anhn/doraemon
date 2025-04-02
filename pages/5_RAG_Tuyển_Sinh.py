@@ -92,26 +92,48 @@ faiss_faq_index.add(faq_embeddings)
 if "chat_history" not in st.session_state:
     st.session_state["chat_history"] = []
 
-# Function to find the best FAQ matches
-def find_best_faq_matches(user_query, top_k=3):
-    query_embedding = sbert_model.encode([user_query], convert_to_tensor=True).cpu().numpy()
-    _, best_match_idxs = faiss_faq_index.search(query_embedding, top_k)
+# Function to extract keywords using GPT
+def extract_keywords_from_gpt(query):
+    prompt = f"Extract the main keywords from the following query:\n{query}"
+    try:
+        response = openai_client.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant. Extract keywords from the input query."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=50,
+            temperature=0.7
+        )
+        return response.choices[0].message.content.strip().split(",")  # Split by commas for keywords
+    except Exception as e:
+        return []
 
-    best_matches = [faq_data[idx] for idx in best_match_idxs[0]]
-    similarities = [
-        util.cos_sim(query_embedding, faq_embeddings[idx]).item()
-        for idx in best_match_idxs[0]
-    ]
+# Function to search for keywords and extract text around them
+def extract_relevant_text_around_keywords(query_keywords, chunked_texts, max_tokens=200):
+    extracted_texts = []
+    for chunk in chunked_texts:
+        words = chunk.split()
+        relevant_text = []
+        
+        for keyword in query_keywords:
+            if keyword.lower() in chunk.lower():
+                # Find the position of the keyword in the chunk
+                start_idx = max(0, chunk.lower().find(keyword.lower()) - max_tokens // 2)
+                end_idx = min(len(words), chunk.lower().find(keyword.lower()) + len(keyword.split()) + max_tokens // 2)
+                
+                # Add the relevant text around the keyword
+                relevant_text.append(" ".join(words[start_idx:end_idx]))
+        
+        if relevant_text:
+            extracted_texts.append(" ".join(relevant_text))
+    
+    # Ensure 200 unique tokens
+    all_relevant_text = " ".join(extracted_texts)
+    unique_tokens = set(all_relevant_text.split())
+    return " ".join(list(unique_tokens)[:max_tokens])
 
-    return best_matches, similarities
-
-# Function to combine all document text as context
-def combine_all_document_texts():
-    # Combine all document texts into a single string as context
-    combined_context = "\n\n".join([doc["content"] for doc in documents])
-    return combined_context
-
-# Function to generate a response using GPT-4o with combined FAQ + document context
+# Function to generate a response using GPT-4o with context
 def generate_gpt4o_response(question, context):
     """
     Generates a response using GPT-4o while incorporating previous chat history.
@@ -153,23 +175,16 @@ if user_input:
     with st.chat_message("user"):
         st.write(user_input)
 
-    # Retrieve FAQ-based responses
-    best_faq_matches, faq_similarities = find_best_faq_matches(user_input)
+    # Extract keywords using GPT
+    query_keywords = extract_keywords_from_gpt(user_input)
 
-    faq_context = "\n\n".join(
-        [f"Q: {match['Question']}\nA: {match['Answer']}" for match in best_faq_matches]
-    ) if best_faq_matches else ""
-
-    # Combine all document content into one context
-    all_documents_context = combine_all_document_texts()
-
-    # Combine FAQ context and document context
-    final_context = f"{faq_context}\n\n{all_documents_context}" if faq_context else all_documents_context
-
-    # Generate response with GPT-4o
-    generated_answer = generate_gpt4o_response(user_input, final_context)
+    # Search for keywords in document chunks and extract relevant text
+    relevant_context = extract_relevant_text_around_keywords(query_keywords, chunked_texts)
+    st.write(query_keywords)
+    # Generate the response using GPT-4o with the relevant extracted context
+    generated_answer = generate_gpt4o_response(user_input, relevant_context)
     
-    # Display response
+    # Display the response
     with st.chat_message("assistant"):
         st.success("💡 **Câu trả lời:**")
         st.write(generated_answer)

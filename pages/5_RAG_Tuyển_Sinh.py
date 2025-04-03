@@ -216,20 +216,21 @@ def generate_gpt_response(question, context):
         #st.write(response)
         # Extract the response and the token usage
         generated_answer = response.choices[0].message.content.strip()
-        st.write(generated_answer)
-        generated_answer2 = response['choices'][0]['message']['content'].strip()  
-        st.write(generated_answer2)
+        #st.write(generated_answer)
+        #generated_answer2 = response['choices'][0]['message']['content'].strip()  
+        #st.write(generated_answer2)
         
         # Get token usage details
-        token_usage = response['usage']
-        input_tokens = token_usage['prompt_tokens']
-        output_tokens = token_usage['completion_tokens']
-        total_tokens = input_tokens + output_tokens
+        #token_usage = response['usage']
+        #input_tokens = token_usage['prompt_tokens']
+        #output_tokens = token_usage['completion_tokens']
+        #total_tokens = input_tokens + output_tokens
 
         # Log the token usage
-        st.write(f"Tokens used: Input = {input_tokens}, Output = {output_tokens}, Total = {total_tokens}")
+        #st.write(f"Tokens used: Input = {input_tokens}, Output = {output_tokens}, Total = {total_tokens}")
         
-        return generated_answer, input_tokens, output_tokens, total_tokens
+        #return generated_answer, input_tokens, output_tokens, total_tokens
+        return generated_answer
 
     except Exception as e:
         return f"Lỗi khi tạo phản hồi: {str(e)}", 0, 0, 0
@@ -273,17 +274,17 @@ if user_input:
 
     # Combine FAQ context and document context
     final_context = f"{faq_context}\n\n{doc_context}" if faq_context else doc_context
-    st.write(final_context)
+    #st.write(final_context)
     # Generate response with GPT
-    generated_answer, input_tokens, output_tokens, total_tokens = generate_gpt_response(user_input, final_context)
-    
+    #generated_answer, input_tokens, output_tokens, total_tokens = generate_gpt_response(user_input, final_context)
+    generated_answer = generate_gpt_response(user_input, final_context)
     # Display the response
     with st.chat_message("assistant"):
         st.success("💡 **Câu trả lời:**")
         st.write(generated_answer)
 
     # Display the number of tokens used
-    st.write(f"Tokens used: Input = {input_tokens}, Output = {output_tokens}, Total = {total_tokens}")
+    #st.write(f"Tokens used: Input = {input_tokens}, Output = {output_tokens}, Total = {total_tokens}")
 
     # Append conversation to session history
     st.session_state["chat_history"].append({"user": user_input, "bot": generated_answer})

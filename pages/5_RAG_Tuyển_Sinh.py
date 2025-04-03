@@ -201,7 +201,7 @@ def estimate_token_count(text):
     
 # Function to generate a response using GPT-4o with combined FAQ + document context
 def generate_gpt_response(question, context):
-    max_token_limit = 8000
+    max_token_limit = 7000
     estimated_token_count = estimate_token_count(context)
     if estimated_token_count > max_token_limit:
         context = " ".join(context.split()[:max_token_limit])  # Cut off the context to the first 8000 tokens

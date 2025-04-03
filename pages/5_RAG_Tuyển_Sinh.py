@@ -266,7 +266,7 @@ if user_input:
 
     faq_context = ""
     for i, similarity in enumerate(faq_similarities):
-        if similarity > 0.8:
+        if similarity > 0.6:
             faq_context += f"Q: {best_faq_matches[i]['Question']}\nA: {best_faq_matches[i]['Answer']}\n\n"
 
     # If no good FAQ match is found, use all document text as context

@@ -195,8 +195,16 @@ def extract_relevant_text(full_text, best_chunk, max_tokens=500):
     extracted_text = " ".join(words[start_idx:end_idx])
     return extracted_text
 
+def estimate_token_count(text):
+    # Using a simple tokenization method (split by spaces and punctuation)
+    return len(text.split())
+    
 # Function to generate a response using GPT-4o with combined FAQ + document context
 def generate_gpt_response(question, context):
+    max_token_limit = 8000
+    estimated_token_count = estimate_token_count(context)
+    if estimated_token_count > max_token_limit:
+        context = " ".join(context.split()[:max_token_limit])  # Cut off the context to the first 8000 tokens
     prompt = (
         f"Một sinh viên hỏi: {question}\n\n"
         f"Dựa trên thông tin sau đây, hãy cung cấp một câu trả lời hữu ích, ngắn gọn và thân thiện. "

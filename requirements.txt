@@ -7,8 +7,8 @@ trubrics>=1.4.3
 streamlit-feedback
 langchain-community
 faiss-cpu
-sentence-transformers==2.2.2
-torch==2.0.1
+sentence-transformers
+torch
 streamlit_feedback
 pymongo
 datetime

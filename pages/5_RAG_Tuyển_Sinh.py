@@ -282,7 +282,7 @@ if user_input:
 
     # Combine FAQ context and document context
     final_context = f"{faq_context}\n\n{doc_context}" if faq_context else doc_context
-    st.write(final_context)
+    #st.write(final_context)
     # Generate response with GPT
     #generated_answer, input_tokens, output_tokens, total_tokens = generate_gpt_response(user_input, final_context)
     generated_answer = generate_gpt_response(user_input, final_context)

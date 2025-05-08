@@ -217,9 +217,9 @@ def generate_gpt_response(question, context):
             messages=[
                 {"role": "system", "content": "Bạn là một trợ lý tuyển sinh đại học hữu ích, chỉ dựa trên nội dung đã cung cấp."},
                 {"role": "user", "content": prompt}
-            ],
-            max_tokens=3000,
-            temperature=0.7
+            ]
+            #,max_tokens=3000,
+            #temperature=0.7
         )
         #st.write(response)
         # Extract the response and the token usage

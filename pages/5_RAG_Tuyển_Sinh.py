@@ -8,6 +8,9 @@ from openai import OpenAI
 from pymongo import MongoClient
 from docx import Document
 import re
+from datetime import datetime
+import pytz
+import requests
 
 # Print the current working directory
 current_directory = os.getcwd()
@@ -19,15 +22,24 @@ sbert_model = SentenceTransformer("all-MiniLM-L6-v2")
 MONGO_URI = st.secrets["mongo"]["uri"]
 DB_NAME = "utt_detai25"
 FAQ_COLLECTION = "faqtuyensinh"
+CHATLOG_COLLECTION = "chatlog"
 
 client_mongo = MongoClient(MONGO_URI)
 db = client_mongo[DB_NAME]
 faq_collection = db[FAQ_COLLECTION]
+chatlog_collection = db[CHATLOG_COLLECTION]
 
 # Load OpenAI API Key
 os.environ["OPENAI_API_KEY"] = st.secrets["api"]["key"]
 openai_client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY"))
 
+# Helper to get user IP
+def get_user_ip():
+    try:
+        return requests.get('https://api.ipify.org').text
+    except:
+        return "unknown"
+        
 # Function to extract text from .docx files
 def extract_text_from_docx(docx_path):
     try:
@@ -296,3 +308,14 @@ if user_input:
 
     # Append conversation to session history
     st.session_state["chat_history"].append({"user": user_input, "bot": generated_answer})
+
+    # Log to MongoDB
+    chatlog_entry = {
+        "user_ip": get_user_ip(),
+        "timestamp": datetime.now(pytz.timezone("UTC")),
+        "user_message": user_input,
+        "bot_response": generated_answer,
+        "is_good": True,
+        "problem_detail": ""
+    }
+    chatlog_collection.insert_one(chatlog_entry)

@@ -19,7 +19,7 @@ if "answer" not in st.session_state:
 if "status_msg" not in st.session_state:
     st.session_state["status_msg"] = ""
 
-# Define callback function for retrieve
+# Callback khi nhấn nút Retrieve
 def retrieve_data():
     q = st.session_state["question"].strip()
     a = st.session_state["answer"].strip()
@@ -27,23 +27,23 @@ def retrieve_data():
     if q:
         record = faq_collection.find_one({"Question": q})
         if record:
-            st.session_state["answer"] = record.get("Answer", "")
+            st.session_state["answer"] = str(record.get("Answer", ""))
             st.session_state["status_msg"] = "✅ Đã tìm thấy câu hỏi và điền sẵn câu trả lời."
         else:
             st.session_state["status_msg"] = "⚠️ Không tìm thấy câu hỏi trong cơ sở dữ liệu."
     elif a:
         record = faq_collection.find_one({"Answer": a})
         if record:
-            st.session_state["question"] = record.get("Question", "")
+            st.session_state["question"] = str(record.get("Question", ""))
             st.session_state["status_msg"] = "✅ Đã tìm thấy câu trả lời và điền sẵn câu hỏi."
         else:
             st.session_state["status_msg"] = "⚠️ Không tìm thấy câu trả lời trong cơ sở dữ liệu."
     else:
         st.session_state["status_msg"] = "⚠️ Vui lòng nhập ít nhất một trong hai trường."
 
-# Giao diện nhập
+# Giao diện nhập (ép kiểu rõ ràng)
 st.text_input("❓ Câu hỏi (Question)", key="question")
-st.text_area("💬 Câu trả lời (Answer)", key="answer", height=150)
+st.text_area("💬 Câu trả lời (Answer)", value=str(st.session_state["answer"]), key="answer", height=150)
 
 # Nút Retrieve
 st.button("🔍 Retrieve", on_click=retrieve_data)

@@ -22,18 +22,18 @@ if st.button("🔍 Retrieve"):
         start_time = datetime.combine(selected_date, datetime.min.time())
         end_time = datetime.combine(selected_date, datetime.max.time())
 
-        # Truy vấn các bản ghi có CreatedAt trong ngày và chỉ lấy các trường cần thiết
+        # Truy vấn các bản ghi có createdAt trong ngày và chỉ lấy các trường cần thiết
         cursor = chatlog_collection.find(
-            {"CreatedAt": {"$gte": start_time, "$lte": end_time}},
+            {"createdAt": {"$gte": start_time, "$lte": end_time}},
             {
                 "user_ip": 1,
                 "user_message": 1,
                 "bot_response": 1,
                 "is_good": 1,
-                "CreatedAt": 1,
+                "createdAt": 1,
                 "_id": 0
             }
-        ).sort("CreatedAt", -1)
+        ).sort("createdAt", -1)
 
         # Chuyển đổi kết quả thành DataFrame
         data = list(cursor)
@@ -41,7 +41,7 @@ if st.button("🔍 Retrieve"):
             st.info("📭 Không có hội thoại nào trong ngày được chọn.")
         else:
             df = pd.DataFrame(data)
-            df["CreatedAt"] = pd.to_datetime(df["CreatedAt"]).dt.strftime("%Y-%m-%d %H:%M:%S")
+            df["createdAt"] = pd.to_datetime(df["createdAt"]).dt.strftime("%Y-%m-%d %H:%M:%S")
             st.success(f"✅ Tìm thấy {len(df)} hội thoại.")
             st.dataframe(df)
 

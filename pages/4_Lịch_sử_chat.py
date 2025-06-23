@@ -9,45 +9,41 @@ client = MongoClient(MONGO_URI)
 db = client["utt_detai25"]
 chatlog_collection = db["chatlog"]
 
-# Giao diện trang
+# Giao diện
 st.set_page_config(page_title="📜 Lịch sử Hội thoại", page_icon="💬")
-st.title("💬 Lịch sử các cuộc hội thoại (chatlog)")
+st.title("💬 Tra cứu các hội thoại từ chatlog")
 
 # Chọn ngày
 selected_date = st.date_input("📅 Chọn ngày muốn xem hội thoại", datetime.today())
 
-# Nút truy vấn dữ liệu
 if st.button("🔍 Retrieve"):
     try:
-        # Khoảng thời gian bắt đầu và kết thúc trong ngày
+        # Xác định thời gian bắt đầu và kết thúc trong ngày
         start_time = datetime.combine(selected_date, datetime.min.time())
         end_time = datetime.combine(selected_date, datetime.max.time())
 
-        # Truy vấn theo timestamp hoặc CreatedAt
-        query = {
-            "$or": [
-                {"timestamp": {"$gte": start_time, "$lte": end_time}},
-                {"CreatedAt": {"$gte": start_time, "$lte": end_time}}
-            ]
-        }
+        # Truy vấn các bản ghi có CreatedAt trong ngày và chỉ lấy các trường cần thiết
+        cursor = chatlog_collection.find(
+            {"CreatedAt": {"$gte": start_time, "$lte": end_time}},
+            {
+                "user_ip": 1,
+                "user_message": 1,
+                "bot_response": 1,
+                "is_good": 1,
+                "CreatedAt": 1,
+                "_id": 0
+            }
+        ).sort("CreatedAt", -1)
 
-        cursor = chatlog_collection.find(query).sort(
-            [("timestamp", -1), ("CreatedAt", -1)]
-        )
-
-        # Chuyển sang DataFrame
+        # Chuyển đổi kết quả thành DataFrame
         data = list(cursor)
         if not data:
             st.info("📭 Không có hội thoại nào trong ngày được chọn.")
         else:
             df = pd.DataFrame(data)
-
-            # Chuẩn hóa hiển thị thời gian
-            for field in ["timestamp", "CreatedAt"]:
-                if field in df.columns:
-                    df[field] = pd.to_datetime(df[field], errors="coerce").dt.strftime("%Y-%m-%d %H:%M:%S")
-
-            st.success(f"✅ Đã tìm thấy {len(df)} cuộc hội thoại.")
+            df["CreatedAt"] = pd.to_datetime(df["CreatedAt"]).dt.strftime("%Y-%m-%d %H:%M:%S")
+            st.success(f"✅ Tìm thấy {len(df)} hội thoại.")
             st.dataframe(df)
+
     except Exception as e:
         st.error(f"❌ Lỗi khi truy vấn dữ liệu: {e}")

@@ -10,14 +10,14 @@ from pymongo import MongoClient
 from openai import OpenAI
 import os
 
-# Load SBERT for embeddings if needed later
 from sentence_transformers import SentenceTransformer
 
 # === CONFIG ===
 DB_NAME = "utt_detai25"
 FAQ_COLLECTION = "faqtuyensinh"
+FIRST_ROWS = 10  # 🔢 Modify this value to fetch more or fewer rows
 
-# === Load from secrets ===
+# === Load secrets ===
 MONGO_URI = st.secrets["mongo"]["uri"]
 OPENAI_API_KEY = st.secrets["api"]["key"]
 os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
@@ -91,16 +91,18 @@ def expand_question(question):
 
 # === Streamlit App ===
 st.title("📚 Mở rộng câu hỏi tuyển sinh từ MongoDB")
-st.markdown("Dữ liệu được lấy từ bộ sưu tập `faqtuyensinh`. Ứng dụng sẽ tạo thêm các biến thể của câu hỏi để hỗ trợ chatbot hoặc hệ thống tìm kiếm.")
+st.markdown(f"Dữ liệu được lấy từ bộ sưu tập `faqtuyensinh` (giới hạn {FIRST_ROWS} dòng đầu tiên).")
 
-if st.button("🚀 Lấy dữ liệu & Tạo biến thể"):
+if st.button("🚀 Tạo biến thể từ MongoDB"):
     with st.spinner("🔄 Đang truy vấn MongoDB và tạo biến thể..."):
-        raw_data = list(faq_collection.find({}, {"_id": 0, "Question": 1, "Answer": 1}))
+        raw_data = list(faq_collection.find({}, {"_id": 0, "question": 1, "answer": 1}).limit(FIRST_ROWS))
         expanded_rows = []
 
         for item in raw_data:
-            question = str(item["Question"]).strip()
-            answer = str(item["Answer"]).strip()
+            question = str(item.get("question", "")).strip()
+            answer = str(item.get("answer", "")).strip()
+            if not question or not answer:
+                continue
             variants = expand_question(question)
             for vq in variants:
                 expanded_rows.append({"question": vq, "answer": answer})

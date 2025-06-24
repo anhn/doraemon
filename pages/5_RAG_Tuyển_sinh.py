@@ -224,7 +224,7 @@ def expand_query_with_synonyms(text):
 def find_best_faq_matches(user_query, top_k=3):
     # Expand query variants using synonyms
     expanded_queries = expand_query_with_synonyms(user_query)
-
+    st.write(expanded_queries)
     best_results = []
 
     for query_variant in expanded_queries:

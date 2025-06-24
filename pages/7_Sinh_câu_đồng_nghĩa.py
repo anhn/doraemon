@@ -1,122 +1,68 @@
 import streamlit as st
 import pandas as pd
-import itertools
+from collections import Counter
+import underthesea
 import re
-import torch
 import tempfile
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM
-from underthesea import word_tokenize
-from pymongo import MongoClient
-from openai import OpenAI
-import os
 
-from sentence_transformers import SentenceTransformer
+# Predefined synonym suggestion dictionary (expand as needed)
+AUTO_SYNONYM_GROUPS = {
+    "trụ sở": ["cơ sở", "địa điểm"],
+    "cơ sở": ["trụ sở", "địa điểm"],
+    "địa điểm": ["trụ sở", "cơ sở"],
+    "tổ hợp": ["khối"],
+    "khối": ["tổ hợp"],
+    "chuẩn": ["đỗ"],
+    "đỗ": ["chuẩn"],
+    "tuyển sinh": ["nhập học", "thi tuyển"],
+    "ngành": ["chuyên ngành", "môn học"],
+    "xét tuyển": ["tuyển chọn", "chọn lọc"]
+}
 
-# === CONFIG ===
-DB_NAME = "utt_detai25"
-FAQ_COLLECTION = "faqtuyensinh"
-FIRST_ROWS = 10  # 🔢 Modify this value to fetch more or fewer rows
+def suggest_synonyms(word):
+    return ", ".join(AUTO_SYNONYM_GROUPS.get(word, []))
 
-# === Load secrets ===
-MONGO_URI = st.secrets["mongo"]["uri"]
-OPENAI_API_KEY = st.secrets["api"]["key"]
-os.environ["OPENAI_API_KEY"] = OPENAI_API_KEY
+# Streamlit UI
+st.title("📚 Tạo Danh Sách Từ Đồng Nghĩa Tuyển Sinh Tiếng Việt")
+st.markdown("Tải lên file Excel chứa văn bản tiếng Việt. Ứng dụng sẽ trích xuất các từ liên quan đến tuyển sinh và đề xuất từ đồng nghĩa.")
 
-# MongoDB connection
-client_mongo = MongoClient(MONGO_URI)
-db = client_mongo[DB_NAME]
-faq_collection = db[FAQ_COLLECTION]
+uploaded_file = st.file_uploader("📂 Tải lên file Excel", type=["xlsx"])
 
-# Load paraphrasing model
-@st.cache_resource
-def load_model():
-    model_name = "VietAI/vit5-base-vietnews-summarization"
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForSeq2SeqLM.from_pretrained(model_name)
-    return tokenizer, model
+if uploaded_file:
+    try:
+        df = pd.read_excel(uploaded_file)
+        st.success("✅ File đã được tải lên thành công.")
 
-tokenizer, model = load_model()
+        if st.button("🚀 Tạo bản đồ từ đồng nghĩa"):
+            with st.spinner("🔄 Đang phân tích..."):
+                corpus = ' '.join(df.astype(str).apply(lambda x: ' '.join(x), axis=1))
+                tagged = underthesea.pos_tag(corpus)
 
-# Synonym groups
-SYNONYM_GROUPS = [
-    ["trụ sở", "cơ sở", "địa điểm"],
-    ["tổ hợp", "khối"],
-    ["chuẩn", "đỗ"],
-]
+                # Filter words with relevant POS tags
+                keywords = [
+                    word.lower() for word, tag in tagged
+                    if tag in ["N", "Np", "V"] and len(word) > 2
+                ]
 
-def find_synonym_groups(question):
-    present_groups = []
-    for group in SYNONYM_GROUPS:
-        if any(re.search(rf"\b{w}\b", question) for w in group):
-            present_groups.append(group)
-    return present_groups
+                # Count frequency
+                freq = Counter(keywords)
+                common = freq.most_common(200)
 
-def generate_synonym_variants(question):
-    groups = find_synonym_groups(question)
-    if not groups:
-        return [question]
-    combinations = list(itertools.product(*groups))
-    variants = set()
-    for combo in combinations:
-        new_q = question
-        for group, word in zip(groups, combo):
-            for w in group:
-                new_q = re.sub(rf"\b{w}\b", word, new_q)
-        variants.add(new_q)
-    return list(variants)
+                # Create DataFrame
+                df_synonyms = pd.DataFrame(common, columns=["base_word", "frequency"])
+                df_synonyms["suggested_synonyms"] = df_synonyms["base_word"].apply(suggest_synonyms)
+                df_synonyms["user_synonyms"] = ""  # for user to fill
 
-def paraphrase_question(question, num_return_sequences=1):
-    input_text = "paraphrase: " + question
-    inputs = tokenizer.encode(input_text, return_tensors="pt", max_length=128, truncation=True)
-    with torch.no_grad():
-        outputs = model.generate(
-            inputs,
-            max_length=128,
-            num_return_sequences=num_return_sequences,
-            do_sample=True,
-            top_k=50,
-            top_p=0.95,
-            temperature=0.8,
-        )
-    return [tokenizer.decode(o, skip_special_tokens=True) for o in outputs]
+                st.success(f"✅ Đã trích xuất {len(df_synonyms)} từ khóa.")
+                st.dataframe(df_synonyms.head(10))
 
-def expand_question(question):
-    all_variants = set()
-    synonym_variants = generate_synonym_variants(question)
-    for variant in synonym_variants:
-        all_variants.add(variant)
-        nlp_variants = paraphrase_question(variant, num_return_sequences=2)
-        all_variants.update(nlp_variants)
-    return list(all_variants)
-
-# === Streamlit App ===
-st.title("📚 Mở rộng câu hỏi tuyển sinh từ MongoDB")
-st.markdown(f"Dữ liệu được lấy từ bộ sưu tập `faqtuyensinh` (giới hạn {FIRST_ROWS} dòng đầu tiên).")
-
-if st.button("🚀 Tạo biến thể từ MongoDB"):
-    with st.spinner("🔄 Đang truy vấn MongoDB và tạo biến thể..."):
-        raw_data = list(faq_collection.find({}, {"_id": 0, "Question": 1, "Answer": 1}).limit(FIRST_ROWS))
-        expanded_rows = []
-
-        for item in raw_data:
-            question = str(item.get("Question", "")).strip()
-            answer = str(item.get("Answer", "")).strip()
-            if not question or not answer:
-                continue
-            variants = expand_question(question)
-            for vq in variants:
-                expanded_rows.append({"question": vq, "answer": answer})
-
-        expanded_df = pd.DataFrame(expanded_rows).drop_duplicates()
-        st.success(f"✅ Hoàn tất! Đã tạo {len(expanded_df)} cặp câu hỏi - trả lời.")
-        st.dataframe(expanded_df.head(10))
-
-        # Download button
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
-            expanded_df.to_excel(tmp.name, index=False)
-            st.download_button(
-                label="📥 Tải về file kết quả",
-                data=open(tmp.name, "rb").read(),
-                file_name="qa_expanded_from_mongo.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-            )
+                with tempfile.NamedTemporaryFile(delete=False, suffix=".xlsx") as tmp:
+                    df_synonyms.to_excel(tmp.name, index=False)
+                    st.download_button(
+                        label="📥 Tải về danh sách từ đồng nghĩa",
+                        data=open(tmp.name, "rb").read(),
+                        file_name="vietnamese_synonym_map_auto.xlsx",
+                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                    )
+    except Exception as e:
+        st.error(f"❌ Lỗi khi xử lý file: {str(e)}")

@@ -14,7 +14,8 @@ st.set_page_config(page_title="Quản lý Câu hỏi FAQ", page_icon="📄")
 st.title("📄 Tải lên dữ liệu Câu hỏi - FAQ")
 
 # Chọn chế độ thao tác dữ liệu
-mode = st.radio("Chọn chế độ lưu dữ liệu:", ("Thêm vào dữ liệu hiện có", "Xóa toàn bộ dữ liệu cũ và thêm mới"))
+#mode = st.radio("Chọn chế độ lưu dữ liệu:", ("Thêm vào dữ liệu hiện có", "Xóa toàn bộ dữ liệu cũ và thêm mới"))
+mode = st.radio("Chọn chế độ lưu dữ liệu:", ("Thêm vào dữ liệu hiện có"))
 
 # Tải lên tệp Excel
 uploaded_file = st.file_uploader("Tải lên file Excel (xlsx) chứa cột Question và Answer", type=["xlsx"])

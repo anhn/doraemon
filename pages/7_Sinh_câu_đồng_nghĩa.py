@@ -95,12 +95,12 @@ st.markdown(f"Dữ liệu được lấy từ bộ sưu tập `faqtuyensinh` (gi
 
 if st.button("🚀 Tạo biến thể từ MongoDB"):
     with st.spinner("🔄 Đang truy vấn MongoDB và tạo biến thể..."):
-        raw_data = list(faq_collection.find({}, {"_id": 0, "question": 1, "answer": 1}).limit(FIRST_ROWS))
+        raw_data = list(faq_collection.find({}, {"_id": 0, "Question": 1, "Answer": 1}).limit(FIRST_ROWS))
         expanded_rows = []
 
         for item in raw_data:
-            question = str(item.get("question", "")).strip()
-            answer = str(item.get("answer", "")).strip()
+            question = str(item.get("Question", "")).strip()
+            answer = str(item.get("Answer", "")).strip()
             if not question or not answer:
                 continue
             variants = expand_question(question)

@@ -18,3 +18,6 @@ python-docx
 nltk
 spacy
 openpyxl
+underthesea
+openpyxl 
+transformers

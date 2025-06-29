@@ -145,13 +145,22 @@ Chỉ trả về kết quả JSON hợp lệ, không giải thích thêm.
     # Try to parse dictionary content
     try:
         parsed = eval(content, {"__builtins__": None}, {})
-        st.write(parsed)
-        if isinstance(parsed, dict) and "query_type" in parsed and "extracted" in parsed:
-            return parsed
-        else:
-            return {"query_type": "unknown", "extracted": {}}
+        if isinstance(parsed, dict):
+            # If already flattened with expected keys
+            if "query_type" in parsed and "score_type" in parsed:
+                return {
+                    "query_type": parsed["query_type"],
+                    "extracted": {
+                        "field": parsed.get("field"),
+                        "score_type": parsed.get("score_type"),
+                        "score": parsed.get("score")
+                    }
+                }
+            elif "query_type" in parsed and "extracted" in parsed:
+                return parsed
     except Exception:
-        return {"query_type": "unknown", "extracted": {}}
+        pass    
+    return {"query_type": "unknown", "extracted": {}}
         
 # Load all .docx files from the current directory
 @st.cache_data

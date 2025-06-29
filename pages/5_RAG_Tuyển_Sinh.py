@@ -318,6 +318,7 @@ if user_input:
     parsed = parse_user_input(user_input)
     df = load_score_data()
     if parsed["score"] is not None:
+        generated_answer="Quá trình tư vấn điểm đầu vào cho thí sinh."
         if parsed["score_type"] is None:
             st.warning("❗ Vui lòng nhập lại câu hỏi kèm theo loại điểm (THPT hoặc học bạ). Bạn có thể hỏi: *Em được 25 điểm THPT, liệu có đỗ ngành Công nghệ thông tin không ạ?*")
         else:

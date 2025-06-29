@@ -394,7 +394,7 @@ if user_input:
                         st.warning("Không tìm thấy thông tin điểm chuẩn phù hợp.")
                 else:
                     st.info(f"🔍 Đang tra cứu các ngành phù hợp với điểm **{score}**, loại điểm **{score_type}**...")
-                    matches = find_matching_scores(df, score_type, field=None, score)
+                    matches = find_matching_scores(df, score_type, field=None, score=score)
                     if matches:
                         matches_df = pd.DataFrame(matches)
                         st.write("### ✅ Các ngành bạn có thể đủ điều kiện xét tuyển:")

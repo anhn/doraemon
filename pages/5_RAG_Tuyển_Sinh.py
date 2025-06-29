@@ -12,6 +12,7 @@ from datetime import datetime
 import pytz
 import requests
 from typing import Optional 
+import pandas as pd
 
 # Print the current working directory
 current_directory = os.getcwd()

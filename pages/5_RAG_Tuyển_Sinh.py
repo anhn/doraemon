@@ -393,7 +393,7 @@ if user_input:
                     else:
                         st.warning("Không tìm thấy thông tin điểm chuẩn phù hợp.")
                 else:
-                    st.info(f"🔍 Đang tra cứu các ngành phù hợp với điểm **{parsed['score']}**, loại điểm **{parsed['score_type']}**...")
+                    st.info(f"🔍 Đang tra cứu các ngành phù hợp với điểm **{score}**, loại điểm **{score_type}**...")
                     matches = find_matching_scores(df, score_type, field=None, score)
                     if matches:
                         matches_df = pd.DataFrame(matches)

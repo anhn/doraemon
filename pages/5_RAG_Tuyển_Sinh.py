@@ -348,12 +348,13 @@ if user_input:
                     st.warning("Không tìm thấy thông tin điểm chuẩn phù hợp.")
             else:
                 st.info(f"🔍 Đang tra cứu các ngành phù hợp với điểm **{parsed['score']}**, loại điểm **{parsed['score_type']}**...")
-                matches = find_matching_scores(df, parsed["score_type"], None, parsed["score"])
-                if not matches.empty:
+                matches = find_matching_scores(df, parsed["score_type"], field=None, score=parsed["score"])
+                if matches:
+                    matches_df = pd.DataFrame(matches)
                     st.write("### ✅ Các ngành bạn có thể đủ điều kiện xét tuyển:")
-                    st.dataframe(matches)
+                    st.dataframe(matches_df)
                 else:
-                    st.warning("Không có ngành nào phù hợp với điểm của bạn.")
+                    st.warning("Không có ngành nào phù hợp với mức điểm này.")
     else:
         # Retrieve FAQ-based responses
         best_faq_matches, faq_similarities = find_best_faq_matches(user_input)

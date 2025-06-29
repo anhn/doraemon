@@ -81,7 +81,10 @@ def parse_user_input(user_input: str) -> dict:
 def find_matching_scores(df, score_type: str, field: Optional[str], score: float):
     if field:
         # Case: field is provided
-        filtered = df[(df["ScoreType"] == score_type.lower()) & (df["Field"].str.lower() == field.lower())]
+        filtered = df[
+            (df["ScoreType"].str.lower() == score_type.lower()) &
+            (df["Field"].str.lower().str.contains(field.lower()))
+        ]
         results = []
         for year in [2023, 2024, 2025]:
             row = filtered[filtered["Year"] == year]

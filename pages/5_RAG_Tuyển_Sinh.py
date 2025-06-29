@@ -151,6 +151,7 @@ Chỉ trả về kết quả JSON hợp lệ, không giải thích thêm.
         parsed = eval(content, {"__builtins__": None}, {})
         if isinstance(parsed, dict):
             query_type = parsed.get("query_type", "unknown") 
+            st.write(query_type)
             # Normalize output: always wrap in "extracted"
             if query_type == "du_doan_do_nganh":
                 return {
@@ -422,7 +423,7 @@ if user_input:
                             escore = item["Score"]
                             estatus = item["Status"]
                             result_text = f"- Năm {eyear} | Ngành: **{efield}** | Điểm chuẩn: **{escore}** → {estatus}"
-                            st.write(result_text)
+                            #st.write(result_text)
                             result_texts.append(result_text)
                         generated_answer = "\n".join(result_texts)
                     else:

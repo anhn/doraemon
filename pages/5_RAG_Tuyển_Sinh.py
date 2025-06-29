@@ -150,30 +150,28 @@ Chỉ trả về kết quả JSON hợp lệ, không giải thích thêm.
     try:
         parsed = eval(content, {"__builtins__": None}, {})
         if isinstance(parsed, dict):
-        query_type = parsed.get("query_type", "unknown")
-
-        # Normalize output: always wrap in "extracted"
-        if query_type == "du_doan_do_nganh":
-            return {
-                "query_type": query_type,
-                "extracted": {
-                    "field": parsed.get("field"),
-                    "score_type": parsed.get("score_type"),
-                    "score": parsed.get("score")
+            query_type = parsed.get("query_type", "unknown") 
+            # Normalize output: always wrap in "extracted"
+            if query_type == "du_doan_do_nganh":
+                return {
+                    "query_type": query_type,
+                    "extracted": {
+                        "field": parsed.get("field"),
+                        "score_type": parsed.get("score_type"),
+                        "score": parsed.get("score")
+                    }
                 }
-            }
-        elif query_type == "tinh_diem_hoc_ba_uutien":
-            return {
-                "query_type": query_type,
-                "extracted": {
-                    "original_score": parsed.get("original_score"),
-                    "ielts_score": parsed.get("ielts_score"),
-                    "good_grade_years": parsed.get("good_grade_years"),
-                    "region": parsed.get("region")
-                    "policy": parsed.get("policy")
+            elif query_type == "tinh_diem_hoc_ba_uutien":
+                return {
+                    "query_type": query_type,
+                    "extracted": {
+                        "original_score": parsed.get("original_score"),
+                        "ielts_score": parsed.get("ielts_score"),
+                        "good_grade_years": parsed.get("good_grade_years"),
+                        "region": parsed.get("region")
+                        "policy": parsed.get("policy")
+                    }
                 }
-            }
-
     except Exception:
         pass    
     return {"query_type": "unknown", "extracted": {}}

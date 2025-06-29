@@ -13,6 +13,7 @@ import pytz
 import requests
 from typing import Optional 
 import pandas as pd
+import json
 
 # Print the current working directory
 current_directory = os.getcwd()
@@ -107,6 +108,48 @@ def find_matching_scores(df, score_type: str, field: Optional[str], score: float
         ]
         return filtered[["Field", "Year", "Score"]].to_dict(orient="records")
 
+def classify_and_extract_user_query(user_query: str):
+    system_prompt = """
+Bạn là hệ thống phân loại và trích xuất thông tin từ câu hỏi tuyển sinh của thí sinh.
+1. Nếu câu hỏi là loại "hỏi về cộng điểm" hoặc "tính điểm ưu tiên", hãy xuất ra JSON sau (nếu có):
+{
+  "query_type": "tinh_diem_uutien",
+  "original_score": <số điểm thi>,
+  "ielts_score": <điểm IELTS>,
+  "good_grade_years": <số năm học sinh giỏi>,
+  "region": <khu vực ưu tiên như KV1, KV2, KV2-NT, KV3>
+}
+2. Nếu câu hỏi là loại "em được XX điểm có đỗ vào ngành ... không?", hãy xuất ra JSON sau:
+{
+  "query_type": "du_doan_do_nganh",
+  "field": "<tên ngành>",
+  "score_type": "<thpt or học bạ>",
+  "score": <số điểm của thí sinh>
+}
+3. Nếu không nhận diện được, trả về:
+{
+  "query_type": "unknown"
+}
+Chỉ trả về kết quả JSON hợp lệ, không giải thích thêm.
+"""
+
+    response = openai_client.chat.completions.create(
+        model="gpt-4o",
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_query}
+        ]
+    )
+    content = response.choices[0].message.content.strip()    
+    # Try to parse dictionary content
+    try:
+        parsed = eval(content, {"__builtins__": None}, {})
+        if isinstance(parsed, dict) and "query_type" in parsed and "extracted" in parsed:
+            return parsed
+        else:
+            return {"query_type": "unknown", "extracted": {}}
+    except Exception:
+        return {"query_type": "unknown", "extracted": {}}
         
 # Load all .docx files from the current directory
 @st.cache_data
@@ -323,40 +366,52 @@ user_input = st.chat_input("Nhập câu hỏi của bạn...")
 if user_input:
     with st.chat_message("user"):
         st.write(user_input)
-    
-    #Tra cuu diem chuan
-    parsed = parse_user_input(user_input)
-    df = load_score_data()
-    if parsed["score"] is not None:
-        generated_answer="Quá trình tư vấn điểm đầu vào cho thí sinh."
-        if parsed["score_type"] is None:
-            st.warning("❗ Vui lòng nhập lại câu hỏi kèm theo loại điểm (THPT hoặc học bạ). Bạn có thể hỏi: *Em được 25 điểm THPT, liệu có đỗ ngành Công nghệ thông tin không ạ?*")
-        else:
-            if parsed["field"]:
-                st.info(f"🔍 Tra cứu điểm ngành **{parsed['field']}**, loại điểm **{parsed['score_type']}**, điểm của bạn: **{parsed['score']}**")
-                results = find_matching_scores(df, parsed["score_type"], parsed["field"], parsed["score"])
-                if results:
-                    for item in results:
-                        year = item["Year"]
-                        field = item["Field"]
-                        score = item["Score"]
-                        status = item["Status"]
-                        st.write(f"- Năm {year} | Ngành: **{field}** | Điểm chuẩn: **{score}** → {status}")
-                else:
-                    st.warning("Không tìm thấy thông tin điểm chuẩn phù hợp.")
+
+    parsed=classify_and_extract_user_query(user_input)
+    query_type = parsed.get("query_type")  
+    if query_type == "du_doan_do_nganh":
+        score = parsed["extracted"].get("score")
+        field = parsed["extracted"].get("field")
+        score_type = parsed["extracted"].get("score_type")
+        # Handle predicted admission logic here
+        df = load_score_data()
+        if score is not None:
+            generated_answer="Quá trình tư vấn điểm đầu vào cho thí sinh."
+            if score_type is None:
+                st.warning("❗ Vui lòng nhập lại câu hỏi kèm theo loại điểm (THPT hoặc học bạ). Bạn có thể hỏi: *Em được 25 điểm THPT, liệu có đỗ ngành Công nghệ thông tin không ạ?*")
             else:
-                st.info(f"🔍 Đang tra cứu các ngành phù hợp với điểm **{parsed['score']}**, loại điểm **{parsed['score_type']}**...")
-                matches = find_matching_scores(df, parsed["score_type"], field=None, score=parsed["score"])
-                if matches:
-                    matches_df = pd.DataFrame(matches)
-                    st.write("### ✅ Các ngành bạn có thể đủ điều kiện xét tuyển:")
-                    st.dataframe(matches_df)
+                if field:
+                    st.info(f"🔍 Tra cứu điểm ngành **{field}**, loại điểm **{score_type}**, điểm của bạn: **{score}**")
+                    results = find_matching_scores(df, score_type, field, score)
+                    if results:
+                        for item in results:
+                            eyear = item["Year"]
+                            efield = item["Field"]
+                            escore = item["Score"]
+                            estatus = item["Status"]
+                            st.write(f"- Năm {eyear} | Ngành: **{efield}** | Điểm chuẩn: **{escore}** → {estatus}")
+                    else:
+                        st.warning("Không tìm thấy thông tin điểm chuẩn phù hợp.")
                 else:
-                    st.warning("Không có ngành nào phù hợp với mức điểm này.")
+                    st.info(f"🔍 Đang tra cứu các ngành phù hợp với điểm **{parsed['score']}**, loại điểm **{parsed['score_type']}**...")
+                    matches = find_matching_scores(df, score_type, field=None, score)
+                    if matches:
+                        matches_df = pd.DataFrame(matches)
+                        st.write("### ✅ Các ngành bạn có thể đủ điều kiện xét tuyển:")
+                        st.dataframe(matches_df)
+                    else:
+                        st.warning("Không có ngành nào phù hợp với mức điểm này.")   
+    elif query_type == "tinh_diem_uutien":
+        ielts_score = parsed["extracted"].get("ielts_score")
+        good_years = parsed["extracted"].get("good_grade_years")
+        region = parsed["extracted"].get("region")
+        # Handle bonus point calculation here
+
+    #Tra cuu diem chuan
+    #parsed = parse_user_input(user_input)
     else:
         # Retrieve FAQ-based responses
         best_faq_matches, faq_similarities = find_best_faq_matches(user_input)
-    
         faq_context = ""
         for i, similarity in enumerate(faq_similarities):
             if similarity > 0.6:

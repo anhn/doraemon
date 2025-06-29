@@ -79,25 +79,34 @@ def parse_user_input(user_input: str) -> dict:
 
 # Search score database
 def find_matching_scores(df, score_type: str, field: Optional[str], score: float):
+    score_type = score_type.lower()
     if field:
-        # Case: field is provided
         filtered = df[
-            (df["ScoreType"].str.lower() == score_type.lower()) &
+            (df["ScoreType"].str.lower() == score_type) &
             (df["Field"].str.lower().str.contains(field.lower()))
         ]
         results = []
         for year in [2023, 2024, 2025]:
-            row = filtered[filtered["Year"] == year]
-            if not row.empty:
-                passing_score = float(row.iloc[0]["Score"])
+            rows = filtered[filtered["Year"] == year]
+            for _, row in rows.iterrows():
+                passing_score = float(row["Score"])
                 status = "✔️ Đủ điểm" if score >= passing_score else "❌ Không đủ điểm"
-                results.append((year, passing_score, status))
+                results.append({
+                    "Year": year,
+                    "Field": row["Field"],
+                    "Score": passing_score,
+                    "Status": status
+                })
         return results
     else:
-        # Case: no field -> show all fields that user score >= passing score
-        filtered = df[(df["ScoreType"] == score_type.lower()) & (df["Year"].isin([2024, 2025]))]
-        matched = filtered[filtered["Score"] <= score]
-        return matched[["Field", "Year", "Score"]]
+        # Nếu không có ngành cụ thể, tìm mọi ngành có điểm chuẩn <= điểm người dùng
+        filtered = df[
+            (df["ScoreType"].str.lower() == score_type) &
+            (df["Year"].isin([2024, 2025])) &
+            (df["Score"] <= score)
+        ]
+        return filtered[["Field", "Year", "Score"]].to_dict(orient="records")
+
         
 # Load all .docx files from the current directory
 @st.cache_data
@@ -329,8 +338,12 @@ if user_input:
                 st.info(f"🔍 Tra cứu điểm ngành **{parsed['field']}**, loại điểm **{parsed['score_type']}**, điểm của bạn: **{parsed['score']}**")
                 results = find_matching_scores(df, parsed["score_type"], parsed["field"], parsed["score"])
                 if results:
-                    for year, passing_score, status in results:
-                        st.write(f"- Năm {year}: Điểm chuẩn {passing_score} → {status}")
+                    for item in results:
+                        year = item["Year"]
+                        field = item["Field"]
+                        score = item["Score"]
+                        status = item["Status"]
+                        st.write(f"- Năm {year} | Ngành: **{field}** | Điểm chuẩn: **{score}** → {status}")
                 else:
                     st.warning("Không tìm thấy thông tin điểm chuẩn phù hợp.")
             else:

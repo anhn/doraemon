@@ -168,7 +168,7 @@ Chỉ trả về kết quả JSON hợp lệ, không giải thích thêm.
                         "original_score": parsed.get("original_score"),
                         "ielts_score": parsed.get("ielts_score"),
                         "good_grade_years": parsed.get("good_grade_years"),
-                        "region": parsed.get("region")
+                        "region": parsed.get("region"),
                         "policy": parsed.get("policy")
                     }
                 }

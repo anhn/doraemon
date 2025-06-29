@@ -119,7 +119,7 @@ Bạn là hệ thống phân loại và trích xuất thông tin từ câu hỏi
   "good_grade_years": <số năm học sinh giỏi>,
   "region": <khu vực ưu tiên như KV1, KV2, KV2-NT, KV3>
 }
-2. Nếu câu hỏi là loại "em được XX điểm có đỗ vào ngành ... không?", hãy xuất ra JSON sau:
+2. Nếu câu hỏi là loại "em được XX điểm học bạ có đỗ vào ngành ... không?", hãy xuất ra JSON sau:
 {
   "query_type": "du_doan_do_nganh",
   "field": "<tên ngành>",
@@ -141,6 +141,7 @@ Chỉ trả về kết quả JSON hợp lệ, không giải thích thêm.
         ]
     )
     content = response.choices[0].message.content.strip()    
+    st.write(content)
     # Try to parse dictionary content
     try:
         parsed = eval(content, {"__builtins__": None}, {})

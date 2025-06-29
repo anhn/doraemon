@@ -33,12 +33,11 @@ def extract_score_data(faq_data):
                 score = float(a.strip())
 
                 extracted.append({
-                    "Question": q,
-                    "Answer": a,
+                    "Score": score,
                     "ScoreType": score_type,
                     "Field": field,
                     "Year": year,
-                    "Score": score
+                    "Question": q
                 })
         except:
             continue

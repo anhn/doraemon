@@ -28,6 +28,7 @@ client_mongo = MongoClient(MONGO_URI)
 db = client_mongo[DB_NAME]
 faq_collection = db[FAQ_COLLECTION]
 chatlog_collection = db[CHATLOG_COLLECTION]
+score_collection = db["diemchuan"]
 
 # Load OpenAI API Key
 os.environ["OPENAI_API_KEY"] = st.secrets["api"]["key"]
@@ -56,6 +57,43 @@ def split_text_into_chunks(text, chunk_size=512, overlap=128):
         chunks.append(" ".join(words[i:i + chunk_size]))
     return chunks
 
+# Load data from diemchuan collection into DataFrame
+def load_score_data():
+    data = list(score_collection.find({}, {"_id": 0}))
+    return pd.DataFrame(data)
+
+# Extract score, type and field name from user input
+def parse_user_input(user_input: str) -> dict:
+    score_match = re.search(r"\b(\d{1,2}(?:\.\d)?)\b", user_input)
+    type_match = re.search(r"(thpt|học bạ)", user_input, re.IGNORECASE)
+    field_match = re.search(r"ngành\s+(.+?)(?:\s+năm|\?|$)", user_input, re.IGNORECASE)
+
+    extracted = {
+        "score": float(score_match.group(1)) if score_match else None,
+        "score_type": type_match.group(1).strip().lower() if type_match else None,
+        "field": field_match.group(1).strip() if field_match else None
+    }
+    return extracted
+
+# Search score database
+def find_matching_scores(df, score_type: str, field: Optional[str], score: float):
+    if field:
+        # Case: field is provided
+        filtered = df[(df["ScoreType"] == score_type.lower()) & (df["Field"].str.lower() == field.lower())]
+        results = []
+        for year in [2023, 2024, 2025]:
+            row = filtered[filtered["Year"] == year]
+            if not row.empty:
+                passing_score = float(row.iloc[0]["Score"])
+                status = "✔️ Đủ điểm" if score >= passing_score else "❌ Không đủ điểm"
+                results.append((year, passing_score, status))
+        return results
+    else:
+        # Case: no field -> show all fields that user score >= passing score
+        filtered = df[(df["ScoreType"] == score_type.lower()) & (df["Year"].isin([2024, 2025]))]
+        matched = filtered[filtered["Score"] <= score]
+        return matched[["Field", "Year", "Score"]]
+        
 # Load all .docx files from the current directory
 @st.cache_data
 def load_documents():
@@ -273,42 +311,55 @@ user_input = st.chat_input("Nhập câu hỏi của bạn...")
 if user_input:
     with st.chat_message("user"):
         st.write(user_input)
-
-    # Retrieve FAQ-based responses
-    best_faq_matches, faq_similarities = find_best_faq_matches(user_input)
-
-    faq_context = ""
-    for i, similarity in enumerate(faq_similarities):
-        if similarity > 0.6:
-            faq_context += f"Q: {best_faq_matches[i]['Question']}\nA: {best_faq_matches[i]['Answer']}\n\n"
-
-    # If no good FAQ match is found, use all document text as context
-    #if not faq_context:
-    #    all_documents_context = combine_all_document_texts()
-    #    preview_documents(documents)
-    #    final_context = all_documents_context
-    #else:
-    #    final_context = faq_context
-
-    # Retrieve document-based context
-    doc_context = retrieve_best_chunk(user_input)[1] if best_faq_matches else ""
-
-    # Combine FAQ context and document context
-    final_context = f"{faq_context}\n\n{doc_context}" if faq_context else doc_context
-    #st.write(final_context)
-    # Generate response with GPT
-    #generated_answer, input_tokens, output_tokens, total_tokens = generate_gpt_response(user_input, final_context)
-    generated_answer = generate_gpt_response(user_input, final_context)
-    # Display the response
-    with st.chat_message("assistant"):
-        st.success("💡 **Câu trả lời:**")
-        st.write(generated_answer)
-
-    # Display the number of tokens used
-    #st.write(f"Tokens used: Input = {input_tokens}, Output = {output_tokens}, Total = {total_tokens}")
-
-    # Append conversation to session history
-    st.session_state["chat_history"].append({"user": user_input, "bot": generated_answer})
+    
+    #Tra cuu diem chuan
+    parsed = parse_user_input(user_input)
+    df = load_score_data()
+    if parsed["score"] is not None:
+        if parsed["score_type"] is None:
+            st.warning("❗ Vui lòng nhập lại câu hỏi kèm theo loại điểm (THPT hoặc học bạ). Bạn có thể hỏi: *Em được 25 điểm THPT, liệu có đỗ ngành Công nghệ thông tin không ạ?*")
+        else:
+            if parsed["field"]:
+                st.info(f"🔍 Tra cứu điểm ngành **{parsed['field']}**, loại điểm **{parsed['score_type']}**, điểm của bạn: **{parsed['score']}**")
+                results = find_matching_scores(df, parsed["score_type"], parsed["field"], parsed["score"])
+                if results:
+                    for year, passing_score, status in results:
+                        st.write(f"- Năm {year}: Điểm chuẩn {passing_score} → {status}")
+                else:
+                    st.warning("Không tìm thấy thông tin điểm chuẩn phù hợp.")
+            else:
+                st.info(f"🔍 Đang tra cứu các ngành phù hợp với điểm **{parsed['score']}**, loại điểm **{parsed['score_type']}**...")
+                matches = find_matching_scores(df, parsed["score_type"], None, parsed["score"])
+                if not matches.empty:
+                    st.write("### ✅ Các ngành bạn có thể đủ điều kiện xét tuyển:")
+                    st.dataframe(matches)
+                else:
+                    st.warning("Không có ngành nào phù hợp với điểm của bạn.")
+    else:
+        # Retrieve FAQ-based responses
+        best_faq_matches, faq_similarities = find_best_faq_matches(user_input)
+    
+        faq_context = ""
+        for i, similarity in enumerate(faq_similarities):
+            if similarity > 0.6:
+                faq_context += f"Q: {best_faq_matches[i]['Question']}\nA: {best_faq_matches[i]['Answer']}\n\n"
+    
+        # Retrieve document-based context
+        doc_context = retrieve_best_chunk(user_input)[1] if best_faq_matches else ""
+    
+        # Combine FAQ context and document context
+        final_context = f"{faq_context}\n\n{doc_context}" if faq_context else doc_context
+        #st.write(final_context)
+        # Generate response with GPT
+        #generated_answer, input_tokens, output_tokens, total_tokens = generate_gpt_response(user_input, final_context)
+        generated_answer = generate_gpt_response(user_input, final_context)
+        # Display the response
+        with st.chat_message("assistant"):
+            st.success("💡 **Câu trả lời:**")
+            st.write(generated_answer)
+            
+        # Append conversation to session history
+        st.session_state["chat_history"].append({"user": user_input, "bot": generated_answer})
 
     # Log to MongoDB
     chatlog_entry = {

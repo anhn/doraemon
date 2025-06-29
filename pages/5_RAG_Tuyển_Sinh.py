@@ -111,13 +111,17 @@ def find_matching_scores(df, score_type: str, field: Optional[str], score: float
 def classify_and_extract_user_query(user_query: str):
     system_prompt = """
 Bạn là hệ thống phân loại và trích xuất thông tin từ câu hỏi tuyển sinh của thí sinh.
-1. Nếu câu hỏi là loại "hỏi về cộng điểm" hoặc "tính điểm ưu tiên", hãy xuất ra JSON sau (nếu có):
+1. Nếu câu hỏi là loại "hỏi về cộng điểm học bạ" hoặc "tính điểm ưu tiên học bạ", dựa vào thông tin sau: 
+Region: KV1 (miền núi, vùng núi, ven biển, hải đảo, biên giới, các thôn đặc biệt khó khăn, xã an toàn khu, ...), KV2-NT (khu vực nông thôn không thuộc KV1), KV2 (các thị xã, thành phố trực thuộc tỉnh; các thị xã, huyện ngoại thành ), KV3 (quận nội thành, thành phố).
+Policy: UT1 hoặc UT2
+hãy xuất ra JSON sau (nếu có):
 {
-  "query_type": "tinh_diem_uutien",
+  "query_type": "tinh_diem_hoc_ba_uutien",
   "original_score": <số điểm thi>,
   "ielts_score": <điểm IELTS>,
   "good_grade_years": <số năm học sinh giỏi>,
   "region": <khu vực ưu tiên như KV1, KV2, KV2-NT, KV3>
+  "policy": <UT1, UT2>
 }
 2. Nếu câu hỏi là loại "em được XX điểm học bạ có đỗ vào ngành ... không?", hãy xuất ra JSON sau:
 {
@@ -146,18 +150,30 @@ Chỉ trả về kết quả JSON hợp lệ, không giải thích thêm.
     try:
         parsed = eval(content, {"__builtins__": None}, {})
         if isinstance(parsed, dict):
-            # If already flattened with expected keys
-            if "query_type" in parsed and "score_type" in parsed:
-                return {
-                    "query_type": parsed["query_type"],
-                    "extracted": {
-                        "field": parsed.get("field"),
-                        "score_type": parsed.get("score_type"),
-                        "score": parsed.get("score")
-                    }
+        query_type = parsed.get("query_type", "unknown")
+
+        # Normalize output: always wrap in "extracted"
+        if query_type == "du_doan_do_nganh":
+            return {
+                "query_type": query_type,
+                "extracted": {
+                    "field": parsed.get("field"),
+                    "score_type": parsed.get("score_type"),
+                    "score": parsed.get("score")
                 }
-            elif "query_type" in parsed and "extracted" in parsed:
-                return parsed
+            }
+        elif query_type == "tinh_diem_hoc_ba_uutien":
+            return {
+                "query_type": query_type,
+                "extracted": {
+                    "original_score": parsed.get("original_score"),
+                    "ielts_score": parsed.get("ielts_score"),
+                    "good_grade_years": parsed.get("good_grade_years"),
+                    "region": parsed.get("region")
+                    "policy": parsed.get("policy")
+                }
+            }
+
     except Exception:
         pass    
     return {"query_type": "unknown", "extracted": {}}
@@ -389,22 +405,32 @@ if user_input:
         # Handle predicted admission logic here
         df = load_score_data()
         if score is not None:
-            generated_answer="Quá trình tư vấn điểm đầu vào cho thí sinh."
             if score_type is None:
-                st.warning("❗ Vui lòng nhập lại câu hỏi kèm theo loại điểm (THPT hoặc học bạ). Bạn có thể hỏi: *Em được 25 điểm THPT, liệu có đỗ ngành Công nghệ thông tin không ạ?*")
+                warning_msg = (
+                    "❗ Vui lòng nhập lại câu hỏi kèm theo loại điểm (THPT hoặc học bạ). "
+                    "Bạn có thể hỏi: *Em được 25 điểm THPT, liệu có đỗ ngành Công nghệ thông tin không ạ?*"
+                )
+                st.warning(warning_msg)
+                generated_answer = warning_msg
             else:
                 if field:
                     st.info(f"🔍 Tra cứu điểm ngành **{field}**, loại điểm **{score_type}**, điểm của bạn: **{score}**")
                     results = find_matching_scores(df, score_type, field, score)
                     if results:
+                        result_texts = []
                         for item in results:
                             eyear = item["Year"]
                             efield = item["Field"]
                             escore = item["Score"]
                             estatus = item["Status"]
-                            st.write(f"- Năm {eyear} | Ngành: **{efield}** | Điểm chuẩn: **{escore}** → {estatus}")
+                            result_text = f"- Năm {eyear} | Ngành: **{efield}** | Điểm chuẩn: **{escore}** → {estatus}"
+                            st.write(result_text)
+                            result_texts.append(result_text)
+                        generated_answer = "\n".join(result_texts)
                     else:
-                        st.warning("Không tìm thấy thông tin điểm chuẩn phù hợp.")
+                        warning_msg = "⚠️ Không tìm thấy thông tin điểm chuẩn phù hợp cho ngành đã nhập."
+                        st.warning(warning_msg)
+                        generated_answer = warning_msg
                 else:
                     st.info(f"🔍 Đang tra cứu các ngành phù hợp với điểm **{score}**, loại điểm **{score_type}**...")
                     matches = find_matching_scores(df, score_type, field=None, score=score)
@@ -412,13 +438,115 @@ if user_input:
                         matches_df = pd.DataFrame(matches)
                         st.write("### ✅ Các ngành bạn có thể đủ điều kiện xét tuyển:")
                         st.dataframe(matches_df)
+                        generated_answer = "✅ Một số ngành bạn có thể đủ điều kiện xét tuyển:\n" + "\n".join(
+                            f"- {row['Field']} ({row['Score']} điểm, năm {row['Year']}) → {row['Status']}"
+                            for _, row in matches_df.iterrows()
+                        )
                     else:
-                        st.warning("Không có ngành nào phù hợp với mức điểm này.")   
-    elif query_type == "tinh_diem_uutien":
+                        warning_msg = "⚠️ Không có ngành nào phù hợp với mức điểm này."
+                        st.warning(warning_msg)
+                        generated_answer = warning_msg
+        else:
+            warning_msg = "⚠️ Không phát hiện điểm trong câu hỏi. Vui lòng nhập điểm để tiếp tục tư vấn."
+            st.warning(warning_msg)
+            generated_answer = warning_msg
+
+    elif query_type == "tinh_diem_hoc_ba_uutien":
+        original_score = parsed["extracted"].get("original_score")
         ielts_score = parsed["extracted"].get("ielts_score")
         good_years = parsed["extracted"].get("good_grade_years")
         region = parsed["extracted"].get("region")
-        # Handle bonus point calculation here
+        policy = parsed["extracted"].get("policy")
+    
+        # Initialize bonuses
+        bonus = 0.0
+        priority_region = 0.0
+        priority_policy = 0.0
+        max_score = 30.0
+    
+        # Calculate bonus based on IELTS
+        try:
+            ielts_score = float(ielts_score) if ielts_score else None
+            if ielts_score:
+                if 4.5 <= ielts_score < 5.0:
+                    bonus += 0.75
+                elif 5.0 <= ielts_score < 6.0:
+                    bonus += 1.0
+                elif 6.0 <= ielts_score < 7.0:
+                    bonus += 1.25
+                elif ielts_score >= 7.0:
+                    bonus += 1.5
+        except:
+            pass
+    
+        # Calculate bonus based on good grade years
+        try:
+            good_years = int(good_years) if good_years else None
+            if good_years == 1:
+                bonus += 0.3
+            elif good_years == 2:
+                bonus += 0.6
+            elif good_years >= 3:
+                bonus += 0.9
+        except:
+            pass
+    
+        # Calculate priority based on region
+        region = str(region).strip().upper() if region else ""
+        if region == "KV1":
+            priority_region = 0.75
+        elif region == "KV2-NT":
+            priority_region = 0.5
+        elif region == "KV2":
+            priority_region = 0.25
+        elif region == "KV3":
+            priority_region = 0.0
+    
+        # Calculate priority based on policy group
+        policy = str(policy).strip().upper() if policy else ""
+        if policy == "UT1":
+            priority_policy = 2.0
+        elif policy == "UT2":
+            priority_policy = 1.0
+    
+        total_priority = priority_region + priority_policy
+    
+        # Final calculation
+        if not original_score:
+            total_added = round(bonus + total_priority, 2)
+            generated_answer = (
+                f"✅ Bạn được cộng tổng cộng **{total_added} điểm**.\n\n"
+                f"- Điểm cộng thưởng: **{bonus}**\n"
+                f"- Điểm ưu tiên khu vực: **{priority_region}**\n"
+                f"- Điểm ưu tiên đối tượng chính sách: **{priority_policy}**\n\n"
+                f"➡️ Bạn có thể cộng thêm vào điểm học bạ khi xét tuyển theo phương thức học bạ kết hợp."
+            )
+        else:
+            try:
+                original_score = float(original_score)
+                combined_score = original_score + bonus
+    
+                if combined_score >= max_score:
+                    final_score = max_score
+                    added_priority = 0
+                elif combined_score >= 22.5:
+                    added_priority = round(((max_score - combined_score) / 7.5) * total_priority, 2)
+                    final_score = round(combined_score + added_priority, 2)
+                else:
+                    added_priority = total_priority
+                    final_score = round(combined_score + added_priority, 2)
+    
+                generated_answer = (
+                    f"✅ Điểm xét tuyển của bạn sau khi cộng:\n"
+                    f"- Điểm học bạ ban đầu: **{original_score}**\n"
+                    f"- Điểm cộng thưởng: **{bonus}**\n"
+                    f"- Điểm ưu tiên khu vực: **{priority_region}**\n"
+                    f"- Điểm ưu tiên chính sách: **{priority_policy}**\n"
+                    f"- Tổng điểm ưu tiên được cộng: **{added_priority}**\n\n"
+                    f"➡️ **Tổng điểm xét tuyển: {final_score}** (tối đa 30 điểm)"
+                )
+            except:
+                generated_answer = "⚠️ Lỗi khi tính điểm xét tuyển. Vui lòng kiểm tra lại điểm đầu vào."
 
     #Tra cuu diem chuan
     #parsed = parse_user_input(user_input)
@@ -439,13 +567,13 @@ if user_input:
         # Generate response with GPT
         #generated_answer, input_tokens, output_tokens, total_tokens = generate_gpt_response(user_input, final_context)
         generated_answer = generate_gpt_response(user_input, final_context)
-        # Display the response
-        with st.chat_message("assistant"):
-            st.success("💡 **Câu trả lời:**")
-            st.write(generated_answer)
-            
-        # Append conversation to session history
-        st.session_state["chat_history"].append({"user": user_input, "bot": generated_answer})
+    # Display the response
+    with st.chat_message("assistant"):
+        st.success("💡 **Câu trả lời:**")
+        st.write(generated_answer)
+        
+    # Append conversation to session history
+    st.session_state["chat_history"].append({"user": user_input, "bot": generated_answer})
 
     # Log to MongoDB
     chatlog_entry = {

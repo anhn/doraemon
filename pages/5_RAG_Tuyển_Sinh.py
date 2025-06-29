@@ -298,7 +298,8 @@ if user_input:
     #st.write(final_context)
     # Generate response with GPT
     #generated_answer, input_tokens, output_tokens, total_tokens = generate_gpt_response(user_input, final_context)
-    generated_answer = generate_gpt_response(user_input, final_context)
+    #generated_answer = generate_gpt_response(user_input, final_context)
+    generated_answer = generate_gpt_response(user_input, doc_context)
     # Display the response
     with st.chat_message("assistant"):
         st.success("💡 **Câu trả lời:**")

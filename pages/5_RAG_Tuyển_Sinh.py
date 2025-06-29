@@ -269,7 +269,6 @@ def generate_gpt_response(question, context):
     estimated_token_count = estimate_token_count(context)
     if estimated_token_count > max_token_limit:
         context = " ".join(context.split()[:max_token_limit])  # Cut off the context to the first 8000 tokens
-    st.write(context)
     prompt = (
         f"Một sinh viên hỏi: {question}\n\n"
         f"Dựa trên thông tin sau đây, hãy cung cấp một câu trả lời hữu ích, ngắn gọn và thân thiện. "
@@ -286,7 +285,6 @@ def generate_gpt_response(question, context):
             #,max_tokens=3000,
             #temperature=0.7
         )
-        #st.write(response)
         # Extract the response and the token usage
         generated_answer = response.choices[0].message.content.strip()
         #st.write(generated_answer)

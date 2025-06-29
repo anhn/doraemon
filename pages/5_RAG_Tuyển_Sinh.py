@@ -368,7 +368,9 @@ if user_input:
         st.write(user_input)
 
     parsed=classify_and_extract_user_query(user_input)
-    query_type = parsed.get("query_type")  
+    query_type = parsed.get("query_type")
+    st.write(query_type)
+    st.write(parsed["extracted"])
     if query_type == "du_doan_do_nganh":
         score = parsed["extracted"].get("score")
         field = parsed["extracted"].get("field")

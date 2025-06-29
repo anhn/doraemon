@@ -11,6 +11,7 @@ import re
 from datetime import datetime
 import pytz
 import requests
+from typing import Optional 
 
 # Print the current working directory
 current_directory = os.getcwd()

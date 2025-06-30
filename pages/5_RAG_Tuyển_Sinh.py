@@ -111,7 +111,7 @@ def find_matching_scores(df, score_type: str, field: Optional[str], score: float
 def classify_and_extract_user_query(user_query: str):
     system_prompt = """
 Bạn là hệ thống phân loại và trích xuất thông tin từ câu hỏi tuyển sinh của thí sinh.
-1. Nếu câu hỏi là loại "hỏi về cộng điểm học bạ" hoặc "tính điểm ưu tiên học bạ", dựa vào thông tin sau: 
+1. Nếu câu hỏi là loại "cộng điểm học bạ" hoặc "tính điểm ưu tiên học bạ" hoặc "tổng điểm thưởng", "tổng điểm ưu tiên", dựa vào thông tin sau: 
 Region: KV1 (miền núi, vùng núi, ven biển, hải đảo, biên giới, các thôn đặc biệt khó khăn, xã an toàn khu, ...), KV2-NT (khu vực nông thôn không thuộc KV1), KV2 (các thị xã, thành phố trực thuộc tỉnh; các thị xã, huyện ngoại thành ), KV3 (quận nội thành, thành phố).
 Policy: UT1 hoặc UT2
 hãy xuất ra JSON sau (nếu có):
@@ -123,7 +123,11 @@ hãy xuất ra JSON sau (nếu có):
   "region": <khu vực ưu tiên như KV1, KV2, KV2-NT, KV3>,
   "policy": <UT1, UT2>
 }
-2. Nếu câu hỏi là loại "em được XX điểm học bạ có đỗ vào ngành ... không?", hãy xuất ra JSON sau:
+2. Nếu câu hỏi là như:
+"em được XX điểm học bạ có đỗ vào ngành ... không?", 
+"em được XX điểm thi THPT có đỗ vào ngành ... không?", 
+"XX điểm thpt đỗ gì ko ạ ?"
+hãy xuất ra JSON sau:
 {
   "query_type": "du_doan_do_nganh",
   "field": "<tên ngành>",

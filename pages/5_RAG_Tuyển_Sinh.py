@@ -152,8 +152,6 @@ Chỉ trả về kết quả JSON hợp lệ, không giải thích thêm.
     st.write(content)
     # Try to parse dictionary content
     try:
-
-    try:
         #parsed = eval(content, {"__builtins__": None}, {})
         parsed = json.loads(content)
         #st.write("Parsed:", parsed)

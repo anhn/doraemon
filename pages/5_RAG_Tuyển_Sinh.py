@@ -149,6 +149,7 @@ Chỉ trả về kết quả JSON hợp lệ, không giải thích thêm.
     # Try to parse dictionary content
     try:
         parsed = eval(content, {"__builtins__": None}, {})
+        st.write(parsed)
         if isinstance(parsed, dict):
             query_type = parsed.get("query_type", "unknown") 
             st.write(query_type)

@@ -441,7 +441,7 @@ if user_input:
                         st.write("### ✅ Các ngành bạn có thể đủ điều kiện xét tuyển:")
                         st.dataframe(matches_df)
                         generated_answer = "✅ Một số ngành bạn có thể đủ điều kiện xét tuyển:\n" + "\n".join(
-                            f"- {row['Field']} ({row['Score']} điểm, năm {row['Year']})}"
+                            f"- {row['Field']} ({row['Score']} điểm, năm {row['Year']})"
                             for _, row in matches_df.iterrows()
                         )
                     else:

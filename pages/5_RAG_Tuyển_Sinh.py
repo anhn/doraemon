@@ -526,10 +526,10 @@ if user_input:
     
                 if combined_score >= max_score:
                     final_score = max_score
-                    added_priority = 0
+                    adjusted_total_priority = 0
                 elif combined_score >= 22.5:
-                    added_priority = round(((max_score - combined_score) / 7.5) * total_priority, 2)
-                    final_score = round(combined_score + added_priority, 2)
+                    adjusted_total_priority = round(((max_score - combined_score) / 7.5) * total_priority, 2)
+                    final_score = round(combined_score + adjusted_total_priority, 2)
                 else:
                     added_priority = total_priority
                     final_score = round(combined_score + added_priority, 2)

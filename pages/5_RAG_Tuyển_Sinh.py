@@ -120,7 +120,7 @@ hãy xuất ra JSON sau (nếu có):
   "original_score": <số điểm thi>,
   "ielts_score": <điểm IELTS>,
   "good_grade_years": <số năm học sinh giỏi>,
-  "region": <khu vực ưu tiên như KV1, KV2, KV2-NT, KV3>
+  "region": <khu vực ưu tiên như KV1, KV2, KV2-NT, KV3>,
   "policy": <UT1, UT2>
 }
 2. Nếu câu hỏi là loại "em được XX điểm học bạ có đỗ vào ngành ... không?", hãy xuất ra JSON sau:
@@ -147,8 +147,9 @@ Chỉ trả về kết quả JSON hợp lệ, không giải thích thêm.
     content = response.choices[0].message.content.strip()    
     # Try to parse dictionary content
     try:
-        parsed = eval(content, {"__builtins__": None}, {})
-        st.write("Parsed" + parsed)
+        #parsed = eval(content, {"__builtins__": None}, {})
+        parsed = json.loads(content)
+        st.write("Parsed:", parsed)
         if isinstance(parsed, dict):
             query_type = parsed.get("query_type", "unknown") 
             # Normalize output: always wrap in "extracted"
@@ -394,8 +395,6 @@ if user_input:
 
     parsed=classify_and_extract_user_query(user_input)
     query_type = parsed.get("query_type")
-    st.write(query_type)
-    st.write(parsed["extracted"])
     if query_type == "du_doan_do_nganh":
         score = parsed["extracted"].get("score")
         field = parsed["extracted"].get("field")

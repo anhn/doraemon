@@ -531,8 +531,8 @@ if user_input:
                     adjusted_total_priority = round(((max_score - combined_score) / 7.5) * total_priority, 2)
                     final_score = round(combined_score + adjusted_total_priority, 2)
                 else:
-                    added_priority = total_priority
-                    final_score = round(combined_score + added_priority, 2)
+                    adjusted_total_priority = total_priority
+                    final_score = round(combined_score + total_priority, 2)
     
                 generated_answer = (
                     f"✅ Điểm xét tuyển của bạn sau khi cộng:\n"
@@ -540,7 +540,7 @@ if user_input:
                     f"- Điểm cộng thưởng: **{bonus}**\n"
                     f"- Điểm ưu tiên khu vực: **{priority_region}**\n"
                     f"- Điểm ưu tiên chính sách: **{priority_policy}**\n"
-                    f"- Tổng điểm ưu tiên được cộng: **{added_priority}**\n\n"
+                    f"- Tổng điểm ưu tiên được cộng: **{adjusted_total_priority}**\n\n"
                     f"➡️ **Tổng điểm xét tuyển: {final_score}** (tối đa 30 điểm)"
                 )
             except:

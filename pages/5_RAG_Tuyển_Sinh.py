@@ -66,17 +66,17 @@ def load_score_data():
     return pd.DataFrame(data)
 
 # Extract score, type and field name from user input
-def parse_user_input(user_input: str) -> dict:
-    score_match = re.search(r"\b(\d{1,2}(?:\.\d)?)\b", user_input)
-    type_match = re.search(r"(thpt|học bạ)", user_input, re.IGNORECASE)
-    field_match = re.search(r"ngành\s+(.+?)(?:\s+năm|\?|$)", user_input, re.IGNORECASE)
-
-    extracted = {
-        "score": float(score_match.group(1)) if score_match else None,
-        "score_type": type_match.group(1).strip().lower() if type_match else None,
-        "field": field_match.group(1).strip() if field_match else None
-    }
-    return extracted
+#def parse_user_input(user_input: str) -> dict:
+#    score_match = re.search(r"\b(\d{1,2}(?:\.\d)?)\b", user_input)
+#    type_match = re.search(r"(thpt|học bạ)", user_input, re.IGNORECASE)
+#    field_match = re.search(r"ngành\s+(.+?)(?:\s+năm|\?|$)", user_input, re.IGNORECASE)
+#
+#    extracted = {
+#        "score": float(score_match.group(1)) if score_match else None,
+#        "score_type": type_match.group(1).strip().lower() if type_match else None,
+#        "field": field_match.group(1).strip() if field_match else None
+#    }
+#    return extracted
 
 # Search score database
 def find_matching_scores(df, score_type: str, field: Optional[str], score: float):
@@ -152,8 +152,10 @@ Chỉ trả về kết quả JSON hợp lệ, không giải thích thêm.
     st.write(content)
     # Try to parse dictionary content
     try:
-        parsed = eval(content, {"__builtins__": None}, {})
-        #parsed = json.loads(content)
+
+    try:
+        #parsed = eval(content, {"__builtins__": None}, {})
+        parsed = json.loads(content)
         #st.write("Parsed:", parsed)
         if isinstance(parsed, dict):
             query_type = parsed.get("query_type", "unknown") 
@@ -178,6 +180,8 @@ Chỉ trả về kết quả JSON hợp lệ, không giải thích thêm.
                         "policy": parsed.get("policy")
                     }
                 }
+    except json.JSONDecodeError as e:
+        st.error(f"❌ JSON decode error: {e}")
     except Exception:
         pass    
     return {"query_type": "unknown", "extracted": {}}

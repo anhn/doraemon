@@ -145,14 +145,12 @@ Chỉ trả về kết quả JSON hợp lệ, không giải thích thêm.
         ]
     )
     content = response.choices[0].message.content.strip()    
-    st.write(content)
     # Try to parse dictionary content
     try:
         parsed = eval(content, {"__builtins__": None}, {})
-        st.write(parsed)
+        st.write("Parsed" + parsed)
         if isinstance(parsed, dict):
             query_type = parsed.get("query_type", "unknown") 
-            st.write(query_type)
             # Normalize output: always wrap in "extracted"
             if query_type == "du_doan_do_nganh":
                 return {

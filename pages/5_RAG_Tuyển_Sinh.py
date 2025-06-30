@@ -149,7 +149,7 @@ Chỉ trả về kết quả JSON hợp lệ, không giải thích thêm.
     try:
         #parsed = eval(content, {"__builtins__": None}, {})
         parsed = json.loads(content)
-        st.write("Parsed:", parsed)
+        #st.write("Parsed:", parsed)
         if isinstance(parsed, dict):
             query_type = parsed.get("query_type", "unknown") 
             # Normalize output: always wrap in "extracted"

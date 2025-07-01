@@ -138,7 +138,7 @@ hãy xuất ra JSON sau:
 {
   "query_type": "unknown"
 }
-Chỉ trả về kết quả JSON hợp lệ, không giải thích thêm.
+Chỉ xuất ra nội dung JSON hợp lệ (bắt đầu bằng `{`, kết thúc bằng `}`), không thêm văn bản thừa, không có bình luận.
 """
 
     response = openai_client.chat.completions.create(
@@ -162,8 +162,8 @@ Chỉ trả về kết quả JSON hợp lệ, không giải thích thêm.
                 return {
                     "query_type": query_type,
                     "extracted": {
-                        "field": parsed.get("field"),
-                        "score_type": parsed.get("score_type"),
+                        "field": parsed.get("field") or None,
+                        "score_type": parsed.get("score_type") or None,
                         "score": parsed.get("score")
                     }
                 }
@@ -172,10 +172,10 @@ Chỉ trả về kết quả JSON hợp lệ, không giải thích thêm.
                     "query_type": query_type,
                     "extracted": {
                         "original_score": parsed.get("original_score"),
-                        "ielts_score": parsed.get("ielts_score"),
-                        "good_grade_years": parsed.get("good_grade_years"),
-                        "region": parsed.get("region"),
-                        "policy": parsed.get("policy")
+                        "ielts_score": parsed.get("ielts_score") or None,
+                        "good_grade_years": parsed.get("good_grade_years") or None,
+                        "region": parsed.get("region") or None,
+                        "policy": parsed.get("policy") or None
                     }
                 }
     except json.JSONDecodeError as e:
@@ -522,7 +522,7 @@ if user_input:
                 f"✅ Bạn được cộng tổng cộng **{total_added} điểm**.\n\n"
                 f"- Điểm cộng thưởng: **{bonus}**\n"
                 f"- Điểm ưu tiên khu vực: **{priority_region}**\n"
-                f"- Điểm ưu tiên đối tượng chính sách: **{priority_policy}**\n\n"
+                f"- Điểm ưu tiên đối tượng: **{priority_policy}**\n\n"
                 f"➡️ Bạn có thể cộng thêm vào điểm học bạ khi xét tuyển theo phương thức học bạ kết hợp."
             )
         else:

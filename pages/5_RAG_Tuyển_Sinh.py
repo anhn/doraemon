@@ -15,6 +15,7 @@ from typing import Optional
 import pandas as pd
 import json
 import math, string
+from collections import Counter
 # Print the current working directory
 current_directory = os.getcwd()
 
@@ -572,9 +573,9 @@ if user_input and is_valid(user_input):
                     f"- Điểm học bạ ban đầu: **{original_score}**\n"
                     f"- Điểm cộng thưởng: **{bonus}**\n"
                     f"- Điểm ưu tiên khu vực: **{priority_region}**\n"
-                    f"- Điểm ưu tiên chính sách: **{priority_policy}**\n"
+                    f"- Điểm ưu tiên đối tượng: **{priority_policy}**\n"
                     f"- Tổng điểm ưu tiên được cộng: **{adjusted_total_priority}**\n\n"
-                    f"➡️ **Tổng điểm xét tuyển: {final_score}** (tối đa 30 điểm)"
+                    f"➡️ **Tổng điểm xét tuyển: {final_score}**"
                 )
             except:
                 generated_answer = "⚠️ Lỗi khi tính điểm xét tuyển. Vui lòng kiểm tra lại điểm đầu vào."

@@ -619,4 +619,5 @@ if user_input and is_valid(user_input):
     }
     chatlog_collection.insert_one(chatlog_entry)
 else:
-    st.write("Xin lỗi, mình chưa kịp hiểu ý. Bạn có thể viết lại thật rõ ràng, tiếng Việt có dấu giúp mình nhé?")
+    with st.chat_message("assistant"):
+        st.write("Xin lỗi, mình chưa kịp hiểu ý. Bạn có thể viết lại thật rõ ràng, tiếng Việt có dấu giúp mình nhé?")

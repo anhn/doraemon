@@ -14,7 +14,7 @@ import requests
 from typing import Optional 
 import pandas as pd
 import json
-
+import math, string
 # Print the current working directory
 current_directory = os.getcwd()
 
@@ -78,6 +78,33 @@ def load_score_data():
 #    }
 #    return extracted
 
+
+from collections import Counter
+
+#chống prompt attack
+SAFE = string.ascii_letters + string.digits
+
+def shannon_entropy(s):
+    counts = collections.Counter(s)
+    return -sum((c/len(s))*math.log2(c/len(s)) for c in counts.values())
+
+def symbol_ratio(s):
+    return sum(ch not in SAFE for ch in s)/len(s)
+
+def looks_gibberish(s, H_thresh=4.0, sym_thresh=0.30):
+    """True nếu chuỗi có entropy cao *và* tỷ lệ ký tự lạ vượt ngưỡng."""
+    return shannon_entropy(s) > H_thresh and symbol_ratio(s) > sym_thresh
+
+def is_valid(text: str, min_len: int = 2) -> bool:
+    """
+    Kiểm tra xem `text` có đủ điều kiện xử lý hay không.
+    - Không rỗng, chiều dài ≥ `min_len`
+    - Không bị đánh dấu là gibberish
+    """
+    if not text or len(text.strip()) < min_len:
+        return False
+    return not looks_gibberish(text)
+    
 # Search score database
 def find_matching_scores(df, score_type: str, field: Optional[str], score: float):
     score_type = score_type.lower()
@@ -396,7 +423,7 @@ for chat in st.session_state["chat_history"]:
 # User input
 user_input = st.chat_input("Nhập câu hỏi của bạn...")
 
-if user_input:
+if user_input and is_valid(user_input):
     with st.chat_message("user"):
         st.write(user_input)
 
@@ -589,3 +616,5 @@ if user_input:
         "problem_detail": ""
     }
     chatlog_collection.insert_one(chatlog_entry)
+else:
+    st.write("Xin lỗi, mình chưa kịp hiểu ý. Bạn có thể viết lại thật rõ ràng, tiếng Việt có dấu giúp mình nhé?")

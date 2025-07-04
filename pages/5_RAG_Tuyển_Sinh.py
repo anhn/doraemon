@@ -93,7 +93,7 @@ def shannon_entropy(s):
 def symbol_ratio(s):
     return sum(ch not in SAFE for ch in s)/len(s)
 
-def looks_gibberish(s, H_thresh=4.0, sym_thresh=0.30):
+def looks_gibberish(s, H_thresh=4.8, sym_thresh=0.30):
     """True nếu chuỗi có entropy cao *và* tỷ lệ ký tự lạ vượt ngưỡng."""
     return shannon_entropy(s) > H_thresh and symbol_ratio(s) > sym_thresh
 
